@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\Churches\Tables;
 
+use App\Enums\ChurchType;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class ChurchesTable
@@ -15,24 +17,40 @@ class ChurchesTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nom')
                     ->searchable(),
                 TextColumn::make('type')
-                    ->badge(),
+                    ->label('Type')
+                    ->badge()
+                    ->formatStateUsing(fn (ChurchType $state) => $state->label())
+                    ->color(fn (ChurchType $state) => match ($state) {
+                        ChurchType::GROUP => 'success',
+                        ChurchType::SUB_GROUP => 'warning',
+                        ChurchType::LOCAL => 'info',
+                    }),
                 TextColumn::make('parent.name')
-                    ->searchable(),
+                    ->label('Église parente')
+                    ->searchable()
+                    ->placeholder('—'),
                 TextColumn::make('manager.name')
-                    ->searchable(),
+                    ->label('Responsable')
+                    ->searchable()
+                    ->placeholder('—'),
+                TextColumn::make('agents_count')
+                    ->label('Utilisateurs')
+                    ->counts('agents')
+                    ->badge(),
                 TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
+                    ->label('Créé le')
+                    ->dateTime('d/m/Y')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('type')
+                    ->label('Type')
+                    ->options(collect(ChurchType::cases())->mapWithKeys(
+                        fn (ChurchType $type) => [$type->value => $type->label()]
+                    )->all()),
             ])
             ->recordActions([
                 EditAction::make(),

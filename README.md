@@ -66,6 +66,7 @@ Créé par `database/seeders/UserSeeder.php` :
 | `php artisan db:seed` | Rejouer le seeder complet |
 | `php artisan test` | Lancer les tests (PHPUnit, SQLite en mémoire) |
 | `./vendor/bin/pint` | Formater le code PHP |
+| `php artisan legacy:import --force` | Importer les données de l'ancienne base (voir « Migration des données ») |
 
 Après modification de `database/migrations/*` ou d'un modèle, un `php artisan serve` relancé
 suffit (Pas besoin de `composer dump-autoload` en développement).
@@ -108,12 +109,13 @@ app/
   Models/                Church, User, Partner, Cellule, Donation, CategoryDon, Notification, MagicToken, Account, Role
   Policies/              Autorisations par ressource (délèguent à ChurchAccessService)
   Providers/Filament/    AdminPanelProvider (panel /dashboard, login, profil)
-  Services/              ChurchAccessService, DonationNotifier, MagicTokenService, UserInviter
+  Services/              ChurchAccessService, DonationNotifier, NotificationService, MagicTokenService, UserInviter
+  Console/Commands/      ImportLegacyData (migration depuis l'ancienne base)
 database/
   migrations/            Churches, Church columns, Cellules, Partners, CategoryDons, Donations, Notifications, MagicTokens, Accounts
   seeders/               RoleAndPermission, Church, User, CategoryDon, DatabaseSeeder
 resources/views/emails/  user-welcome, donation-confirmation
-tests/Feature/           AuthTest, ChurchAccessTest, MailTest
+tests/Feature/           AuthTest, ChurchAccessTest, MailTest, DonationNotificationTest, CreateDonationPageTest, FilamentScopingQueryTest, ImportLegacyDataTest
 ```
 
 ## Emails
@@ -146,6 +148,41 @@ Couverture actuelle :
 - `MailTest` : envoi des confirmations de don et emails de bienvenue.
 
 Les tests tournent sur SQLite en mémoire (`phpunit.xml`), sans impact sur la base MySQL.
+
+## Migration des données
+
+Les données de l'ancienne application Next.js (Postgres/Neon) ont été migrées vers la base
+MySQL via `php artisan legacy:import`.
+
+**Fonctionnement :**
+
+1. Exporter l'ancienne base en JSON (depuis `C:\Project\sponsorship-traking`) :
+
+   ```bash
+   node export-legacy.js   # produit legacy-export.json
+   ```
+
+2. Copier l'export dans `storage/app/legacy-export.json`, puis lancer :
+
+   ```bash
+   php artisan legacy:import --force
+   # ou avec un chemin explicite :
+   php artisan legacy:import --path=storage/app/legacy-export.json --force
+   ```
+
+La commande vide les tables métier (églises, utilisateurs, cellules, partenaires, dons,
+notifications) puis réimporte en respectant la hiérarchie et les clés étrangères :
+
+- Églises importées en deux passes (parents puis liens `parent_id`), puis responsables (`manager_id`).
+- Utilisateurs importés avec leurs rôles (résolus par nom) et leur église assignée.
+- Cellules/partenaires importés en deux passes (relation circulaire `leader_id` ↔ `cellule_id`).
+- Dons et notifications réattachés par identifiants mappés.
+- Les hachages bcrypt `$2a$`/`$2b$` (générés par Node) sont normalisés en `$2y$` pour que
+  Laravel puisse les vérifier. Les mots de passe par défaut de l'ancienne base sont `azerty123`.
+- Le compte administrateur courant (`sounesatchougo@gmail.com`, absent de l'ancienne base) est
+  recréé en `SUPER_ADMIN` à la fin pour ne pas perdre l'accès.
+
+La commande est idempotente : on peut la relancer sans risque.
 
 ## Notes d'administration
 

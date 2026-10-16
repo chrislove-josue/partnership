@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 
 class UsersTable
@@ -45,7 +46,20 @@ class UsersTable
             ->filters([
                 SelectFilter::make('roles')
                     ->label('Rôle')
-                    ->relationship('roles', 'name'),
+                    ->relationship('roles', 'name')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => RoleName::tryFrom($record->name)?->label() ?? $record->name)
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('assigned_church_id')
+                    ->label('Église assignée')
+                    ->relationship('assignedChurch', 'name')
+                    ->searchable()
+                    ->preload(),
+                TernaryFilter::make('is_active')
+                    ->label('Statut')
+                    ->placeholder('Tous')
+                    ->trueLabel('Actifs')
+                    ->falseLabel('Inactifs'),
             ])
             ->recordActions([
                 EditAction::make(),

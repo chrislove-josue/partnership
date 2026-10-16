@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
@@ -79,9 +80,9 @@ class ImportLegacyData extends Command
             return self::SUCCESS;
         }
 
-        DB::transaction(function () use ($data) {
-            $this->wipe();
+        $this->wipe();
 
+        DB::transaction(function () use ($data) {
             $this->importCategories($data['categoryDons'] ?? []);
             $this->importChurches($data['churches'] ?? []);
             $this->importUsers($data['users'] ?? [], $data['roles'] ?? []);
@@ -114,9 +115,29 @@ class ImportLegacyData extends Command
         return self::SUCCESS;
     }
 
+    /**
+     * Normalise un hachage bcrypt pour Laravel.
+     *
+     * Node (bcryptjs) génère des hachages en $2a$/$2b$ que le hasher de Laravel
+     * refuse ("This password does not use the Bcrypt algorithm"). $2y$ est
+     * fonctionnellement identique à $2b$, seul le préfixe diffère.
+     */
+    private function normalizeHash(?string $hash): string
+    {
+        if (empty($hash)) {
+            return Hash::make('azerty123');
+        }
+
+        if (str_starts_with($hash, '$2a$') || str_starts_with($hash, '$2b$')) {
+            return '$2y$'.substr($hash, 4);
+        }
+
+        return $hash;
+    }
+
     private function wipe(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        Schema::disableForeignKeyConstraints();
 
         foreach ([
             'notifications',
@@ -132,7 +153,7 @@ class ImportLegacyData extends Command
             DB::table($table)->truncate();
         }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -196,7 +217,7 @@ class ImportLegacyData extends Command
                 'name' => $row['name'] ?? $row['email'],
                 'email' => $row['email'],
                 'email_verified_at' => ! empty($row['emailVerified']) ? Carbon::parse($row['emailVerified']) : null,
-                'password' => $row['password'] ?? Illuminate\Support\Facades\Hash::make('azerty123'),
+                'password' => $this->normalizeHash($row['password'] ?? null),
                 'remember_token' => null,
                 'assigned_church_id' => $this->churchMap[$row['assignedChurchId']] ?? null,
                 'is_active' => ! empty($row['isActive']) ? 1 : 0,

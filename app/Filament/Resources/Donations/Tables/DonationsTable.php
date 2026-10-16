@@ -5,9 +5,12 @@ namespace App\Filament\Resources\Donations\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class DonationsTable
 {
@@ -41,12 +44,34 @@ class DonationsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
+                Filter::make('periode')
+                    ->label('Période')
+                    ->schema([
+                        DatePicker::make('date_from')
+                            ->label('Du'),
+                        DatePicker::make('date_to')
+                            ->label('Au'),
+                    ])
+                    ->columns(2)
+                    ->query(fn (Builder $query, array $data) => $query
+                        ->when($data['date_from'] ?? null, fn (Builder $q, $date) => $q->whereDate('date', '>=', $date))
+                        ->when($data['date_to'] ?? null, fn (Builder $q, $date) => $q->whereDate('date', '<=', $date))),
                 SelectFilter::make('church_id')
                     ->label('Église')
-                    ->relationship('church', 'name'),
+                    ->relationship('church', 'name')
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('category_id')
                     ->label('Catégorie')
-                    ->relationship('category', 'name'),
+                    ->relationship('category', 'name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('partner_id')
+                    ->label('Partenaire')
+                    ->relationship('partner', 'first_name')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => $record->full_name)
+                    ->searchable(['first_name', 'last_name'])
+                    ->preload(),
             ])
             ->recordActions([
                 EditAction::make(),

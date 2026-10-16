@@ -12,6 +12,6 @@ class CreateDonation extends CreateRecord
 
     protected function afterCreate(): void
     {
-        app(DonationNotifier::class)->sendConfirmation($this->record);
+        app(DonationNotifier::class)->handle($this->record);
     }
 }

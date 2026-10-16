@@ -8,6 +8,7 @@ use App\Models\Church;
 use App\Models\Donation;
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 /**
@@ -32,6 +33,21 @@ class NotificationService
             return;
         }
 
+        // Ne conserver que des utilisateurs réellement existants : une clé
+        // étrangère invalide ferait échouer l'insertion en bloc et on perdrait
+        // toutes les notifications.
+        $existing = User::query()
+            ->whereIn('id', $userIds)
+            ->pluck('id')
+            ->map(fn ($id) => (string) $id)
+            ->all();
+
+        $userIds = array_values(array_intersect($userIds, $existing));
+
+        if ($userIds === []) {
+            return;
+        }
+
         $now = now();
 
         $rows = array_map(fn ($userId) => [
@@ -45,7 +61,18 @@ class NotificationService
             'created_at' => $now,
         ], $userIds);
 
-        Notification::query()->insert($rows);
+        try {
+            Notification::query()->insert($rows);
+        } catch (\Throwable $e) {
+            // Repli ligne par ligne : on sauvegarde au moins celles qui passent.
+            foreach ($rows as $row) {
+                try {
+                    Notification::query()->insert([$row]);
+                } catch (\Throwable) {
+                    Log::warning('Impossible de sauvegarder la notification pour l\'utilisateur '.$row['user_id'].' : '.$e->getMessage());
+                }
+            }
+        }
     }
 
     /**

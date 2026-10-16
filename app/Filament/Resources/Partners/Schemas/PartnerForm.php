@@ -2,39 +2,59 @@
 
 namespace App\Filament\Resources\Partners\Schemas;
 
+use App\Services\ChurchAccessService;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Auth;
 
 class PartnerForm
 {
     public static function configure(Schema $schema): Schema
     {
+        $access = app(ChurchAccessService::class);
+        $actor = Auth::user();
+        $churchIds = $actor ? $access->accessibleChurchIds($actor) : [];
+
         return $schema
             ->components([
                 TextInput::make('first_name')
-                    ->required(),
+                    ->label('Prénom')
+                    ->required()
+                    ->maxLength(255),
                 TextInput::make('last_name')
-                    ->required(),
+                    ->label('Nom')
+                    ->required()
+                    ->maxLength(255),
                 TextInput::make('email')
-                    ->label('Email address')
+                    ->label('Adresse email')
                     ->email()
-                    ->default(null),
+                    ->unique(ignoreRecord: true),
                 TextInput::make('phone')
+                    ->label('Téléphone')
                     ->tel()
-                    ->default(null),
+                    ->unique(ignoreRecord: true),
                 TextInput::make('handle_kc')
-                    ->default(null),
+                    ->label('Identifiant KingChat (handle KC)')
+                    ->unique(ignoreRecord: true),
                 TextInput::make('address')
-                    ->default(null),
-                DatePicker::make('birthdate'),
-                Select::make('cellule_id')
-                    ->relationship('cellule', 'name')
-                    ->default(null),
+                    ->label('Adresse'),
+                DatePicker::make('birthdate')
+                    ->label('Date de naissance'),
                 Select::make('church_id')
-                    ->relationship('church', 'name')
-                    ->required(),
+                    ->label('Église')
+                    ->relationship('church', 'name', fn ($query) => $query->whereIn('id', $churchIds))
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->live(),
+                Select::make('cellule_id')
+                    ->label('Cellule')
+                    ->relationship('cellule', 'name', fn ($query, $get) => $query
+                        ->when($get('church_id'), fn ($q, $churchId) => $q->where('church_id', $churchId)))
+                    ->searchable()
+                    ->preload(),
             ]);
     }
 }

@@ -14,8 +14,10 @@
 /auth.json
 /node_modules
 /public/build
+/public/css/filament
+/public/fonts/filament
 /public/hot
-/public/storage
+/public/js/filament
 /storage/*.key
 /storage/pail
 /vendor

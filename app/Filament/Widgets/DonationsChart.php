@@ -9,11 +9,14 @@ use Illuminate\Support\Facades\Auth;
 
 class DonationsChart extends ChartWidget
 {
-    protected static ?string $heading = 'Dons des 12 derniers mois';
-
     protected static ?int $sort = 2;
 
     protected int|string|array $columnSpan = 'full';
+
+    public function getHeading(): ?string
+    {
+        return 'Dons des 12 derniers mois';
+    }
 
     protected function getData(): array
     {

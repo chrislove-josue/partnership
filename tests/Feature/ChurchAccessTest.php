@@ -34,12 +34,12 @@ class ChurchAccessTest extends TestCase
     {
         $this->seed();
 
-        $group = \App\Models\Church::where('name', 'CE SIKECODJI')->firstOrFail();
-        $sub = \App\Models\Church::create(['name' => 'SUB', 'type' => \App\Enums\ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
-        $local = \App\Models\Church::create(['name' => 'LOCAL', 'type' => \App\Enums\ChurchType::LOCAL, 'parent_id' => $sub->id]);
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $sub = Church::create(['name' => 'SUB', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $sub->id]);
 
-        $admin = $this->makeUser(\App\Enums\RoleName::SUPER_ADMIN->value, $group->id);
-        $access = app(\App\Services\ChurchAccessService::class);
+        $admin = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id);
+        $access = app(ChurchAccessService::class);
 
         $this->assertTrue($access->canAccessChurchData($admin, $local->id));
         $this->assertTrue($access->canModifyChurchData($admin, $local->id));

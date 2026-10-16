@@ -235,6 +235,7 @@ class ChurchAccessService
      * Filtre une collection d'items possédant church_id par les églises accessibles.
      *
      * @template T
+     *
      * @param  Collection<int, T>  $items
      * @return Collection<int, T>
      */

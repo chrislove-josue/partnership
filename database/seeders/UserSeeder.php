@@ -15,7 +15,7 @@ class UserSeeder extends Seeder
         $groupChurch = Church::where('name', 'CE SIKECODJI')->firstOrFail();
 
         $superAdmin = User::updateOrCreate(
-            ['email' => 'libertsinzo7@gmail.com'],
+            ['email' => 'sounesatchougo@gmail.com'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('azerty123'),

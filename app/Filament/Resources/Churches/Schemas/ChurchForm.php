@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Churches\Schemas;
 
 use App\Enums\ChurchType;
-use App\Models\User;
 use App\Services\ChurchAccessService;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;

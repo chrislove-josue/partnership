@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Users\Tables;
 
+use App\Enums\RoleName;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -25,7 +26,7 @@ class UsersTable
                 TextColumn::make('roles.name')
                     ->label('Rôle')
                     ->badge()
-                    ->formatStateUsing(fn (string $state) => \App\Enums\RoleName::tryFrom($state)?->label() ?? $state),
+                    ->formatStateUsing(fn (string $state) => RoleName::tryFrom($state)?->label() ?? $state),
                 TextColumn::make('assignedChurch.name')
                     ->label('Église assignée')
                     ->searchable(),

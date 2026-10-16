@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\Notifications\Schemas;
 
 use App\Enums\NotificationType;
-use App\Models\User;
 use App\Services\ChurchAccessService;
 use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Select;

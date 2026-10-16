@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -50,5 +51,17 @@ class Partner extends Model
     public function donations(): HasMany
     {
         return $this->hasMany(Donation::class);
+    }
+
+    /**
+     * Ajoute un attribut calculé `total_donations` = somme des dons du partenaire.
+     */
+    public function scopeWithTotalDonations(Builder $query): Builder
+    {
+        return $query->addSelect([
+            'total_donations' => Donation::query()
+                ->selectRaw('COALESCE(SUM(donations.amount), 0)')
+                ->whereColumn('donations.partner_id', 'partners.id'),
+        ]);
     }
 }

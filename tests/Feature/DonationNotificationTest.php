@@ -92,6 +92,7 @@ class DonationNotificationTest extends TestCase
 
     public function test_no_notifications_when_there_are_no_recipients(): void
     {
+        $this->seed(\Database\Seeders\RoleAndPermissionSeeder::class);
         CategoryDon::create(['name' => 'Dime', 'color' => '#3B82F6']);
 
         $church = Church::create(['name' => 'Eglise isolee', 'type' => \App\Enums\ChurchType::LOCAL]);

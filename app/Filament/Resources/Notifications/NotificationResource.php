@@ -35,7 +35,7 @@ class NotificationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    protected static function churchScopeColumn(): string
+    public static function churchScopeColumn(): string
     {
         return 'user.assigned_church_id';
     }

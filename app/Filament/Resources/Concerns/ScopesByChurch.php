@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Concerns;
+namespace App\Filament\Resources\Concerns;
 
 use App\Services\ChurchAccessService;
 use Illuminate\Database\Eloquent\Builder;
@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Builder;
 trait ScopesByChurch
 {
     /**
-     * Colonne utilisée pour filtrer (church_id par défaut).
-     * Les sous-classes peuvent la surcharger (ex: assigned_church_id pour User).
+     * Colonne utilisée pour filtrer par église. À surcharger si besoin.
      */
-    protected static string $churchScopeColumn = 'church_id';
+    public static function churchScopeColumn(): string
+    {
+        return 'church_id';
+    }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
 
@@ -25,8 +27,6 @@ trait ScopesByChurch
 
         $ids = app(ChurchAccessService::class)->accessibleChurchIds($user);
 
-        return $query->whereIn(static::$churchColumn, $ids);
+        return $query->whereIn(static::churchScopeColumn(), $ids);
     }
-
-    protected static string $churchColumn = 'church_id';
 }

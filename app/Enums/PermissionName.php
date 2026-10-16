@@ -33,49 +33,4 @@ enum PermissionName: string
             self::MANAGE_OWN_PROFILE => 'Gérer son profil',
         };
     }
-
-    /**
-     * Permissions attribuées par défaut à chaque rôle lors du seed.
-     *
-     * @return array<int, self>
-     */
-    public static function forRole(RoleName $role): array
-    {
-        return match ($role) {
-            RoleName::SUPER_ADMIN => self::cases(),
-
-            RoleName::GROUP_PASTOR => [
-                self::READ_OWN_CHURCH_DATA,
-                self::READ_CHILD_CHURCHES_DATA,
-                self::MANAGE_SUBGROUP_PASTORS,
-                self::MANAGE_LOCAL_PASTORS,
-                self::MANAGE_STAFF,
-                self::MANAGE_CHURCHES,
-                self::VIEW_DASHBOARD,
-                self::MANAGE_OWN_PROFILE,
-            ],
-
-            RoleName::SUBGROUP_PASTOR => [
-                self::READ_OWN_CHURCH_DATA,
-                self::READ_CHILD_CHURCHES_DATA,
-                self::MANAGE_LOCAL_PASTORS,
-                self::MANAGE_STAFF,
-                self::VIEW_DASHBOARD,
-                self::MANAGE_OWN_PROFILE,
-            ],
-
-            self::LOCAL_PASTOR => [
-                self::READ_OWN_CHURCH_DATA,
-                self::MANAGE_STAFF,
-                self::VIEW_DASHBOARD,
-                self::MANAGE_OWN_PROFILE,
-            ],
-
-            self::STAFF => [
-                self::READ_OWN_CHURCH_DATA,
-                self::VIEW_DASHBOARD,
-                self::MANAGE_OWN_PROFILE,
-            ],
-        };
-    }
 }

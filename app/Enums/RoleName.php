@@ -22,6 +22,51 @@ enum RoleName: string
     }
 
     /**
+     * Permissions attribuées par défaut à ce rôle (miroir de types/auth.ts).
+     *
+     * @return array<int, PermissionName>
+     */
+    public function permissions(): array
+    {
+        return match ($this) {
+            self::SUPER_ADMIN => PermissionName::cases(),
+
+            self::GROUP_PASTOR => [
+                PermissionName::READ_OWN_CHURCH_DATA,
+                PermissionName::READ_CHILD_CHURCHES_DATA,
+                PermissionName::MANAGE_SUBGROUP_PASTORS,
+                PermissionName::MANAGE_LOCAL_PASTORS,
+                PermissionName::MANAGE_STAFF,
+                PermissionName::MANAGE_CHURCHES,
+                PermissionName::VIEW_DASHBOARD,
+                PermissionName::MANAGE_OWN_PROFILE,
+            ],
+
+            self::SUBGROUP_PASTOR => [
+                PermissionName::READ_OWN_CHURCH_DATA,
+                PermissionName::READ_CHILD_CHURCHES_DATA,
+                PermissionName::MANAGE_LOCAL_PASTORS,
+                PermissionName::MANAGE_STAFF,
+                PermissionName::VIEW_DASHBOARD,
+                PermissionName::MANAGE_OWN_PROFILE,
+            ],
+
+            self::LOCAL_PASTOR => [
+                PermissionName::READ_OWN_CHURCH_DATA,
+                PermissionName::MANAGE_STAFF,
+                PermissionName::VIEW_DASHBOARD,
+                PermissionName::MANAGE_OWN_PROFILE,
+            ],
+
+            self::STAFF => [
+                PermissionName::READ_OWN_CHURCH_DATA,
+                PermissionName::VIEW_DASHBOARD,
+                PermissionName::MANAGE_OWN_PROFILE,
+            ],
+        };
+    }
+
+    /**
      * Rôles qu'un acteur peut gérer (créer/modifier/supprimer).
      * SUPER_ADMIN gère tout (traité séparément).
      *

@@ -25,14 +25,9 @@ class RoleAndPermissionSeeder extends Seeder
             $role->save();
 
             $role->syncPermissions(array_map(
-                fn (PermissionName $p) => $p->value,
-                PermissionName::{$this->permissionSetMethod($roleName)}()
+                fn (PermissionName $permission) => $permission->value,
+                $roleName->permissions()
             ));
         }
-    }
-
-    private function permissionSetMethod(RoleName $roleName): string
-    {
-        return 'ROLE_PERMISSIONS';
     }
 }

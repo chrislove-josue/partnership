@@ -32,6 +32,11 @@ class ChurchResource extends Resource
 
     protected static ?string $navigationLabel = 'Églises';
 
+    public static function churchScopeColumn(): string
+    {
+        return 'id';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return ChurchForm::configure($schema);

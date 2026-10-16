@@ -60,6 +60,19 @@ class Church extends Model
     }
 
     /**
+     * Ajoute un attribut calculé `total_donations` = somme des dons
+     * rattachés directement à l'église (sans compter ses sous-églises).
+     */
+    public function scopeWithTotalDonations(Builder $query): Builder
+    {
+        return $query->addSelect([
+            'total_donations' => Donation::query()
+                ->selectRaw('COALESCE(SUM(donations.amount), 0)')
+                ->whereColumn('donations.church_id', 'churches.id'),
+        ]);
+    }
+
+    /**
      * Retourne tous les identifiants des églises descendantes (récursif).
      *
      * @return array<int, int>

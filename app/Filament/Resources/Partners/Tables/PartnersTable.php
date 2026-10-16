@@ -8,12 +8,14 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PartnersTable
 {
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->withTotalDonations())
             ->columns([
                 TextColumn::make('full_name')
                     ->label('Nom complet')
@@ -34,6 +36,11 @@ class PartnersTable
                     ->label('Cellule')
                     ->placeholder('—')
                     ->toggleable(),
+                TextColumn::make('total_donations')
+                    ->label('Montant total')
+                    ->money('XOF')
+                    ->alignEnd()
+                    ->sortable(),
                 TextColumn::make('birthdate')
                     ->label('Naissance')
                     ->date('d/m/Y')

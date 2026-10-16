@@ -14,7 +14,7 @@ class LatestDonations extends TableWidget
 {
     protected static ?string $heading = 'Derniers dons';
 
-    protected static ?int $sort = 3;
+    protected static ?int $sort = 10;
 
     protected int|string|array $columnSpan = 'full';
 

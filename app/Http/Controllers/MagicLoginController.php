@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Services\MagicTokenService;
+use Illuminate\Http\Request;
 
 class MagicLoginController extends Controller
 {
-    public function __invoke(string $token, MagicTokenService $tokens)
+    public function __invoke(Request $request, MagicTokenService $tokens)
     {
-        $magic = $tokens->consume($token);
+        $token = (string) $request->query('token', '');
+
+        $magic = $token !== '' ? $tokens->consume($token) : null;
 
         if (! $magic) {
             return redirect('/dashboard/login')->withErrors([
@@ -26,7 +29,7 @@ class MagicLoginController extends Controller
         }
 
         auth()->login($user);
-        request()->session()->regenerate();
+        $request->session()->regenerate();
 
         return redirect('/dashboard');
     }

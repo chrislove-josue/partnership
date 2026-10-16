@@ -26,7 +26,8 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('dashboard')
+            ->brandName('Suivi des Partenariats')
             ->login()
             ->colors([
                 'primary' => Color::Amber,

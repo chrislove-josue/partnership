@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\RoleName;
 use App\Mail\DonationConfirmationMail;
 use App\Mail\UserWelcomeMail;
 use App\Models\CategoryDon;
@@ -79,7 +80,7 @@ class MailTest extends TestCase
         Mail::fake();
         $this->seed();
 
-        $user = User::role(\App\Enums\RoleName::SUPER_ADMIN->value)->firstOrFail();
+        $user = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
 
         $sent = app(UserInviter::class)->sendWelcome($user, 'azerty123', 'Super Admin');
 

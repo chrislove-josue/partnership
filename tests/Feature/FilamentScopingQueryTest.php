@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Enums\RoleName;
 use App\Filament\Resources\Cellules\CelluleResource;
 use App\Filament\Resources\Churches\ChurchResource;
 use App\Filament\Resources\Donations\DonationResource;
 use App\Filament\Resources\Notifications\NotificationResource;
 use App\Filament\Resources\Partners\PartnerResource;
 use App\Filament\Resources\Users\UserResource;
+use App\Models\Church;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -34,7 +36,7 @@ class FilamentScopingQueryTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::role(\App\Enums\RoleName::SUPER_ADMIN->value)->firstOrFail();
+        $admin = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
         $this->actingAs($admin);
 
         $resource::getEloquentQuery()->count();
@@ -47,7 +49,7 @@ class FilamentScopingQueryTest extends TestCase
     {
         $this->seed();
 
-        $church = \App\Models\Church::firstOrFail();
+        $church = Church::firstOrFail();
 
         $pastor = User::create([
             'name' => 'Pasteur Local',
@@ -56,7 +58,7 @@ class FilamentScopingQueryTest extends TestCase
             'assigned_church_id' => $church->id,
             'is_active' => true,
         ]);
-        $pastor->syncRoles([\App\Enums\RoleName::LOCAL_PASTOR->value]);
+        $pastor->syncRoles([RoleName::LOCAL_PASTOR->value]);
 
         $this->actingAs($pastor);
 

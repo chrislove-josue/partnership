@@ -9,7 +9,7 @@
         "php": "^8.3",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
-        "symfony/polyfill-mbstring": "*"
+        "symfony/polyfill-mbstring": "1.32"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

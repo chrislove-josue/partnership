@@ -8,6 +8,7 @@ use App\Models\Church;
 use App\Models\Donation;
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Support\Str;
 
 /**
  * Port de lib/notificationService.ts — création des notifications dashboard.
@@ -34,7 +35,7 @@ class NotificationService
         $now = now();
 
         $rows = array_map(fn ($userId) => [
-            'id' => (string) \Illuminate\Support\Str::uuid(),
+            'id' => (string) Str::uuid(),
             'type' => $type->value,
             'title' => $title,
             'message' => $message,

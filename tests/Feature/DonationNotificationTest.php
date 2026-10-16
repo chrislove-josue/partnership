@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ChurchType;
 use App\Enums\RoleName;
 use App\Models\CategoryDon;
 use App\Models\Church;
@@ -10,6 +11,7 @@ use App\Models\Notification;
 use App\Models\Partner;
 use App\Models\User;
 use App\Services\NotificationService;
+use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -92,10 +94,10 @@ class DonationNotificationTest extends TestCase
 
     public function test_no_notifications_when_there_are_no_recipients(): void
     {
-        $this->seed(\Database\Seeders\RoleAndPermissionSeeder::class);
+        $this->seed(RoleAndPermissionSeeder::class);
         CategoryDon::create(['name' => 'Dime', 'color' => '#3B82F6']);
 
-        $church = Church::create(['name' => 'Eglise isolee', 'type' => \App\Enums\ChurchType::LOCAL]);
+        $church = Church::create(['name' => 'Eglise isolee', 'type' => ChurchType::LOCAL]);
 
         $donation = $this->makeDonation($church, null);
 

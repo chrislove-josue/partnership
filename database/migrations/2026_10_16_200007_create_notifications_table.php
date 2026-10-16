@@ -12,13 +12,14 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('type');
             $table->string('title');
-            $table->text('body');
+            $table->text('message');
             $table->json('data')->nullable();
-            $table->timestamp('read_at')->nullable();
+            $table->boolean('is_read')->default(false);
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
 
-            $table->index(['user_id', 'read_at']);
+            $table->index(['user_id', 'is_read']);
+            $table->index(['user_id', 'created_at']);
         });
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Donations;
 
+use App\Filament\Resources\Concerns\ScopesByChurch;
 use App\Filament\Resources\Donations\Pages\CreateDonation;
 use App\Filament\Resources\Donations\Pages\EditDonation;
 use App\Filament\Resources\Donations\Pages\ListDonations;
@@ -13,12 +14,23 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class DonationResource extends Resource
 {
+    use ScopesByChurch;
+
     protected static ?string $model = Donation::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBanknotes;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Dons';
+
+    protected static ?string $modelLabel = 'don';
+
+    protected static ?string $pluralModelLabel = 'dons';
+
+    protected static ?string $navigationLabel = 'Dons';
 
     public static function form(Schema $schema): Schema
     {
@@ -28,13 +40,6 @@ class DonationResource extends Resource
     public static function table(Table $table): Table
     {
         return DonationsTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

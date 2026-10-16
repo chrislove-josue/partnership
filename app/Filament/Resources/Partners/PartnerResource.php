@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Partners;
 
+use App\Filament\Resources\Concerns\ScopesByChurch;
 use App\Filament\Resources\Partners\Pages\CreatePartner;
 use App\Filament\Resources\Partners\Pages\EditPartner;
 use App\Filament\Resources\Partners\Pages\ListPartners;
@@ -13,12 +14,23 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class PartnerResource extends Resource
 {
+    use ScopesByChurch;
+
     protected static ?string $model = Partner::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Partenaires';
+
+    protected static ?string $modelLabel = 'partenaire';
+
+    protected static ?string $pluralModelLabel = 'partenaires';
+
+    protected static ?string $navigationLabel = 'Partenaires';
 
     public static function form(Schema $schema): Schema
     {
@@ -28,13 +40,6 @@ class PartnerResource extends Resource
     public static function table(Table $table): Table
     {
         return PartnersTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

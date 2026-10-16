@@ -13,12 +13,21 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use UnitEnum;
 
 class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
+
+    protected static string|UnitEnum|null $navigationGroup = 'Utilisateurs';
+
+    protected static ?string $modelLabel = 'rôle';
+
+    protected static ?string $pluralModelLabel = 'rôles';
+
+    protected static ?string $navigationLabel = 'Rôles';
 
     public static function form(Schema $schema): Schema
     {
@@ -28,13 +37,6 @@ class RoleResource extends Resource
     public static function table(Table $table): Table
     {
         return RolesTable::configure($table);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

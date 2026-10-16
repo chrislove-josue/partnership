@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Roles\Tables;
 
+use App\Enums\RoleName;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -16,19 +17,21 @@ class RolesTable
         return $table
             ->columns([
                 TextColumn::make('name')
+                    ->label('Nom')
+                    ->badge()
+                    ->formatStateUsing(fn (string $state) => RoleName::tryFrom($state)?->label() ?? $state)
                     ->searchable(),
-                TextColumn::make('guard_name')
-                    ->searchable(),
+                TextColumn::make('permissions_count')
+                    ->label('Permissions')
+                    ->counts('permissions')
+                    ->badge(),
+                TextColumn::make('users_count')
+                    ->label('Utilisateurs')
+                    ->counts('users')
+                    ->badge(),
                 IconColumn::make('is_system')
+                    ->label('Système')
                     ->boolean(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //

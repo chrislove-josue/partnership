@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\ChurchType;
+use App\Models\CategoryDon;
 use App\Models\Cellule;
 use App\Models\Church;
 use App\Models\Donation;
@@ -28,9 +29,13 @@ class DonationTrendServiceTest extends TestCase
 
     private Partner $outsider;
 
+    private CategoryDon $category;
+
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->category = CategoryDon::create(['name' => 'Dîme']);
 
         $this->churchA = Church::create(['name' => 'Église A', 'type' => ChurchType::LOCAL]);
         $this->churchB = Church::create(['name' => 'Église B', 'type' => ChurchType::LOCAL]);
@@ -72,6 +77,7 @@ class DonationTrendServiceTest extends TestCase
             'date' => $date,
             'partner_id' => $partner->id,
             'church_id' => $church->id,
+            'category_id' => $this->category->id,
         ]);
     }
 
@@ -94,9 +100,9 @@ class DonationTrendServiceTest extends TestCase
             array_column($trend['series'], 'label')
         );
 
-        $this->assertSame([0, 5000], $trend['series'][0]['data']);
-        $this->assertSame([1000, 3000], $trend['series'][1]['data']);
-        $this->assertSame([2000, 0], $trend['series'][2]['data']);
+        $this->assertEquals([0, 5000], $trend['series'][0]['data']);
+        $this->assertEquals([1000, 3000], $trend['series'][1]['data']);
+        $this->assertEquals([2000, 0], $trend['series'][2]['data']);
     }
 
     public function test_it_respects_the_partner_limit(): void
@@ -112,8 +118,8 @@ class DonationTrendServiceTest extends TestCase
         $trend = app(DonationTrendService::class)->byChurch([$this->churchA->id, $this->churchB->id]);
 
         $this->assertSame(['Église A', 'Église B'], array_column($trend['series'], 'label'));
-        $this->assertSame([3000, 3000], $trend['series'][0]['data']);
-        $this->assertSame([0, 5000], $trend['series'][1]['data']);
+        $this->assertEquals([3000, 3000], $trend['series'][0]['data']);
+        $this->assertEquals([0, 5000], $trend['series'][1]['data']);
     }
 
     public function test_it_builds_monthly_variation_by_cellule_including_leader(): void
@@ -121,7 +127,7 @@ class DonationTrendServiceTest extends TestCase
         $trend = app(DonationTrendService::class)->byCellule([$this->churchA->id], 10);
 
         $this->assertSame(['Cellule Alpha'], array_column($trend['series'], 'label'));
-        $this->assertSame([3000, 3000], $trend['series'][0]['data']);
+        $this->assertEquals([3000, 3000], $trend['series'][0]['data']);
     }
 
     public function test_it_scopes_results_to_the_given_churches(): void
@@ -129,8 +135,8 @@ class DonationTrendServiceTest extends TestCase
         $trend = app(DonationTrendService::class)->byPartner([$this->churchA->id], 10);
 
         $this->assertSame(['Membre Alpha', 'Leader Alpha'], array_column($trend['series'], 'label'));
-        $this->assertSame([1000, 3000], $trend['series'][0]['data']);
-        $this->assertSame([2000, 0], $trend['series'][1]['data']);
+        $this->assertEquals([1000, 3000], $trend['series'][0]['data']);
+        $this->assertEquals([2000, 0], $trend['series'][1]['data']);
     }
 
     public function test_it_returns_empty_series_without_churches(): void

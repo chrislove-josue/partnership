@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\ChurchType;
+use App\Enums\NotificationType;
 use App\Enums\RoleName;
 use App\Models\CategoryDon;
 use App\Models\Church;
@@ -10,10 +11,12 @@ use App\Models\Donation;
 use App\Models\Notification;
 use App\Models\Partner;
 use App\Models\User;
+use App\Services\DonationNotifier;
 use App\Services\NotificationService;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class DonationNotificationTest extends TestCase
@@ -104,5 +107,36 @@ class DonationNotificationTest extends TestCase
         app(NotificationService::class)->notifyNewDonation($donation);
 
         $this->assertDatabaseCount('notifications', 0);
+    }
+
+    public function test_notifications_are_saved_even_when_the_email_fails(): void
+    {
+        $this->seed();
+        Mail::shouldReceive('to')->andThrow(new \RuntimeException('SMTP indisponible'));
+
+        $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $donation = $this->makeDonation($church, 'donor@example.test');
+
+        app(DonationNotifier::class)->handle($donation);
+
+        $this->assertDatabaseHas('notifications', ['type' => 'NEW_DONATION']);
+        $this->assertEquals(1, Notification::where('type', 'NEW_DONATION')->count());
+    }
+
+    public function test_invalid_recipient_ids_do_not_lose_valid_notifications(): void
+    {
+        $this->seed();
+
+        $user = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
+
+        app(NotificationService::class)->createNotifications(
+            NotificationType::NEW_DONATION,
+            'Titre',
+            'Message',
+            [],
+            [$user->id, 999999999],
+        );
+
+        $this->assertEquals(1, Notification::where('user_id', $user->id)->count());
     }
 }

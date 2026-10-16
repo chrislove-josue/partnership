@@ -34,7 +34,7 @@ class FilamentScopingQueryTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $admin = User::role(\App\Enums\RoleName::SUPER_ADMIN->value)->firstOrFail();
         $this->actingAs($admin);
 
         $resource::getEloquentQuery()->count();

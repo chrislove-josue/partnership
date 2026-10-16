@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\RoleName;
 use App\Models\User;
 use App\Services\MagicTokenService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -10,6 +11,11 @@ use Tests\TestCase;
 class AuthTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function superAdmin(): User
+    {
+        return User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
+    }
 
     public function test_login_page_renders(): void
     {
@@ -25,7 +31,7 @@ class AuthTest extends TestCase
     {
         $this->seed();
 
-        $user = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $user = $this->superAdmin();
 
         $link = app(MagicTokenService::class)->generate($user->email);
         $path = parse_url($link, PHP_URL_PATH).'?'.parse_url($link, PHP_URL_QUERY);
@@ -39,7 +45,7 @@ class AuthTest extends TestCase
     {
         $this->seed();
 
-        $user = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $user = $this->superAdmin();
 
         $link = app(MagicTokenService::class)->generate($user->email);
         $path = parse_url($link, PHP_URL_PATH).'?'.parse_url($link, PHP_URL_QUERY);

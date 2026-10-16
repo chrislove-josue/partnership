@@ -79,12 +79,12 @@ class MailTest extends TestCase
         Mail::fake();
         $this->seed();
 
-        $user = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $user = User::role(\App\Enums\RoleName::SUPER_ADMIN->value)->firstOrFail();
 
         $sent = app(UserInviter::class)->sendWelcome($user, 'azerty123', 'Super Admin');
 
         $this->assertTrue($sent);
-        Mail::assertSent(UserWelcomeMail::class, fn ($mail) => $mail->hasTo('libertsinzo7@gmail.com'));
+        Mail::assertSent(UserWelcomeMail::class, fn ($mail) => $mail->hasTo($user->email));
         $this->assertDatabaseCount('magic_tokens', 1);
     }
 }

@@ -27,6 +27,14 @@ trait ScopesByChurch
 
         $ids = app(ChurchAccessService::class)->accessibleChurchIds($user);
 
-        return $query->whereIn(static::churchScopeColumn(), $ids);
+        $column = static::churchScopeColumn();
+
+        if (str_contains($column, '.')) {
+            [$relation, $relationColumn] = explode('.', $column, 2);
+
+            return $query->whereHas($relation, fn (Builder $q) => $q->whereIn($relationColumn, $ids));
+        }
+
+        return $query->whereIn($column, $ids);
     }
 }

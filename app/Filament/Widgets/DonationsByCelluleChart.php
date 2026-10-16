@@ -6,7 +6,7 @@ use App\Services\DonationTrendService;
 
 class DonationsByCelluleChart extends TrendChartWidget
 {
-    protected static ?int $sort = 5;
+    protected static ?int $sort = 6;
 
     public function getHeading(): ?string
     {

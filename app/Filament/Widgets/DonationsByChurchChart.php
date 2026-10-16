@@ -6,7 +6,7 @@ use App\Services\DonationTrendService;
 
 class DonationsByChurchChart extends TrendChartWidget
 {
-    protected static ?int $sort = 4;
+    protected static ?int $sort = 5;
 
     public function getHeading(): ?string
     {

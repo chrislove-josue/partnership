@@ -47,9 +47,9 @@ Le back-office est accessible sur [http://localhost:8000/dashboard](http://local
 
 ### Compte initial
 
-Créé par le seeder :
+Créé par `database/seeders/UserSeeder.php` :
 
-- **Email** : `libertsinzo7@gmail.com`
+- **Email** : `sounesatchougo@gmail.com` (modifiable dans le seeder)
 - **Mot de passe** : `azerty123`
 - **Rôle** : `SUPER_ADMIN` (accès complet)
 

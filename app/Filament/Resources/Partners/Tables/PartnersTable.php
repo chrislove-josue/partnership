@@ -46,10 +46,14 @@ class PartnersTable
             ->filters([
                 SelectFilter::make('church_id')
                     ->label('Église')
-                    ->relationship('church', 'name'),
+                    ->relationship('church', 'name')
+                    ->searchable()
+                    ->preload(),
                 SelectFilter::make('cellule_id')
                     ->label('Cellule')
-                    ->relationship('cellule', 'name'),
+                    ->relationship('cellule', 'name')
+                    ->searchable()
+                    ->preload(),
             ])
             ->recordActions([
                 EditAction::make(),

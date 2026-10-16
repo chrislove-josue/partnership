@@ -6,6 +6,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class PartnersTable
@@ -14,37 +15,41 @@ class PartnersTable
     {
         return $table
             ->columns([
-                TextColumn::make('first_name')
-                    ->searchable(),
-                TextColumn::make('last_name')
-                    ->searchable(),
+                TextColumn::make('full_name')
+                    ->label('Nom complet')
+                    ->searchable(['first_name', 'last_name'])
+                    ->sortable(['last_name']),
                 TextColumn::make('email')
-                    ->label('Email address')
-                    ->searchable(),
+                    ->label('Email')
+                    ->searchable()
+                    ->placeholder('—'),
                 TextColumn::make('phone')
-                    ->searchable(),
-                TextColumn::make('handle_kc')
-                    ->searchable(),
-                TextColumn::make('address')
-                    ->searchable(),
-                TextColumn::make('birthdate')
-                    ->date()
-                    ->sortable(),
-                TextColumn::make('cellule.name')
-                    ->searchable(),
+                    ->label('Téléphone')
+                    ->searchable()
+                    ->placeholder('—'),
                 TextColumn::make('church.name')
+                    ->label('Église')
                     ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
+                TextColumn::make('cellule.name')
+                    ->label('Cellule')
+                    ->placeholder('—')
+                    ->toggleable(),
+                TextColumn::make('birthdate')
+                    ->label('Naissance')
+                    ->date('d/m/Y')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
+                TextColumn::make('created_at')
+                    ->label('Créé le')
+                    ->dateTime('d/m/Y')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('church_id')
+                    ->label('Église')
+                    ->relationship('church', 'name'),
+                SelectFilter::make('cellule_id')
+                    ->label('Cellule')
+                    ->relationship('cellule', 'name'),
             ])
             ->recordActions([
                 EditAction::make(),

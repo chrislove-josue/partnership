@@ -30,7 +30,6 @@ class AdminPanelProvider extends PanelProvider
             ->brandName('Suivi des Partenariats')
             ->login()
             ->profile()
-            ->locale('fr')
             ->colors([
                 'primary' => Color::Blue,
             ])

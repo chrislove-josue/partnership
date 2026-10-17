@@ -13,8 +13,6 @@ use Illuminate\Support\Facades\Auth;
 
 class TopChurchesWidget extends TableWidget
 {
-    protected ?string $heading = 'Top 5 des églises partenaires';
-
     protected static ?int $sort = 2;
 
     protected int|string|array $columnSpan = 'full';
@@ -22,6 +20,11 @@ class TopChurchesWidget extends TableWidget
     protected function getTableHeaderActions(): array
     {
         return [];
+    }
+
+    public function getHeading(): ?string
+    {
+        return 'Top 5 des Ǹglises partenaires';
     }
 
     public function table(Table $table): Table

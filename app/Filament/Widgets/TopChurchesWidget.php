@@ -5,7 +5,6 @@ namespace App\Filament\Widgets;
 use App\Enums\ChurchType;
 use App\Models\Church;
 use App\Services\ChurchAccessService;
-use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;

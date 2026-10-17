@@ -30,26 +30,32 @@ class PartnersTable
                     ->searchable()
                     ->placeholder('—'),
                 TextColumn::make('handle_kc')
-                    ->label('KingsChat')
+                    ->label('KingChat')
                     ->searchable()
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('church.name')
                     ->label('Église')
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
                 TextColumn::make('cellule.name')
                     ->label('Cellule')
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('total_donations')
                     ->label('Montant total')
                     ->money('XOF')
                     ->alignEnd()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
                 TextColumn::make('birthdate')
                     ->label('Naissance')
-                    ->date('d/m/Y'),
+                    ->date('d/m/Y')
+                    ->toggleable(),
                 TextColumn::make('created_at')
                     ->label('Créé le')
-                    ->dateTime('d/m/Y'),
+                    ->dateTime('d/m/Y')
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('church_id')

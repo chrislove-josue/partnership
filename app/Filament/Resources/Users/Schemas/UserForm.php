@@ -45,7 +45,7 @@ class UserForm
                     ->tel()
                     ->unique(ignoreRecord: true),
                 TextInput::make('handle_kc')
-                    ->label('Identifiant KingChat (handle KC)')
+                    ->label('Identifiant KingsChat (handle KC)')
                     ->unique(ignoreRecord: true),
                 TextInput::make('password')
                     ->label('Mot de passe')

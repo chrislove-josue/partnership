@@ -29,6 +29,10 @@ class PartnersTable
                     ->label('Téléphone')
                     ->searchable()
                     ->placeholder('—'),
+                TextColumn::make('handle_kc')
+                    ->label('KingsChat')
+                    ->searchable()
+                    ->placeholder('—'),
                 TextColumn::make('church.name')
                     ->label('Église')
                     ->searchable(),

@@ -34,8 +34,7 @@ class PartnersTable
                     ->searchable(),
                 TextColumn::make('cellule.name')
                     ->label('Cellule')
-                    ->placeholder('—')
-                    ->toggleable(),
+                    ->placeholder('—'),
                 TextColumn::make('total_donations')
                     ->label('Montant total')
                     ->money('XOF')
@@ -43,12 +42,10 @@ class PartnersTable
                     ->sortable(),
                 TextColumn::make('birthdate')
                     ->label('Naissance')
-                    ->date('d/m/Y')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->date('d/m/Y'),
                 TextColumn::make('created_at')
                     ->label('Créé le')
-                    ->dateTime('d/m/Y')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->dateTime('d/m/Y'),
             ])
             ->filters([
                 SelectFilter::make('church_id')

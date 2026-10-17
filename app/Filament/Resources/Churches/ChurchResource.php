@@ -47,6 +47,11 @@ class ChurchResource extends Resource
         return ChurchesTable::configure($table);
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name'];
+    }
+
     public static function getPages(): array
     {
         return [

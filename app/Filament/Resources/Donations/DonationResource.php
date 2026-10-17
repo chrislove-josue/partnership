@@ -42,6 +42,11 @@ class DonationResource extends Resource
         return DonationsTable::configure($table);
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['partner.full_name', 'church.name', 'category.name'];
+    }
+
     public static function getPages(): array
     {
         return [

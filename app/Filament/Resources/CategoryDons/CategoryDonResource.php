@@ -39,6 +39,11 @@ class CategoryDonResource extends Resource
         return CategoryDonsTable::configure($table);
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name'];
+    }
+
     public static function getPages(): array
     {
         return [

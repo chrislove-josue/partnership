@@ -42,6 +42,11 @@ class PartnerResource extends Resource
         return PartnersTable::configure($table);
     }
 
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['first_name', 'last_name', 'email', 'phone', 'handle_kc'];
+    }
+
     public static function getPages(): array
     {
         return [

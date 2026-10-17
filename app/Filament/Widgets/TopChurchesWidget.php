@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Enums\ChurchType;
 use App\Models\Church;
 use App\Services\ChurchAccessService;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -13,7 +14,17 @@ use Illuminate\Support\Facades\Auth;
 
 class TopChurchesWidget extends TableWidget
 {
-    protected static ?string $heading = 'Top 5 des églises partenaires';
+    protected ?string $heading = 'Top 5 des églises partenaires';
+
+    protected function getTableHeaderActions(): array
+    {
+        return [];
+    }
+
+    protected function getHeading(): string
+    {
+        return 'Top 5 des églises partenaires';
+    }
 
     protected static ?int $sort = 2;
 

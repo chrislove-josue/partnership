@@ -92,6 +92,10 @@ export function AdminScreen() {
 
   const churchOptions = churches.map((church) => ({ label: church.name, value: String(church.id) }));
   const userOptions = users.map((user) => ({ label: user.name, value: String(user.id) }));
+  const partnerOptions = partners.map((partner) => ({
+    label: partner.full_name ?? `${partner.first_name} ${partner.last_name}`,
+    value: String(partner.id),
+  }));
 
   const openForm = (record?: Editable) => {
     setFormError('');

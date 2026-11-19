@@ -68,7 +68,8 @@ class AdminThemeTest extends TestCase
             ->assertSee('M17.472 14.382', false)
             ->assertSee('support-fab__toggle', false)
             ->assertSee('Replier le bouton d’assistance')
-            ->assertSee('Déplier le bouton d’assistance');
+            ->assertSee('Déplier le bouton d’assistance')
+            ->assertSee("open ? 'm9 5 7 7-7 7' : 'm15 19-7-7 7-7'", false);
     }
 
     public function test_support_button_is_visible_in_the_dashboard(): void
@@ -86,6 +87,7 @@ class AdminThemeTest extends TestCase
             ->assertSee('M17.472 14.382', false)
             ->assertSee('support-fab__toggle', false)
             ->assertSee('Replier le bouton d’assistance')
-            ->assertSee('Déplier le bouton d’assistance');
+            ->assertSee('Déplier le bouton d’assistance')
+            ->assertSee("open ? 'm9 5 7 7-7 7' : 'm15 19-7-7 7-7'", false);
     }
 }

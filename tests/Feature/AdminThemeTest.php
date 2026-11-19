@@ -54,4 +54,23 @@ class AdminThemeTest extends TestCase
         $this->assertSame('Oui', __('filament-tables::table.columns.icon.boolean.true'));
         $this->assertSame('Actions', __('filament-forms::components.key_value.columns.actions.label'));
     }
+
+    public function test_support_button_is_visible_on_the_login_page(): void
+    {
+        $this->get('/login')
+            ->assertOk()
+            ->assertSee('Pour toute assistance, veuillez contacter +22998123353')
+            ->assertSee('tel:+22998123353', false);
+    }
+
+    public function test_support_button_is_visible_in_the_dashboard(): void
+    {
+        $user = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertSee('Pour toute assistance, veuillez contacter +22998123353')
+            ->assertSee('tel:+22998123353', false);
+    }
 }

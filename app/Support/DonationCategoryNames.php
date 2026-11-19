@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-/** Libellés français des catégories de dons, avec tolérance aux anciens noms anglais. */
+/** Libellés canoniques des catégories de dons, avec tolérance aux anciennes variantes. */
 class DonationCategoryNames
 {
     /** @var array<int, string> */
@@ -10,7 +10,7 @@ class DonationCategoryNames
         'Dîmes',
         'Offrandes',
         'Rhapsodie des Réalités',
-        'Mission Urbaine',
+        'Mission InnerCity',
         'École de Guérisons',
     ];
 
@@ -29,16 +29,16 @@ class DonationCategoryNames
         'rhapsody of realities' => 'Rhapsodie des Réalités',
         'rhapsodie de réalités' => 'Rhapsodie des Réalités',
         'rhapsodie des réalités' => 'Rhapsodie des Réalités',
-        'innercity mission' => 'Mission Urbaine',
-        'mission innercity' => 'Mission Urbaine',
-        'mission urbaine' => 'Mission Urbaine',
+        'innercity mission' => 'Mission InnerCity',
+        'mission innercity' => 'Mission InnerCity',
+        'mission urbaine' => 'Mission InnerCity',
         'healing streams' => 'École de Guérisons',
         'école de guérisons' => 'École de Guérisons',
         'ecole de guérisons' => 'École de Guérisons',
         'ecole de guerisons' => 'École de Guérisons',
     ];
 
-    /** Ramène un libellé connu (anglais ou ancien) vers sa forme française. */
+    /** Ramène un libellé connu (anglais ou ancien) vers sa forme canonique. */
     public static function normalize(string $name): string
     {
         $name = trim($name);

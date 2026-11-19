@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /** Corrige les libellés qui diffèrent encore de la forme française canonique (accents inclus). */
+    /** Corrige les libellés qui diffèrent encore de la forme canonique (accents inclus). */
     public function up(): void
     {
         DB::transaction(function (): void {

@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     /**
-     * Anciens libellés (imports anglais ou orthographe incomplète) vers les libellés français.
+     * Anciens libellés (imports anglais ou orthographe incomplète) vers les libellés canoniques.
+     * « Mission InnerCity » reste en anglais, comme demandé.
      *
      * @var array<string, string>
      */
@@ -14,8 +15,8 @@ return new class extends Migration
         'Tithe' => 'Dîmes',
         'Offering' => 'Offrandes',
         'Rhapsody of Realities' => 'Rhapsodie des Réalités',
-        'InnerCity Mission' => 'Mission Urbaine',
-        'Mission InnerCity' => 'Mission Urbaine',
+        'InnerCity Mission' => 'Mission InnerCity',
+        'Mission Urbaine' => 'Mission InnerCity',
         'Healing Streams' => 'École de Guérisons',
         'Ecole de Guérisons' => 'École de Guérisons',
     ];

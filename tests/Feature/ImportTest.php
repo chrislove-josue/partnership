@@ -301,12 +301,14 @@ class ImportTest extends TestCase
         $this->assertSame(0, Donation::count());
     }
 
-    public function test_legacy_category_names_are_normalized_to_french(): void
+    public function test_legacy_category_names_are_normalized_to_canonical_labels(): void
     {
+        $this->assertSame('Mission InnerCity', DonationCategoryNames::normalize('Mission InnerCity'));
         $this->assertSame('Dîmes', DonationCategoryNames::normalize('Tithe'));
         $this->assertSame('Offrandes', DonationCategoryNames::normalize('offering'));
         $this->assertSame('Rhapsodie des Réalités', DonationCategoryNames::normalize('Rhapsody of Realities'));
-        $this->assertSame('Mission Urbaine', DonationCategoryNames::normalize('InnerCity Mission'));
+        $this->assertSame('Mission InnerCity', DonationCategoryNames::normalize('InnerCity Mission'));
+        $this->assertSame('Mission InnerCity', DonationCategoryNames::normalize('Mission Urbaine'));
         $this->assertSame('École de Guérisons', DonationCategoryNames::normalize('Healing Streams'));
         $this->assertSame('Offrandes', DonationCategoryNames::normalize('Offrandes'));
     }

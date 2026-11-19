@@ -26,7 +26,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('dashboard')
-            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->theme(asset('css/filament/admin/theme.css'))
             ->brandName('ChurchManager')
             ->font('Geist', 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap')
             ->monoFont('Geist Mono', 'https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap')

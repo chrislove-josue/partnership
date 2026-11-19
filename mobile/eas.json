@@ -1,7 +1,4 @@
 {
-  "cli": {
-    "appVersion": "auto"
-  },
   "build": {
     "apk": {
       "android": {

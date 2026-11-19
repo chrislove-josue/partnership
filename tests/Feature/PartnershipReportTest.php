@@ -28,14 +28,22 @@ class PartnershipReportTest extends TestCase
 
     private function makeUser(string $role, int $churchId, string $email, ?int $managerOf = null): User
     {
+        return $this->makeUserWithRoles([$role], $churchId, $email, $managerOf);
+    }
+
+    /**
+     * @param  array<int, string>  $roles
+     */
+    private function makeUserWithRoles(array $roles, int $churchId, string $email, ?int $managerOf = null): User
+    {
         $user = User::create([
-            'name' => 'User '.$role,
+            'name' => 'User '.implode('-', $roles),
             'email' => $email,
             'password' => Hash::make('password'),
             'assigned_church_id' => $churchId,
             'is_active' => true,
         ]);
-        $user->syncRoles([$role]);
+        $user->syncRoles($roles);
 
         if ($managerOf !== null) {
             Church::whereKey($managerOf)->update(['manager_id' => $user->id]);
@@ -193,7 +201,7 @@ class PartnershipReportTest extends TestCase
         app(PartnershipReportService::class)->resolveRecipients($staff, $group->id);
     }
 
-    public function test_staff_report_goes_to_all_active_local_pastors_of_his_church(): void
+    public function test_staff_report_uses_the_church_manager_before_other_pastors(): void
     {
         $this->seed();
 
@@ -208,11 +216,39 @@ class PartnershipReportTest extends TestCase
         $result = app(PartnershipReportService::class)->resolveRecipients($staff, $local->id);
         $emails = array_column($result['recipients'], 'email');
 
-        $this->assertContains($pastor->email, $emails);
-        $this->assertContains($otherPastor->email, $emails);
+        $this->assertSame([$pastor->email], $emails);
+        $this->assertNotContains($otherPastor->email, $emails);
         $this->assertNotContains($inactivePastor->email, $emails);
-        $this->assertCount(2, $emails);
         $this->assertSame('pasteur de votre église', $result['targetLabel']);
+    }
+
+    public function test_group_pastor_can_be_the_local_church_manager_recipient(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $group->id]);
+        $pastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe-local@example.test', $local->id);
+        $staff = $this->makeUser(RoleName::STAFF->value, $local->id, 'staff@example.test');
+
+        $result = app(PartnershipReportService::class)->resolveRecipients($staff, $local->id);
+
+        $this->assertSame([$pastor->email], array_column($result['recipients'], 'email'));
+    }
+
+    public function test_subgroup_pastor_can_be_the_local_church_manager_recipient(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $sub = Church::create(['name' => 'SUB', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $sub->id]);
+        $pastor = $this->makeUser(RoleName::SUBGROUP_PASTOR->value, $sub->id, 'sous-groupe-local@example.test', $local->id);
+        $staff = $this->makeUser(RoleName::STAFF->value, $local->id, 'staff@example.test');
+
+        $result = app(PartnershipReportService::class)->resolveRecipients($staff, $local->id);
+
+        $this->assertSame([$pastor->email], array_column($result['recipients'], 'email'));
     }
 
     public function test_local_pastor_report_climbs_hierarchy_to_group_manager(): void

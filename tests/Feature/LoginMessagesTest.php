@@ -55,7 +55,8 @@ class LoginMessagesTest extends TestCase
         string $code,
     ): void {
         $test->assertSet('loginError', Login::LOGIN_MESSAGES[$code])
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertDontSeeHtml('<svg class="mt-0.5 h-4 w-4 shrink-0"');
     }
 
     public function test_root_and_guests_are_redirected_directly_to_login(): void

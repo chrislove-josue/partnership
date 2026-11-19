@@ -124,9 +124,8 @@ class Login extends BaseLogin
             }
 
             return new HtmlString(
-                '<div role="alert" class="flex items-start gap-2 rounded-lg border border-danger-500/40 bg-danger-500/10 p-3 text-sm text-danger-700 dark:text-danger-300">'
-                . '<svg class="mt-0.5 h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.5h.008v.008H12v-.008Z" /></svg>'
-                . '<span>'.e($this->loginError).'</span>'
+                '<div role="alert" class="rounded-lg border border-danger-500/40 bg-danger-500/10 p-3 text-sm text-danger-700 dark:text-danger-300">'
+                . e($this->loginError)
                 . '</div>',
             );
         })

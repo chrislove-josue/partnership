@@ -208,11 +208,13 @@ class PartnershipReportService
     /**
      * Résolution de la chaîne hiérarchique des destinataires.
      *
-     * Personnel (rattaché à une église locale) → pasteur local de cette église ;
-     * pasteur local ou de sous-groupe → tous les pasteurs de groupe actifs du
-     * groupe (avec tous les pasteurs de sous-groupe et les super administrateurs
-     * en copie) ; pasteur de groupe / SUPER_ADMIN → super administrateurs.
-     * L'adresse de l'expéditeur est toujours exclue.
+     * Personnel (rattaché à une église locale) → responsable de cette église,
+     * ou tout pasteur local actif (y compris un pasteur de sous-groupe ou de
+     * groupe, qui occupe aussi cette fonction) ; pasteur local ou de sous-groupe
+     * → responsable du groupe ou pasteurs de groupe actifs, avec les responsables
+     * de sous-groupes et les super administrateurs en copie ; pasteur de groupe /
+     * SUPER_ADMIN → super administrateurs. L'adresse de l'expéditeur est toujours
+     * exclue.
      *
      * @return array{
      *     recipients: array<int, array{email: string, name: string}>,

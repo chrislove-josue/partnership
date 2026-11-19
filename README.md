@@ -43,7 +43,25 @@ Lancer le serveur de développement :
 php artisan serve
 ```
 
-Le back-office est accessible sur [http://localhost:8000/dashboard](http://localhost:8000/dashboard).
+La racine `/` et toute route protégée renvoient directement sur la connexion
+[http://localhost:8000/login](http://localhost:8000/login). Le back-office est accessible sur
+[http://localhost:8000/dashboard](http://localhost:8000/dashboard) après connexion
+(`/dashboard/login` reste un alias de `/login`).
+
+### Connexion
+
+La page `/login` affiche des messages explicites, identiques à ceux de l'application Next.js :
+
+| Situation | Message |
+| --- | --- |
+| Email ou mot de passe vide | Veuillez renseigner l'email et le mot de passe. |
+| Email inconnu | Aucun compte n'existe avec cette adresse email. |
+| Compte sans mot de passe (OAuth) | Ce compte n'a pas de mot de passe. Utilisez un autre moyen de connexion. |
+| Compte désactivé | Ce compte est désactivé. Contactez l'administrateur. |
+| Mot de passe erroné | Mot de passe incorrect. |
+
+Logique dans `App\Filament\Pages\Auth\Login`, redirection dans `App\Http\Middleware\Authenticate`.
+Aucun compte n'est créé pour `sounesatchougo@gmail.com`.
 
 ### Compte initial
 

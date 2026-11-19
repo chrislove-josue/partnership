@@ -21,7 +21,7 @@ class ImportTemplateGenerator
         ['churchName', 20, "Nom exact de l'église (créée si absente)"],
         ['donationAmount', 16, 'Nombre uniquement (sans devise ni espace)'],
         ['donationDate', 14, 'Format AAAA-MM-JJ, ex : 2026-11-01'],
-        ['donationCategoryName', 22, 'Ex : Offering, Tithe (créée si absente)'],
+        ['donationCategoryName', 22, 'Ex : Offrandes, Dîmes (créée si absente)'],
     ];
 
     public function toXlsx(bool $withDonation = true): string
@@ -43,8 +43,8 @@ class ImportTemplateGenerator
         }
 
         $examples = $withDonation ? [
-            ['Nestor', 'ATCHOUGO', 'nestor@example.test', '+22961981233', '@nestor229', 'CE SIKECODJI', 5000, '2026-11-01', 'Offering'],
-            ['Marie', 'Dossou', 'marie@example.test', '+22961000002', '@marie2', 'CE SIKECODJI', 3000, '2024-02-02', 'Tithe'],
+            ['Nestor', 'ATCHOUGO', 'nestor@example.test', '+22961981233', '@nestor229', 'CE SIKECODJI', 5000, '2026-11-01', DonationCategoryNames::CANONICAL[1]],
+            ['Marie', 'Dossou', 'marie@example.test', '+22961000002', '@marie2', 'CE SIKECODJI', 3000, '2024-02-02', DonationCategoryNames::CANONICAL[0]],
         ] : [
             ['Nestor', 'ATCHOUGO', 'nestor@example.test', '+22961981233', '@nestor229', 'CE SIKECODJI', null, null, null],
             ['Marie', 'Dossou', 'marie@example.test', '+22961000002', '@marie2', 'CE SIKECODJI', null, null, null],

@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "ChurchManager",
-    "slug": "churchmanager-mobile",
+    "name": "FinanceMobile",
+    "slug": "finance-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",

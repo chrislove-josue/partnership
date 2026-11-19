@@ -208,11 +208,11 @@ class PartnershipReportService
     /**
      * Résolution de la chaîne hiérarchique des destinataires.
      *
-     * Personnel → pasteur(s) de sa propre église (tous les pasteurs de groupe
-     * actifs pour une église groupe) ; pasteur d'église ou de sous-groupe →
-     * pasteur de groupe (avec les pasteurs de sous-groupe et les super
-     * administrateurs en copie) ; pasteur de groupe / SUPER_ADMIN → super
-     * administrateurs. L'adresse de l'expéditeur est toujours exclue.
+     * Personnel (rattaché à une église locale) → pasteur local de cette église ;
+     * pasteur local ou de sous-groupe → tous les pasteurs de groupe actifs du
+     * groupe (avec tous les pasteurs de sous-groupe et les super administrateurs
+     * en copie) ; pasteur de groupe / SUPER_ADMIN → super administrateurs.
+     * L'adresse de l'expéditeur est toujours exclue.
      *
      * @return array{
      *     recipients: array<int, array{email: string, name: string}>,
@@ -237,6 +237,31 @@ class PartnershipReportService
 
         $managerOf = function (Church $church): ?User {
             return Church::with('manager:id,email,name')->find($church->id)?->manager;
+        };
+
+        $activeRoleUsers = function (string $role, Church $church): array {
+            return User::role($role)
+                ->where('is_active', true)
+                ->where('assigned_church_id', $church->id)
+                ->get(['id', 'email', 'name'])
+                ->all();
+        };
+
+        /** Toutes les églises sous-groupes situées sous une église groupe. */
+        $subGroupChurches = function (Church $group): array {
+            $subGroups = [];
+            $visit = function (Church $parent) use (&$visit, &$subGroups): void {
+                foreach (Church::where('parent_id', $parent->id)->get() as $child) {
+                    if ($child->type === ChurchType::SUB_GROUP) {
+                        $subGroups[$child->id] = $child;
+                    }
+
+                    $visit($child);
+                }
+            };
+            $visit($group);
+
+            return array_values($subGroups);
         };
 
         $addTo = function (User $manager, string $label) use (&$to, &$chain, $senderEmail, $person): void {
@@ -287,21 +312,14 @@ class PartnershipReportService
             RoleName::SUPER_ADMIN->value,
         ];
 
-        // Personnel : envoi aux pasteurs de sa propre église, même si cette
-        // église est une église groupe. Pour une église groupe, tous les
-        // pasteurs de groupe actifs rattachés à l'église reçoivent le rapport.
+        // Personnel : rattaché à une seule église locale, envoi au pasteur local.
         if (! in_array($user->roleName(), $pastorRoles, true)) {
-            $pastors = [];
-
-            if ($church->type === ChurchType::GROUP) {
-                $pastors = User::role(RoleName::GROUP_PASTOR->value)
-                    ->where('is_active', true)
-                    ->where('assigned_church_id', $church->id)
-                    ->get(['id', 'email', 'name'])
-                    ->all();
+            if ($church->type !== ChurchType::LOCAL) {
+                throw new RuntimeException('Un personnel doit être rattaché à une église locale.');
             }
 
-            // Sans pasteur de groupe actif, on retombe sur le responsable de l'église.
+            $pastors = $activeRoleUsers(RoleName::LOCAL_PASTOR->value, $church);
+
             if ($pastors === []) {
                 $manager = $managerOf($church);
 
@@ -317,7 +335,7 @@ class PartnershipReportService
             }
 
             if ($to === []) {
-                throw new RuntimeException('Aucun pasteur d’église actif n’est assigné à cette église.');
+                throw new RuntimeException('Aucun pasteur local actif n’est assigné à cette église.');
             }
 
             return [

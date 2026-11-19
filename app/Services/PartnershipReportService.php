@@ -358,15 +358,11 @@ class PartnershipReportService
             ];
         }
 
-        // Pasteur d'église ou de sous-groupe : envoi direct au pasteur de groupe.
+        // Pasteur d'église ou de sous-groupe : envoi direct au(x) pasteur(s) de groupe.
         $group = null;
-        $subGroups = [];
         $cursor = $church->parent_id ? Church::find($church->parent_id) : null;
 
         while ($cursor) {
-            if ($cursor->type === ChurchType::SUB_GROUP) {
-                $subGroups[] = $cursor;
-            }
             if ($cursor->type === ChurchType::GROUP) {
                 $group = $cursor;
                 break;
@@ -376,10 +372,18 @@ class PartnershipReportService
         }
 
         if ($group) {
-            $groupManager = $managerOf($group);
+            $groupPastors = $activeRoleUsers(RoleName::GROUP_PASTOR->value, $group);
 
-            if ($groupManager) {
-                $addTo($groupManager, "pasteur de groupe ({$group->name})");
+            if ($groupPastors === []) {
+                $manager = $managerOf($group);
+
+                if ($manager) {
+                    $groupPastors = [$manager];
+                }
+            }
+
+            foreach ($groupPastors as $pastor) {
+                $addTo($pastor, "pasteur de groupe ({$group->name})");
             }
         }
 
@@ -396,12 +400,21 @@ class PartnershipReportService
             ];
         }
 
-        // Copie hiérarchique : pasteurs de sous-groupe et super administrateurs.
-        foreach ($subGroups as $subGroup) {
-            $subManager = $managerOf($subGroup);
+        // Copie hiérarchique : tous les pasteurs de sous-groupe du groupe et
+        // les super administrateurs actifs.
+        foreach ($subGroupChurches($group) as $subGroup) {
+            $subPastors = $activeRoleUsers(RoleName::SUBGROUP_PASTOR->value, $subGroup);
 
-            if ($subManager) {
-                $addCc($subManager, "pasteur de sous-groupe ({$subGroup->name})");
+            if ($subPastors === []) {
+                $manager = $managerOf($subGroup);
+
+                if ($manager) {
+                    $subPastors = [$manager];
+                }
+            }
+
+            foreach ($subPastors as $pastor) {
+                $addCc($pastor, "pasteur de sous-groupe ({$subGroup->name})");
             }
         }
         $addSuperAdmins('cc');

@@ -180,25 +180,38 @@ class PartnershipReportTest extends TestCase
         $this->assertSame('pasteur de votre église', $result['targetLabel']);
     }
 
-    public function test_staff_on_a_group_church_reports_to_its_pastor_not_super_admins(): void
+    public function test_staff_on_a_group_church_is_rejected(): void
     {
         $this->seed();
 
         $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
-        $pastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'pasteur-groupe@example.test', $group->id);
-        $otherPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'autre-pasteur@example.test');
-        $admin = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'admin@example.test');
         $staff = $this->makeUser(RoleName::STAFF->value, $group->id, 'staff@example.test');
 
-        $result = app(PartnershipReportService::class)->resolveRecipients($staff, $group->id);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('église locale');
+
+        app(PartnershipReportService::class)->resolveRecipients($staff, $group->id);
+    }
+
+    public function test_staff_report_goes_to_all_active_local_pastors_of_his_church(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $group->id]);
+        $pastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'pasteur@example.test', $local->id);
+        $otherPastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'autre-pasteur@example.test');
+        $inactivePastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'inactif@example.test');
+        $inactivePastor->update(['is_active' => false]);
+        $staff = $this->makeUser(RoleName::STAFF->value, $local->id, 'staff@example.test');
+
+        $result = app(PartnershipReportService::class)->resolveRecipients($staff, $local->id);
         $emails = array_column($result['recipients'], 'email');
 
         $this->assertContains($pastor->email, $emails);
         $this->assertContains($otherPastor->email, $emails);
+        $this->assertNotContains($inactivePastor->email, $emails);
         $this->assertCount(2, $emails);
-        $this->assertSame([], $result['cc']);
-        $this->assertNotContains($admin->email, array_column($result['recipients'], 'email'));
-        $this->assertNotContains('libertsinzo7@gmail.com', array_column($result['recipients'], 'email'));
         $this->assertSame('pasteur de votre église', $result['targetLabel']);
     }
 

@@ -30,7 +30,7 @@
             </div>
         </div>
 
-        <div class="mt-6 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700">
+        <div class="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700">
             <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                 <h2 class="text-base font-semibold text-gray-900 dark:text-white">Dons par catégorie — {{ $report['period']['label'] }}</h2>
             </div>
@@ -65,7 +65,7 @@
             </table>
         </div>
 
-        <div class="mt-6 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700">
+        <div class="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700">
             <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                 <h2 class="text-base font-semibold text-gray-900 dark:text-white">Partenaires ayant donné</h2>
             </div>
@@ -96,7 +96,7 @@
         </div>
 
         @if ($report['partnersWithoutDonation'] !== [])
-            <div class="mt-6 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700">
+            <div class="mt-6 overflow-x-auto rounded-xl bg-white shadow-sm ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-gray-700">
                 <div class="border-b border-gray-200 px-5 py-4 dark:border-gray-700">
                     <h2 class="text-base font-semibold text-gray-900 dark:text-white">Partenaires sans don sur la période</h2>
                 </div>

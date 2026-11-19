@@ -8,6 +8,7 @@ use App\Models\Church;
 use App\Models\Partner;
 use App\Models\User;
 use App\Services\ChurchAccessService;
+use App\Support\DonationCategoryNames;
 use RuntimeException;
 
 /** Références partagées par les imports partenaires et dons. */
@@ -40,7 +41,7 @@ abstract class BaseImportService
     /** Recherche insensible à la casse, avec auto-création (couleur #1F4E78). */
     protected function resolveCategory(string $name): CategoryDon
     {
-        $name = trim($name);
+        $name = DonationCategoryNames::normalize($name);
         $category = CategoryDon::whereRaw('LOWER(name) = ?', [mb_strtolower($name)])->first();
 
         return $category ?? CategoryDon::create([

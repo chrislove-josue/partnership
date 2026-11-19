@@ -10,6 +10,7 @@ use App\Models\Notification;
 use App\Models\Partner;
 use App\Models\Role;
 use App\Models\User;
+use App\Support\DonationCategoryNames;
 use Database\Seeders\UserSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
@@ -163,8 +164,9 @@ class ImportLegacyData extends Command
     private function importCategories(array $rows): void
     {
         foreach ($rows as $row) {
+            $name = DonationCategoryNames::normalize((string) $row['name']);
             $category = CategoryDon::updateOrCreate(
-                ['name' => $row['name']],
+                ['name' => $name],
                 ['color' => $row['color'] ?? '#3B82F6'],
             );
 
@@ -387,7 +389,4 @@ class ImportLegacyData extends Command
         }
 
         foreach (array_chunk($batch, 500) as $chunk) {
-            DB::table('magic_tokens')->insert($chunk);
-        }
-    }
-}
+   

@@ -29,6 +29,11 @@ export function ProfileScreen() {
   const [password, setPassword] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
+  const [serverUrl, setServerUrl] = useState(apiUrl);
+
+  useEffect(() => {
+    setServerUrl(apiUrl);
+  }, [apiUrl]);
 
   useEffect(() => {
     if (user) {
@@ -58,6 +63,7 @@ export function ProfileScreen() {
       }
 
       await api<{ user: User }>('/profile', { method: 'PATCH', body });
+      await updateApiUrl(serverUrl);
       await refreshUser();
       setPassword('');
       setConfirmation('');
@@ -89,6 +95,19 @@ export function ProfileScreen() {
         <TextField label="Adresse email" value={email} onChangeText={setEmail} keyboardType="email-address" />
         <TextField label="Téléphone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
         <TextField label="Identifiant KingsChat (handle KC)" value={handleKc} onChangeText={setHandleKc} />
+      </Card>
+
+      <Card>
+        <SectionTitle>Connexion au serveur</SectionTitle>
+        <TextField
+          label="Adresse de l'API"
+          value={serverUrl}
+          onChangeText={setServerUrl}
+          placeholder="http://192.168.1.10:8000/api"
+        />
+        <Text style={styles.help}>
+          Utilisez l’adresse de la machine qui héberge Laravel, suivie de /api. Sur un téléphone physique, remplacez localhost par l’IP de cette machine.
+        </Text>
       </Card>
 
       <Card>

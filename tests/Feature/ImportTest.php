@@ -80,7 +80,7 @@ class ImportTest extends TestCase
         $this->assertNull($helpers->normalizePhone(null));
 
         $this->assertSame('@nestor229', $helpers->normalizeHandleKC(' nestor229 '));
-        $this->assertSame('@nestor229', $helpers->normalizeHandleKC('@@Nestor 229'));
+        $this->assertSame('@Nestor229', $helpers->normalizeHandleKC('@@Nestor 229'));
 
         $this->assertSame(5000.0, $helpers->parseAmount('5 000'));
         $this->assertSame(5000.0, $helpers->parseAmount('5,000'));

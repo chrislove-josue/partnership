@@ -9,21 +9,21 @@ class ErrorPagesTest extends TestCase
 {
     /** @var array<int, array{title: string, message: string}> */
     private const ERRORS = [
-        400 => ['title' => 'Requête invalide', 'message' => "La requête envoyée n'a pas pu être comprise."],
+        400 => ['title' => 'Requête invalide', 'message' => "La requête envoyée n'a pas pu être comprise. Vérifiez les informations saisies et réessayez."],
         401 => ['title' => 'Authentification requise', 'message' => 'Vous devez vous connecter pour accéder à cette page.'],
-        402 => ['title' => 'Paiement requis', 'message' => 'Cette ressource nécessite un paiement.'],
-        403 => ['title' => 'Accès refusé', 'message' => "Vous n'avez pas les autorisations nécessaires."],
+        402 => ['title' => 'Paiement requis', 'message' => "Cette ressource nécessite un paiement. Contactez l'administrateur pour y accéder."],
+        403 => ['title' => 'Accès refusé', 'message' => "Vous n'avez pas les autorisations nécessaires pour accéder à cette page."],
         404 => ['title' => 'Page introuvable', 'message' => "La page recherchée n'existe pas ou a été déplacée."],
         405 => ['title' => 'Action non autorisée', 'message' => "Cette action n'est pas disponible pour cette page."],
-        408 => ['title' => 'Délai dépassé', 'message' => 'La demande a mis trop de temps à aboutir.'],
-        419 => ['title' => 'Session expirée', 'message' => 'Votre session a expiré pour des raisons de sécurité.'],
-        422 => ['title' => 'Données invalides', 'message' => "Certaines informations envoyées ne sont pas valides."],
-        429 => ['title' => 'Trop de demandes', 'message' => 'Vous avez effectué trop de demandes.'],
-        500 => ['title' => 'Erreur interne du serveur', 'message' => 'Une erreur inattendue est survenue.'],
+        408 => ['title' => 'Délai dépassé', 'message' => 'La demande a mis trop de temps à aboutir. Vérifiez votre connexion et réessayez.'],
+        419 => ['title' => 'Session expirée', 'message' => 'Votre session a expiré pour des raisons de sécurité. Rechargez la page et reconnectez-vous.'],
+        422 => ['title' => 'Données invalides', 'message' => "Certaines informations envoyées ne sont pas valides. Corrigez-les et réessayez."],
+        429 => ['title' => 'Trop de demandes', 'message' => 'Vous avez effectué trop de demandes. Patientez quelques instants avant de réessayer.'],
+        500 => ['title' => 'Erreur interne du serveur', 'message' => 'Une erreur inattendue est survenue. Réessayez dans quelques instants.'],
         501 => ['title' => 'Fonctionnalité indisponible', 'message' => "Cette fonctionnalité n'est pas encore disponible."],
-        502 => ['title' => 'Passerelle indisponible', 'message' => 'Le serveur a reçu une réponse invalide.'],
-        503 => ['title' => 'Service temporairement indisponible', 'message' => 'Le service est temporairement indisponible.'],
-        504 => ['title' => 'Délai de la passerelle dépassé', 'message' => "Le serveur n'a pas répondu à temps."],
+        502 => ['title' => 'Passerelle indisponible', 'message' => 'Le serveur a reçu une réponse invalide. Réessayez dans quelques instants.'],
+        503 => ['title' => 'Service temporairement indisponible', 'message' => 'Le service est temporairement indisponible. Réessayez dans quelques instants.'],
+        504 => ['title' => 'Délai de la passerelle dépassé', 'message' => "Le serveur n'a pas répondu à temps. Réessayez dans quelques instants."],
     ];
 
     protected function setUp(): void

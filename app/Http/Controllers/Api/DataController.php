@@ -148,6 +148,31 @@ class DataController extends Controller
         ])->all()]);
     }
 
+    public function updateDonation(Request $request, Donation $donation): JsonResponse
+    {
+        Gate::authorize('update', $donation);
+
+        $data = $request->validate([
+            'amount' => ['sometimes', 'required', 'numeric', 'min:0.01'],
+            'date' => ['sometimes', 'required', 'date'],
+            'church_id' => ['sometimes', 'required', 'integer', Rule::in($this->access->accessibleChurchIds($request->user()))],
+            'partner_id' => ['sometimes', 'required', 'integer', Rule::exists('partners', 'id')->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))],
+            'category_id' => ['sometimes', 'required', 'integer', Rule::exists('category_dons', 'id')],
+        ]);
+
+        $donation->update($data);
+
+        return response()->json(['message' => 'Don mis à jour.', 'donation' => $donation]);
+    }
+
+    public function destroyDonation(Donation $donation): JsonResponse
+    {
+        Gate::authorize('delete', $donation);
+        $donation->delete();
+
+        return response()->json(['message' => 'Don supprimé.']);
+    }
+
     public function storeDonation(Request $request): JsonResponse
     {
         Gate::authorize('create', Donation::class);

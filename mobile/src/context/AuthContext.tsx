@@ -59,6 +59,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
         }
       } catch {
+        clearCache();
         await SecureStore.deleteItemAsync(TOKEN_KEY);
         await SecureStore.deleteItemAsync(USER_KEY);
         setAuthToken(null);
@@ -98,6 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
     } finally {
+      clearCache();
       await SecureStore.deleteItemAsync(TOKEN_KEY);
       await SecureStore.deleteItemAsync(USER_KEY);
       setAuthToken(null);

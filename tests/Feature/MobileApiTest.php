@@ -163,6 +163,23 @@ class MobileApiTest extends TestCase
         Mail::assertSent(PartnershipReportMail::class);
     }
 
+    public function test_report_export_is_available_from_the_api(): void
+    {
+        $this->seed();
+
+        $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $sender = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+
+        $this->actingAs($sender, 'sanctum')
+            ->get('/api/reports/partnership/export?'.http_build_query([
+                'church_id' => $church->id,
+                'type' => 'year',
+                'year' => now()->year,
+            ]))
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    }
+
     public function test_notifications_are_private_to_the_authenticated_user(): void
     {
         $this->seed();

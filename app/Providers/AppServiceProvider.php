@@ -3,7 +3,11 @@
 namespace App\Providers;
 
 use App\Auth\LogoutResponse;
+use App\Listeners\RecordLoginHistory;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\ServiceProvider;
 
@@ -49,5 +53,7 @@ class AppServiceProvider extends ServiceProvider
             'components.select.actions.remove_option.label' => 'Retirer :label',
             'components.select.search_label' => 'Rechercher',
         ], 'fr', 'filament-forms');
+
+        Event::listen([Login::class, Logout::class], RecordLoginHistory::class);
     }
 }

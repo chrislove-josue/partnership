@@ -70,6 +70,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(Notification::class);
     }
 
+    public function loginHistories(): HasMany
+    {
+        return $this->hasMany(LoginHistory::class);
+    }
+
     // ─────────────────────────────────────────────────────────────────────
     // Helpers métier (miroir de types/auth.ts)
     // ─────────────────────────────────────────────────────────────────────

@@ -338,6 +338,40 @@ class PartnershipReportTest extends TestCase
         $this->assertNotContains($otherGroupPastor->email, array_column($result['recipients'], 'email'));
     }
 
+    public function test_subgroup_report_is_sent_to_group_pastor(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        Church::whereKey($group->id)->update(['manager_id' => null]);
+        $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
+        $sub = Church::create(['name' => 'CE CALAVI', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
+        $subPastor = $this->makeUser(RoleName::SUBGROUP_PASTOR->value, $sub->id, 'sous-groupe@example.test', $sub->id);
+
+        $result = app(PartnershipReportService::class)->resolveRecipients($subPastor, $sub->id);
+
+        $this->assertSame([$groupPastor->email], array_column($result['recipients'], 'email'));
+        $this->assertSame('pasteur de votre groupe', $result['targetLabel']);
+        $this->assertContains('pasteur de groupe ('.$group->name.')', $result['chain']);
+        $this->assertNotContains($subPastor->email, array_column($result['recipients'], 'email'));
+    }
+
+    public function test_staff_of_subgroup_also_reports_to_group_pastor(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        Church::whereKey($group->id)->update(['manager_id' => null]);
+        $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
+        $sub = Church::where('name', 'CE CALAVI')->firstOrFail();
+        $staff = $this->makeUser(RoleName::STAFF->value, $sub->id, 'staff-sous-groupe@example.test');
+
+        $result = app(PartnershipReportService::class)->resolveRecipients($staff, $sub->id);
+
+        $this->assertSame([$groupPastor->email], array_column($result['recipients'], 'email'));
+        $this->assertSame('pasteur de votre groupe', $result['targetLabel']);
+    }
+
     public function test_local_pastor_report_copies_subgroup_pastor_and_super_admins(): void
     {
         $this->seed();

@@ -433,7 +433,7 @@ class PartnershipReportService
 
         // Copie hiérarchique : tous les pasteurs de sous-groupe du groupe et
         // les super administrateurs actifs.
-        foreach ($subGroupChurches($group) as $subGroup) {
+        foreach ($group ? $subGroupChurches($group) : [] as $subGroup) {
             $subPastors = $pastorsFor($subGroup, RoleName::SUBGROUP_PASTOR->value);
 
             foreach ($subPastors as $pastor) {

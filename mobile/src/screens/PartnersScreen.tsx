@@ -153,6 +153,15 @@ export function PartnersScreen() {
       subtitle={`${partners.length} partenaire(s)`}
       actions={<PrimaryButton title="Ajouter" onPress={() => openForm()} />}
     >
+      <ImportExportCard
+        title="Partenaires Excel"
+        help="Colonnes : firstName, lastName, email, phone, handleKC, churchName, celluleName, address, birthdate, donationAmount, donationDate, donationCategoryName."
+        importPath="/partners/import"
+        templatePath="/partners/template"
+        templateFileName="modele_partenaires.xlsx"
+        onImported={() => void load()}
+      />
+
       <Card>
         <TextField label="Rechercher" value={search} onChangeText={setSearch} placeholder="Nom, téléphone, handle KC" />
         <SelectField

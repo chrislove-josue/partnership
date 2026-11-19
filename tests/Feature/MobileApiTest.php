@@ -11,7 +11,6 @@ use App\Models\Notification;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -80,29 +79,24 @@ class MobileApiTest extends TestCase
         $this->seed();
 
         $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
-        $other = Church::query()->create([
-            'name' => 'Autre groupe',
-            'type' => ChurchType::GROUP,
+        $local = Church::query()->create([
+            'name' => 'CE MOBILE TEST',
+            'type' => ChurchType::LOCAL,
+            'parent_id' => $group->id,
         ]);
-        $admin = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $pastor = User::factory()->create([
+            'email' => 'pasteur-mobile@example.test',
+            'assigned_church_id' => $local->id,
+        ]);
+        $pastor->syncRoles([RoleName::LOCAL_PASTOR->value]);
         $partner = Partner::query()->create([
             'first_name' => 'Jean',
             'last_name' => 'Dupont',
-            'church_id' => $group->id,
+            'church_id' => $local->id,
         ]);
         $category = CategoryDon::query()->firstOrFail();
 
-        $this->actingAs($admin, 'sanctum')
-            ->postJson('/api/donations', [
-                'amount' => 5000,
-                'date' => now()->toDateString(),
-                'church_id' => $other->id,
-                'partner_id' => $partner->id,
-                'category_id' => $category->id,
-            ])
-            ->assertOk();
-
-        $this->actingAs($admin, 'sanctum')
+        $this->actingAs($pastor, 'sanctum')
             ->postJson('/api/donations', [
                 'amount' => 5000,
                 'date' => now()->toDateString(),
@@ -110,11 +104,22 @@ class MobileApiTest extends TestCase
                 'partner_id' => $partner->id,
                 'category_id' => $category->id,
             ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('church_id');
+
+        $this->actingAs($pastor, 'sanctum')
+            ->postJson('/api/donations', [
+                'amount' => 5000,
+                'date' => now()->toDateString(),
+                'church_id' => $local->id,
+                'partner_id' => $partner->id,
+                'category_id' => $category->id,
+            ])
             ->assertCreated()
             ->assertJsonPath('donation.amount', 5000);
 
         $this->assertDatabaseCount('donations', 1);
-        $this->assertDatabaseHas('notifications', ['user_id' => $admin->id]);
+        $this->assertDatabaseHas('notifications', ['user_id' => $pastor->id]);
     }
 
     public function test_report_send_requires_explicit_confirmation(): void

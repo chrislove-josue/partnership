@@ -626,6 +626,20 @@ class PartnershipReportTest extends TestCase
             ->assertSee('7 000 FCFA');
     }
 
+    public function test_report_page_renders_when_a_required_filter_is_empty(): void
+    {
+        $this->seed();
+
+        $admin = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $this->actingAs($admin);
+
+        \Livewire\Livewire::test(\App\Filament\Pages\PartnershipReport::class)
+            ->set('data.church_id', null)
+            ->assertSee('Aucune église sélectionnée')
+            ->set('data.type', null)
+            ->assertSee('Aucune église sélectionnée');
+    }
+
     public function test_report_page_renders_for_a_super_admin(): void
     {
         $this->seed();

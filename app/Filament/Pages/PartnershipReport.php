@@ -114,7 +114,10 @@ class PartnershipReport extends Page
      */
     public function getReport(): array
     {
-        $state = $this->form->getState();
+        // `getState()` valide le formulaire. Or cette méthode est appelée à
+        // chaque rendu Livewire : une validation ici ferait échouer la page
+        // dès qu'un champ requis est temporairement vide. On lit l'état brut.
+        $state = $this->rawSelectionState();
 
         if (empty($state['church_id'])) {
             return ['error' => 'Aucune église sélectionnée.'];
@@ -210,10 +213,16 @@ class PartnershipReport extends Page
         ];
     }
 
+    /** État brut du formulaire, sans validation (affichage uniquement). */
+    private function rawSelectionState(): array
+    {
+        return is_array($this->data) ? $this->data : [];
+    }
+
     /** @return array{0: \App\Models\User, 1: int, 2: PeriodType, 3: int, 4: int|null} */
     private function readSelection(): array
     {
-        $state = $this->form->getState();
+        $state = $this->rawSelectionState();
         $user = Auth::user();
 
         if (! $user) {

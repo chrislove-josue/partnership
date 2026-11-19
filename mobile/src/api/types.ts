@@ -90,6 +90,17 @@ export interface ImportResult {
   message: string;
 }
 
+export interface LoginHistoryEntry {
+  id: number;
+  event: 'login' | 'logout';
+  event_label: string;
+  source: 'web' | 'mobile';
+  source_label: string;
+  ip_address: string | null;
+  user_agent: string | null;
+  happened_at: string;
+}
+
 export interface AppNotification {
   id: string;
   type: string;

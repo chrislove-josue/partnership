@@ -104,7 +104,9 @@ export function AdminScreen() {
     setType(record && 'type' in record ? String(record.type) : 'LOCAL');
     setParentId(record && 'parent_id' in record && record.parent_id ? String(record.parent_id) : '');
     setChurchId(record && 'church_id' in record ? String(record.church_id) : churchId);
-    setLeaderId(record && 'leader_id' in record && record.leader_id ? String(record.leader_id) : '');
+    setLeaderId(record && 'leader_id' in record && record.leader_id
+      ? String(record.leader_id)
+      : record && 'manager_id' in record && record.manager_id ? String(record.manager_id) : '');
     setColor(record && 'color' in record ? record.color : '#3B82F6');
     setEmail(record && 'email' in record ? record.email : '');
     setPhone(record && 'phone' in record ? record.phone ?? '' : '');

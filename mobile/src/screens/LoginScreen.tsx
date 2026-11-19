@@ -1,15 +1,26 @@
-import React, { useState } from 'react';
-import { Image, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
 import { colors, PrimaryButton, TextField } from '../components/ui';
 
 export function LoginScreen() {
-  const { login } = useAuth();
+  const { login, apiUrl, updateApiUrl } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [serverUrl, setServerUrl] = useState(apiUrl);
+  const [serverSaved, setServerSaved] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    setServerUrl(apiUrl);
+  }, [apiUrl]);
+
+  const applyServer = async () => {
+    await updateApiUrl(serverUrl);
+    setServerSaved(true);
+  };
 
   const submit = async () => {
     setError('');
@@ -39,6 +50,20 @@ export function LoginScreen() {
       <View style={styles.form}>
         <Text style={styles.title}>Connexion</Text>
         <Text style={styles.help}>Utilisez votre email et votre mot de passe du back-office.</Text>
+        <TextField
+          label="Adresse du serveur"
+          value={serverUrl}
+          onChangeText={(value) => {
+            setServerUrl(value);
+            setServerSaved(false);
+          }}
+          placeholder="http://192.168.1.10:8000/api"
+        />
+        <Pressable style={styles.serverButton} onPress={() => void applyServer()}>
+          <Text style={styles.serverButtonText}>
+            {serverSaved ? 'Adresse enregistrée ✓' : 'Utiliser cette adresse'}
+          </Text>
+        </Pressable>
         <TextField
           label="Adresse email"
           value={email}
@@ -86,5 +111,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '700', color: colors.navy, marginBottom: 4 },
   help: { fontSize: 13, color: colors.muted, marginBottom: 18 },
   error: { color: colors.red, marginBottom: 12, fontSize: 14 },
+  serverButton: { alignSelf: 'flex-start', marginBottom: 16 },
+  serverButtonText: { color: colors.blue, fontWeight: '700', fontSize: 13 },
   footer: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 18 },
 });

@@ -1,7 +1,17 @@
 import { File, Paths } from 'expo-file-system';
 
-export const API_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8000/api';
+const DEFAULT_API_URL =
+  process.env.EXPO_PUBLIC_API_URL ?? 'http://172.16.206.66:8000/api';
+
+let apiUrl = DEFAULT_API_URL;
+
+export function getApiUrl(): string {
+  return apiUrl;
+}
+
+export function setApiUrl(url: string): void {
+  apiUrl = url.trim().replace(/\/+$/, '');
+}
 
 let authToken: string | null = null;
 
@@ -58,7 +68,7 @@ export async function api<T>(
     headers.Authorization = `Bearer ${authToken}`;
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${apiUrl}${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
@@ -78,7 +88,7 @@ export async function api<T>(
 }
 
 export async function apiDownload(path: string, fileName: string): Promise<string> {
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await fetch(`${apiUrl}${path}`, {
     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
   });
 

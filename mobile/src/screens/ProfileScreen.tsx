@@ -16,7 +16,7 @@ import {
 } from '../components/ui';
 
 export function ProfileScreen() {
-  const { user, refreshUser, logout } = useAuth();
+  const { user, refreshUser, logout, apiUrl, updateApiUrl } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');

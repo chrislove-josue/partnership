@@ -1,14 +1,17 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { api, ApiError, setAuthToken } from '../api/client';
+import { api, ApiError, getApiUrl, setApiUrl, setAuthToken } from '../api/client';
 import type { User } from '../api/types';
 
 const TOKEN_KEY = 'churchmanager_token';
 const USER_KEY = 'churchmanager_user';
+const API_URL_KEY = 'churchmanager_api_url';
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
+  apiUrl: string;
+  updateApiUrl: (url: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -19,12 +22,26 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [apiUrl, setApiUrlState] = useState(getApiUrl());
+
+  const updateApiUrl = useCallback(async (url: string) => {
+    const normalized = url.trim().replace(/\/+$/, '');
+    await SecureStore.setItemAsync(API_URL_KEY, normalized);
+    setApiUrl(normalized);
+    setApiUrlState(normalized);
+  }, []);
 
   useEffect(() => {
     let active = true;
 
     (async () => {
       try {
+        const storedUrl = await SecureStore.getItemAsync(API_URL_KEY);
+        if (storedUrl) {
+          setApiUrl(storedUrl);
+          setApiUrlState(storedUrl);
+        }
+
         const token = await SecureStore.getItemAsync(TOKEN_KEY);
         if (!token) {
           return;
@@ -101,8 +118,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [logout]);
 
   const value = useMemo(
-    () => ({ user, loading, login, logout, refreshUser }),
-    [user, loading, login, logout, refreshUser],
+    () => ({ user, loading, apiUrl, updateApiUrl, login, logout, refreshUser }),
+    [user, loading, apiUrl, updateApiUrl, login, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

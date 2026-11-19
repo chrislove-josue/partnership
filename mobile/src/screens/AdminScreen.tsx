@@ -37,6 +37,7 @@ export function AdminScreen() {
   const [cellules, setCellules] = useState<Cellule[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [partners, setPartners] = useState<Partner[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Editable | null>(null);

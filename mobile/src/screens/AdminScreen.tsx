@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { api, ApiError } from '../api/client';
-import type { Category, Cellule, Church, Role, User } from '../api/types';
+import type { Category, Cellule, Church, Partner, Role, User } from '../api/types';
 import {
   Badge,
   Card,

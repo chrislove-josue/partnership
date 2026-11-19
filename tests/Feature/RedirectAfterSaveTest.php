@@ -70,6 +70,31 @@ class RedirectAfterSaveTest extends TestCase
             ->assertRedirect(ChurchResource::getUrl('index'));
     }
 
+    public function test_create_another_keeps_the_form_open_and_simple_create_redirects(): void
+    {
+        $this->seed();
+        $admin = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
+
+        Livewire::actingAs($admin)
+            ->test(CreateChurch::class)
+            ->fillForm([
+                'name' => 'CE MULTIPLE 1',
+                'type' => ChurchType::LOCAL->value,
+            ])
+            ->call('createAnother')
+            ->assertHasNoFormErrors()
+            ->fillForm([
+                'name' => 'CE MULTIPLE 2',
+                'type' => ChurchType::LOCAL->value,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors()
+            ->assertRedirect(ChurchResource::getUrl('index'));
+
+        $this->assertDatabaseHas('churches', ['name' => 'CE MULTIPLE 1']);
+        $this->assertDatabaseHas('churches', ['name' => 'CE MULTIPLE 2']);
+    }
+
     public function test_updating_a_church_redirects_to_the_list(): void
     {
         $this->seed();

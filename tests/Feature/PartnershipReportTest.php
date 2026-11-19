@@ -363,7 +363,7 @@ class PartnershipReportTest extends TestCase
         $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
         Church::whereKey($group->id)->update(['manager_id' => null]);
         $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
-        $sub = Church::where('name', 'CE CALAVI')->firstOrFail();
+        $sub = Church::create(['name' => 'CE CALAVI', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
         $staff = $this->makeUser(RoleName::STAFF->value, $sub->id, 'staff-sous-groupe@example.test');
 
         $result = app(PartnershipReportService::class)->resolveRecipients($staff, $sub->id);

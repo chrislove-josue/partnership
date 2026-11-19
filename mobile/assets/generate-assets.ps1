@@ -121,11 +121,11 @@ Draw-AppIcon $graphics 40 70 500 $true
 $navyBrush = New-Brush $navy
 $goldBrush = New-Brush $gold
 $mutedBrush = New-Brush $muted
-$titleFont = New-Object System.Drawing.Font('Segoe UI', 120, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
-$taglineFont = New-Object System.Drawing.Font('Segoe UI', 64, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Pixel)
+$titleFont = New-Object System.Drawing.Font('Segoe UI', 100, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
+$taglineFont = New-Object System.Drawing.Font('Segoe UI', 100, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
 
 $graphics.DrawString('FinanceMobile', $titleFont, $navyBrush, 570, 185)
-$graphics.FillRectangle($goldBrush, 578, 335, 720, 10)
+$graphics.FillRectangle($goldBrush, 578, 335, 920, 10)
 $graphics.DrawString(('Gestion financi' + [char]0x00E8 + 're'), $taglineFont, $mutedBrush, 582, 380)
 
 $titleFont.Dispose()

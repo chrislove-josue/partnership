@@ -134,13 +134,50 @@ export async function api<T>(
   return result;
 }
 
+export interface UploadFile {
+  uri: string;
+  name: string;
+  mimeType?: string | null;
+}
+
+export async function apiUpload<T>(
+  path: string,
+  file: UploadFile,
+  field = 'file',
+): Promise<T> {
+  const form = new FormData();
+  form.append(field, {
+    uri: file.uri,
+    name: file.name,
+    type: file.mimeType ?? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  } as unknown as Blob);
+
+  const response = await fetch(`${apiUrl}${path}`, {
+    method: 'POST',
+    headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    body: form,
+  });
+
+  const data = await parseResponse(response);
+  if (!response.ok) {
+    const errors = (data.errors ?? undefined) as Record<string, string[]> | undefined;
+    throw new ApiError(
+      String(data.message ?? "L'envoi du fichier a échoué."),
+      response.status,
+      errors,
+    );
+  }
+
+  return data as T;
+}
+
 export async function apiDownload(path: string, fileName: string): Promise<string> {
   const response = await fetch(`${apiUrl}${path}`, {
     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
   });
 
   if (!response.ok) {
-    throw new ApiError('Impossible de télécharger le rapport.', response.status);
+    throw new ApiError('Impossible de télécharger le fichier.', response.status);
   }
 
   const blob = await response.blob();

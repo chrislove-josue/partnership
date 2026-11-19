@@ -59,7 +59,6 @@ class UserForm
                     ->options($roleOptions)
                     ->multiple()
                     ->required()
-                    ->helperText('Un pasteur de sous-groupe est aussi pasteur local ; un pasteur de groupe est aussi pasteur de sous-groupe et pasteur local. Les fonctions impliquées sont ajoutées automatiquement.')
                     ->relationship('roles', 'name'),
                 Select::make('assigned_church_id')
                     ->label('Église assignée')

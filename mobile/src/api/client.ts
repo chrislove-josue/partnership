@@ -17,6 +17,7 @@ export function setApiUrl(url: string): void {
 }
 
 let authToken: string | null = null;
+let unauthorizedHandler: (() => void) | null = null;
 
 export function setAuthToken(token: string | null): void {
   authToken = token;
@@ -24,6 +25,19 @@ export function setAuthToken(token: string | null): void {
 
 export function getAuthToken(): string | null {
   return authToken;
+}
+
+/** Appelé lorsqu'une requête authentifiée reçoit un 401 (session expirée). */
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  unauthorizedHandler = handler;
+}
+
+function handleUnauthorized(sendsToken: boolean): void {
+  if (!sendsToken) {
+    return;
+  }
+  authToken = null;
+  unauthorizedHandler?.();
 }
 
 export class ApiError extends Error {
@@ -88,7 +102,8 @@ export async function api<T>(
     'Content-Type': 'application/json',
   };
 
-  if (authenticated && authToken) {
+  const sendsToken = authenticated && authToken !== null;
+  if (sendsToken) {
     headers.Authorization = `Bearer ${authToken}`;
   }
 
@@ -112,7 +127,10 @@ export async function api<T>(
   const data = await parseResponse(response);
 
   if (!response.ok) {
-    if (method === 'GET' && cacheKey) {
+    handleUnauthorized(sendsToken && response.status === 401);
+
+    // Une session expirée ne doit jamais être masquée par des données périmées.
+    if (method === 'GET' && cacheKey && response.status !== 401) {
       const stale = readStaleCache<T>(cacheKey);
       if (stale !== null) {
         return stale;
@@ -152,17 +170,19 @@ export async function apiUpload<T>(
     type: file.mimeType ?? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   } as unknown as Blob);
 
+  const sendsToken = authToken !== null;
   const response = await fetch(`${apiUrl}${path}`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...(sendsToken ? { Authorization: `Bearer ${authToken}` } : {}),
     },
     body: form,
   });
 
   const data = await parseResponse(response);
   if (!response.ok) {
+    handleUnauthorized(sendsToken && response.status === 401);
     const errors = (data.errors ?? undefined) as Record<string, string[]> | undefined;
     throw new ApiError(
       String(data.message ?? "L'envoi du fichier a échoué."),
@@ -175,14 +195,16 @@ export async function apiUpload<T>(
 }
 
 export async function apiDownload(path: string, fileName: string): Promise<string> {
+  const sendsToken = authToken !== null;
   const response = await fetch(`${apiUrl}${path}`, {
     headers: {
       Accept: 'application/json, application/octet-stream',
-      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      ...(sendsToken ? { Authorization: `Bearer ${authToken}` } : {}),
     },
   });
 
   if (!response.ok) {
+    handleUnauthorized(sendsToken && response.status === 401);
     throw new ApiError('Impossible de télécharger le fichier.', response.status);
   }
 

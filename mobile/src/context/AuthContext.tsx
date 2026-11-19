@@ -1,6 +1,16 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { api, ApiError, clearCache, getApiUrl, setApiUrl, setAuthToken } from '../api/client';
+import {
+  api,
+  ApiError,
+  clearCache,
+  getApiUrl,
+  setApiUrl,
+  setAuthToken,
+  setUnauthorizedHandler,
+} from '../api/client';
+import { clearSession, loadSession, saveSession } from '../api/session';
+import type { SessionInfo } from '../api/session';
 import type { User } from '../api/types';
 
 const TOKEN_KEY = 'churchmanager_token';
@@ -9,6 +19,7 @@ const API_URL_KEY = 'churchmanager_api_url';
 
 interface AuthContextValue {
   user: User | null;
+  session: SessionInfo | null;
   loading: boolean;
   apiUrl: string;
   updateApiUrl: (url: string) => Promise<void>;
@@ -21,6 +32,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<SessionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [apiUrl, setApiUrlState] = useState(getApiUrl());
 
@@ -29,6 +41,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await SecureStore.setItemAsync(API_URL_KEY, normalized);
     setApiUrl(normalized);
     setApiUrlState(normalized);
+  }, []);
+
+  const forget = useCallback(async () => {
+    clearCache();
+    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await SecureStore.deleteItemAsync(USER_KEY);
+    await clearSession();
+    setAuthToken(null);
+    setUser(null);
+    setSession(null);
   }, []);
 
   useEffect(() => {
@@ -52,19 +74,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (saved) {
           setUser(JSON.parse(saved) as User);
         }
+        const storedSession = await loadSession();
+        if (storedSession) {
+          setSession(storedSession);
+        }
 
         const response = await api<{ user: User }>('/me');
-        if (active) {
-          setUser(response.user);
-          await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
+        if (!active) {
+          return;
         }
-      } catch {
-        clearCache();
-        await SecureStore.deleteItemAsync(TOKEN_KEY);
-        await SecureStore.deleteItemAsync(USER_KEY);
-        setAuthToken(null);
-        if (active) {
-          setUser(null);
+
+        setUser(response.user);
+        await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
+        const synced: SessionInfo = {
+          connectedAt: storedSession?.connectedAt ?? new Date().toISOString(),
+          lastSyncAt: new Date().toISOString(),
+        };
+        await saveSession(synced);
+        setSession(synced);
+      } catch (error) {
+        // Hors-ligne, on conserve le jeton et l'utilisateur mémorisés : le cache
+        // local reste consultable. Seul un 401 signifie une session terminée.
+        if (error instanceof ApiError && error.status === 401) {
+          await forget();
         }
       } finally {
         if (active) {
@@ -76,7 +108,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [forget]);
+
+  const logout = useCallback(async () => {
+    try {
+      await api('/logout', { method: 'POST' });
+    } catch (error) {
+      if (!(error instanceof ApiError)) {
+        throw error;
+      }
+    } finally {
+      await forget();
+    }
+  }, [forget]);
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      void logout();
+    });
+
+    return () => setUnauthorizedHandler(null);
+  }, [logout]);
 
   const login = useCallback(async (email: string, password: string) => {
     const response = await api<{ token: string; user: User }>('/login', {
@@ -87,24 +139,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     await SecureStore.setItemAsync(TOKEN_KEY, response.token);
     await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
+    const now = new Date().toISOString();
+    const opened: SessionInfo = { connectedAt: now, lastSyncAt: now };
+    await saveSession(opened);
     setAuthToken(response.token);
     setUser(response.user);
-  }, []);
-
-  const logout = useCallback(async () => {
-    try {
-      await api('/logout', { method: 'POST' });
-    } catch (error) {
-      if (!(error instanceof ApiError)) {
-        throw error;
-      }
-    } finally {
-      clearCache();
-      await SecureStore.deleteItemAsync(TOKEN_KEY);
-      await SecureStore.deleteItemAsync(USER_KEY);
-      setAuthToken(null);
-      setUser(null);
-    }
+    setSession(opened);
   }, []);
 
   const refreshUser = useCallback(async () => {
@@ -112,16 +152,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response = await api<{ user: User }>('/me');
       setUser(response.user);
       await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
+      const synced: SessionInfo = {
+        connectedAt: session?.connectedAt ?? new Date().toISOString(),
+        lastSyncAt: new Date().toISOString(),
+      };
+      await saveSession(synced);
+      setSession(synced);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         await logout();
       }
     }
-  }, [logout]);
+  }, [logout, session]);
 
   const value = useMemo(
-    () => ({ user, loading, apiUrl, updateApiUrl, login, logout, refreshUser }),
-    [user, loading, apiUrl, updateApiUrl, login, logout, refreshUser],
+    () => ({ user, session, loading, apiUrl, updateApiUrl, login, logout, refreshUser }),
+    [user, session, loading, apiUrl, updateApiUrl, login, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

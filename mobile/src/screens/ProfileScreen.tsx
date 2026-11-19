@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { api, ApiError } from '../api/client';
+import { formatSessionDate } from '../api/session';
 import type { User } from '../api/types';
 import { useAuth } from '../context/AuthContext';
 import {

@@ -284,6 +284,29 @@ php artisan test --filter=LoginHistoryTest
 
 ---
 
+## 6 quater. Sessions, cache et cookies
+
+### Sessions
+
+- **Site web** : sessions Laravel stockées en base (`SESSION_DRIVER=database`), cookie de session `suivi-des-partenariats-session`, régénéré à la connexion. `SESSION_HTTP_ONLY=true` et `SESSION_SAME_SITE=lax` par défaut ; activer `SESSION_SECURE_COOKIE=true` en HTTPS.
+- **Application mobile** : pas de cookies. Le jeton Sanctum, le compte et les détails de la session (`connectedAt`, `lastSyncAt`) sont conservés dans `expo-secure-store`. Une réponse `401` ferme la session automatiquement ; une panne réseau conserve le jeton et autorise la consultation hors-ligne. Les dates sont visibles dans **Profil → Sécurité**.
+
+### Cache
+
+- **Mobile** : réponses GET en cache local 5 minutes (`mobile/src/api/cache.ts`), avec données périmées en secours hors-ligne et invalidation après écriture.
+- **Serveur** : `App\Services\ReportCache` met en cache les rapports de partenariat (`REPORT_CACHE_TTL`, 300 s par défaut) via `config('cache.report_ttl')`. La clé inclut une version globale incrémentée par `AppServiceProvider` dès qu’un don, partenaire, église, catégorie ou cellule est créé, modifié ou supprimé : aucune donnée périmée après une modification.
+
+### Cookies
+
+Une bannière Filament (`resources/views/filament/components/cookie-consent.blade.php`) explique les trois cookies utilisés : session, `XSRF-TOKEN` et `churchmanager_cookie_consent`. Le choix est mémorisé 6 mois dans ce dernier cookie, écrit par le navigateur et exclu du chiffrement via `bootstrap/app.php`. Aucun cookie publicitaire ou de suivi n’est déposé.
+
+```bash
+php artisan test --filter=ReportCacheTest
+php artisan test --filter=CookieConsentTest
+```
+
+---
+
 ## 7. Générer les assets (logo et icônes)
 
 Les sources sont dans `mobile/assets/` :
@@ -350,7 +373,7 @@ Copier l’APK final :
 
 ```powershell
 cd C:\Project\partnership
-copy .\mobile\android\app\build\outputs\apk\release\app-release.apk .\mobile\FinanceMobile-1.3.1.apk /Y
+copy .\mobile\android\app\build\outputs\apk\release\app-release.apk .\mobile\FinanceMobile-1.3.2.apk /Y
 ```
 
 Le numéro de version est aligné dans `mobile/app.json`, `mobile/package.json` et `mobile/android/app/build.gradle` (`versionCode` / `versionName`). Pour une nouvelle version, incrémenter ces trois fichiers avant le build. Attention : `expo prebuild` réécrit `build.gradle` et remet `versionCode 1` — le remettre à la valeur voulue **après** le prebuild, avant Gradle.

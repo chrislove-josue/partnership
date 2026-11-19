@@ -31,6 +31,7 @@ mobile/FinanceMobile-1.1.0.apk
 mobile/FinanceMobile-1.2.0.apk
 mobile/FinanceMobile-1.3.0.apk
 mobile/FinanceMobile-1.3.1.apk
+mobile/FinanceMobile-1.3.2.apk
 ```
 
 Il est signé avec la clé de debug générée par Expo : il s’installe directement sur Android, mais n’est pas destiné au Play Store. L’adresse de l’API peut être modifiée **depuis l’application**, sans recompiler :
@@ -43,6 +44,12 @@ Pour un téléphone physique, utilisez l’IP de la machine qui héberge Laravel
 ## Cache local
 
 Les réponses GET sont mises en cache dans le dossier temporaire de l’application (`expo-file-system`) pendant **5 minutes**. Les écrans s’affichent donc instantanément, même avec une connexion lente, et les données sont rafraîchies automatiquement à l’ouverture suivante. En cas de perte réseau, la dernière version connue est utilisée. Le cache est vidé à la déconnexion et après chaque modification (don, partenaire, utilisateur…).
+
+Le serveur met également les rapports de partenariat en cache (`REPORT_CACHE_TTL`, 5 minutes par défaut). Toute écriture sur un don, un partenaire, une église, une catégorie ou une cellule incrémente la version du cache : le rapport affiché est donc toujours à jour après une modification.
+
+## Session et cookies
+
+Le jeton Sanctum, les informations du compte et les détails de la session sont conservés dans le stockage sécurisé du téléphone (`expo-secure-store`). **Profil → Sécurité** affiche la date d’ouverture de la session et la dernière synchronisation avec le serveur. Si le serveur répond `401`, la session est fermée automatiquement ; si le réseau est indisponible, l’application reste consultable avec le cache local. L’APK n’utilise pas de cookies (authentification par jeton Bearer). Sur le site web, la session Laravel est stockée en base et protégée par les cookies `XSRF-TOKEN` et de session ; une bannière explique les cookies utilisés et mémorise la prise de connaissance dans `churchmanager_cookie_consent`.
 
 ## Fonctionnalités
 

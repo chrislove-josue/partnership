@@ -253,7 +253,9 @@ Le site ne propose pas d’export brut des listes de dons ou de partenaires : le
 
 ### Destinataires des rapports de partenariat
 
-- Rapport d’une **église locale** : pasteur de la locale, avec copies du pasteur de sous-groupe, du pasteur de groupe et des super administrateurs.
+- Rapport d’un **membre d’une église locale** : pasteur responsable de cette locale (`pasteur de votre église`).
+- Rapport du **pasteur d’une église locale sous un sous-groupe** (ex. CE PARAKOU sous CE CALAVI) : envoi au **pasteur du sous-groupe**, avec copies du pasteur du groupe et des super administrateurs.
+- Rapport du **pasteur d’une église locale rattachée directement au groupe** : pasteur du groupe, avec copies des super administrateurs.
 - Rapport d’une **église sous-groupe** (pasteur ou membre rattaché) : envoi direct au **pasteur du groupe**, avec copies des autres pasteurs de sous-groupe et des super administrateurs.
 - Rapport de l’**église groupe** : hiérarchie nationale (super administrateurs).
 - L’expéditeur est exclu des destinataires. Aucun envoi n’est effectué sans `confirm: true`.

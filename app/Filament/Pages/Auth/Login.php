@@ -76,7 +76,7 @@ class Login extends BaseLogin
         }
 
         Filament::auth()->login($user, (bool) ($data['remember'] ?? false));
-        request()->session()->regenerate();
+        session()->regenerate();
 
         return app(LoginResponse::class);
     }

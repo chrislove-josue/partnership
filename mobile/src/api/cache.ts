@@ -1,4 +1,4 @@
-import { File, Paths } from 'expo-file-system';
+import { Directory, File, Paths } from 'expo-file-system';
 
 interface CacheEntry<T> {
   timestamp: number;
@@ -69,4 +69,18 @@ export function invalidateCache(prefix?: string): void {
 
 export function clearCache(): void {
   invalidateCache();
+
+  try {
+    const cacheDir = new Directory(Paths.cache);
+    if (!cacheDir.exists) {
+      return;
+    }
+    cacheDir.list().forEach((entry) => {
+      if (entry instanceof File && entry.uri.includes('churchmanager-cache-') && entry.exists) {
+        entry.delete();
+      }
+    });
+  } catch {
+    // Le cache reste une optimisation : ne jamais bloquer la déconnexion.
+  }
 }

@@ -152,7 +152,7 @@ class ImportLegacyDataTest extends TestCase
         // Don -> références
         $donation = Donation::firstOrFail();
         $this->assertSame($partner->id, $donation->partner_id);
-        $this->assertSame('Tithe', $donation->category->name);
+        $this->assertSame('Dîmes', $donation->category->name);
         $this->assertEquals(25000, $donation->amount);
 
         // Notification -> utilisateur

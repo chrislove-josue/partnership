@@ -62,8 +62,8 @@ class ImportActionTest extends TestCase
         $file = $this->uploadXlsx(
             ['firstName', 'lastName', 'email', 'phone', 'churchName', 'celluleName', 'donationAmount', 'donationDate', 'donationCategoryName'],
             [
-                ['Alice', 'YAO', 'alice@example.test', '61981233', 'CE SIKECODJI', 'Cellule Test', 6500, '2026-02-10', 'Offering UI'],
-                ['Bob', 'KOUASSI', 'bob@example.test', '61000002', 'CE SIKECODJI', 'Cellule Test', 3500, '2026-02-11', 'Offering UI'],
+                ['Alice', 'YAO', 'alice@example.test', '61981233', 'CE SIKECODJI', 'Cellule Test', 6500, '2026-02-10', 'Offrandes UI'],
+                ['Bob', 'KOUASSI', 'bob@example.test', '61000002', 'CE SIKECODJI', 'Cellule Test', 3500, '2026-02-11', 'Offrandes UI'],
             ],
         );
 
@@ -98,8 +98,8 @@ class ImportActionTest extends TestCase
         $file = $this->uploadXlsx(
             ['email', 'churchName', 'donationAmount', 'donationDate', 'donationCategoryName'],
             [
-                ['jean@example.test', 'CE SIKECODJI', 5000, '2026-02-10', 'Tithe UI'],
-                ['jean@example.test', 'CE SIKECODJI', 5000, '2026-02-10', 'Tithe UI'],
+                ['jean@example.test', 'CE SIKECODJI', 5000, '2026-02-10', 'Dîmes UI'],
+                ['jean@example.test', 'CE SIKECODJI', 5000, '2026-02-10', 'Dîmes UI'],
             ],
         );
 

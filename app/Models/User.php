@@ -86,6 +86,27 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
+     * Ajoute les fonctions impliquées par les rôles déjà assignés.
+     * Un pasteur de groupe est aussi pasteur de sous-groupe et pasteur local ;
+     * un pasteur de sous-groupe est aussi pasteur local.
+     */
+    public function syncImpliedRoles(): void
+    {
+        $roles = collect($this->getRoleNames()->all())
+            ->map(fn (string $name): ?RoleName => RoleName::tryFrom($name))
+            ->filter()
+            ->flatMap(fn (RoleName $role): array => $role->withImpliedRoles())
+            ->unique(fn (RoleName $role): string => $role->value)
+            ->map(fn (RoleName $role): string => $role->value)
+            ->values()
+            ->all();
+
+        if ($roles !== []) {
+            $this->syncRoles($roles);
+        }
+    }
+
+    /**
      * @return array<int, string>
      */
     public function permissionNames(): array

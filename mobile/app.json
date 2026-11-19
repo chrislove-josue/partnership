@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "FinanceMobile",
+    "name": "ChurchManager",
     "slug": "finance-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -9,11 +9,22 @@
       "supportsTablet": true
     },
     "android": {
-      "permissions": ["INTERNET"]
+      "package": "com.churchmanager.benin",
+      "permissions": [
+        "INTERNET"
+      ]
     },
     "web": {
       "bundler": "metro"
     },
-    "plugins": ["expo-secure-store"]
+    "plugins": [
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "fdac1fad-d7c6-4a20-9a32-c3ed265a61e5"
+      }
+    },
+    "owner": "chrislove-josue"
   }
 }

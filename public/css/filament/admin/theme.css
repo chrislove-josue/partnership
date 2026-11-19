@@ -452,7 +452,12 @@
     transition: background-color 150ms ease, transform 150ms ease;
 }
 
-.support-fab__toggle:hover {
+.support-fab--expanded .support-fab__toggle:hover {
+    background-color: var(--gray-50);
+    transform: translateX(1px);
+}
+
+.support-fab--collapsed .support-fab__toggle:hover {
     background-color: var(--gray-50);
     transform: translateX(-1px);
 }

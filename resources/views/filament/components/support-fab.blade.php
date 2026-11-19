@@ -34,10 +34,10 @@
         aria-controls="support-fab-link"
     >
         <svg class="support-fab__toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" x-show="open">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m15 19-7-7 7-7" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" />
         </svg>
         <svg class="support-fab__toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" x-show="!open">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m9 5 7 7-7 7" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="m15 19-7-7 7-7" />
         </svg>
     </button>
 

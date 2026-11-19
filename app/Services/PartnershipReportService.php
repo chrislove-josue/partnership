@@ -279,18 +279,6 @@ class PartnershipReportService
             throw new RuntimeException('Église introuvable');
         }
 
-        // Une église groupe est le sommet de la chaîne locale.
-        if ($church->type === ChurchType::GROUP) {
-            $addSuperAdmins('to');
-
-            return [
-                'recipients' => array_values($to),
-                'cc' => [],
-                'targetLabel' => 'hiérarchie nationale (super administrateurs)',
-                'chain' => $chain,
-            ];
-        }
-
         $pastorRoles = [
             RoleName::LOCAL_PASTOR->value,
             RoleName::SUBGROUP_PASTOR->value,
@@ -298,7 +286,9 @@ class PartnershipReportService
             RoleName::SUPER_ADMIN->value,
         ];
 
-        // Personnel : envoi uniquement au pasteur de sa propre église.
+        // Personnel : envoi uniquement au pasteur de sa propre église, même si
+        // cette église est une église groupe. Le type d'église ne remplace jamais
+        // la chaîne hiérarchique du personnel.
         if (! in_array($user->roleName(), $pastorRoles, true)) {
             $manager = $managerOf($church);
 
@@ -312,6 +302,18 @@ class PartnershipReportService
                 'recipients' => array_values($to),
                 'cc' => [],
                 'targetLabel' => 'pasteur de votre église',
+                'chain' => $chain,
+            ];
+        }
+
+        // Une église groupe est le sommet de la chaîne locale pour un pasteur.
+        if ($church->type === ChurchType::GROUP) {
+            $addSuperAdmins('to');
+
+            return [
+                'recipients' => array_values($to),
+                'cc' => [],
+                'targetLabel' => 'hiérarchie nationale (super administrateurs)',
                 'chain' => $chain,
             ];
         }

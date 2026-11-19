@@ -180,6 +180,24 @@ class PartnershipReportTest extends TestCase
         $this->assertSame('pasteur de votre église', $result['targetLabel']);
     }
 
+    public function test_staff_on_a_group_church_reports_to_its_pastor_not_super_admins(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $pastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'pasteur-groupe@example.test', $group->id);
+        $admin = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'admin@example.test');
+        $staff = $this->makeUser(RoleName::STAFF->value, $group->id, 'staff@example.test');
+
+        $result = app(PartnershipReportService::class)->resolveRecipients($staff, $group->id);
+
+        $this->assertSame([$pastor->email], array_column($result['recipients'], 'email'));
+        $this->assertSame([], $result['cc']);
+        $this->assertNotContains($admin->email, array_column($result['recipients'], 'email'));
+        $this->assertNotContains('libertsinzo7@gmail.com', array_column($result['recipients'], 'email'));
+        $this->assertSame('pasteur de votre église', $result['targetLabel']);
+    }
+
     public function test_local_pastor_report_climbs_hierarchy_to_group_manager(): void
     {
         $this->seed();

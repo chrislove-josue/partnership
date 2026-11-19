@@ -1,0 +1,208 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Enums\PermissionName;
+use App\Http\Controllers\Controller;
+use App\Models\CategoryDon;
+use App\Models\Cellule;
+use App\Models\Church;
+use App\Models\Donation;
+use App\Models\Partner;
+use App\Services\ChurchAccessService;
+use App\Services\DonationNotifier;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
+
+class DataController extends Controller
+{
+    public function __construct(
+        private readonly ChurchAccessService $access,
+        private readonly DonationNotifier $notifier,
+    ) {}
+
+    public function churches(Request $request): JsonResponse
+    {
+        return response()->json([
+            'data' => $this->access->accessibleChurches($request->user())
+                ->map(fn (Church $church): array => [
+                    'id' => $church->id,
+                    'name' => $church->name,
+                    'type' => $church->type?->value ?? (string) $church->type,
+                    'parent_id' => $church->parent_id,
+                ])->values()->all(),
+        ]);
+    }
+
+    public function partners(Request $request): JsonResponse
+    {
+        Gate::authorize('viewAny', Partner::class);
+
+        $query = Partner::query()
+            ->with(['church:id,name', 'cellule:id,name'])
+            ->withTotalDonations()
+            ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
+            ->when($request->string('search')->toString(), function ($query, string $search): void {
+                $query->where(function ($query) use ($search): void {
+                    $query->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('handle_kc', 'like', "%{$search}%");
+                });
+            })
+            ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))
+            ->when($request->filled('cellule_id'), fn ($query) => $query->where('cellule_id', $request->integer('cellule_id')))
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->limit(300);
+
+        return response()->json(['data' => $query->get()->map(fn (Partner $partner): array => [
+            'id' => $partner->id,
+            'first_name' => $partner->first_name,
+            'last_name' => $partner->last_name,
+            'full_name' => $partner->full_name,
+            'email' => $partner->email,
+            'phone' => $partner->phone,
+            'handle_kc' => $partner->handle_kc,
+            'address' => $partner->address,
+            'birthdate' => $partner->birthdate?->toDateString(),
+            'church_id' => $partner->church_id,
+            'church' => $partner->church?->name,
+            'cellule_id' => $partner->cellule_id,
+            'cellule' => $partner->cellule?->name,
+            'total_donations' => (float) ($partner->total_donations ?? 0),
+        ])->all()]);
+    }
+
+    public function cellules(Request $request): JsonResponse
+    {
+        Gate::authorize('viewAny', Cellule::class);
+
+        $query = Cellule::query()
+            ->with(['church:id,name', 'leader:id,first_name,last_name'])
+            ->withTotalDonations()
+            ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
+            ->when($request->string('search')->toString(), function ($query, string $search): void {
+                $query->where('name', 'like', "%{$search}%");
+            })
+            ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))
+            ->orderBy('name')
+            ->limit(300);
+
+        return response()->json(['data' => $query->get()->map(fn (Cellule $cellule): array => [
+            'id' => $cellule->id,
+            'name' => $cellule->name,
+            'church_id' => $cellule->church_id,
+            'church' => $cellule->church?->name,
+            'leader_id' => $cellule->leader_id,
+            'leader' => $cellule->leader?->full_name,
+            'total_donations' => (float) ($cellule->total_donations ?? 0),
+        ])->all()]);
+    }
+
+    public function categories(): JsonResponse
+    {
+        return response()->json([
+            'data' => CategoryDon::query()->orderBy('name')->get()
+                ->map(fn (CategoryDon $category): array => [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'color' => $category->color,
+                ])->all(),
+        ]);
+    }
+
+    public function donations(Request $request): JsonResponse
+    {
+        Gate::authorize('viewAny', Donation::class);
+
+        $query = Donation::query()
+            ->with([
+                'partner:id,first_name,last_name,email,phone,handle_kc',
+                'church:id,name',
+                'category:id,name,color',
+            ])
+            ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
+            ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))
+            ->when($request->filled('category_id'), fn ($query) => $query->where('category_id', $request->integer('category_id')))
+            ->when($request->filled('partner_id'), fn ($query) => $query->where('partner_id', $request->integer('partner_id')))
+            ->when($request->filled('date_from'), fn ($query) => $query->whereDate('date', '>=', $request->string('date_from')->toString()))
+            ->when($request->filled('date_to'), fn ($query) => $query->whereDate('date', '<=', $request->string('date_to')->toString()))
+            ->latest('date')
+            ->latest('id')
+            ->limit(300);
+
+        return response()->json(['data' => $query->get()->map(fn (Donation $donation): array => [
+            'id' => $donation->id,
+            'amount' => (float) $donation->amount,
+            'date' => $donation->date?->toIso8601String(),
+            'church_id' => $donation->church_id,
+            'church' => $donation->church?->name,
+            'partner_id' => $donation->partner_id,
+            'partner' => $donation->partner?->full_name,
+            'category_id' => $donation->category_id,
+            'category' => $donation->category?->name,
+            'color' => $donation->category?->color,
+        ])->all()]);
+    }
+
+    public function storeDonation(Request $request): JsonResponse
+    {
+        Gate::authorize('create', Donation::class);
+
+        $user = $request->user();
+        $churchIds = $this->access->accessibleChurchIds($user);
+
+        $data = $request->validate([
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'date' => ['required', 'date'],
+            'church_id' => ['required', 'integer', Rule::in($churchIds)],
+            'partner_id' => ['required', 'integer', Rule::exists('partners', 'id')->whereIn('church_id', $churchIds)],
+            'category_id' => ['required', 'integer', Rule::exists('category_dons', 'id')],
+        ], [
+            'amount.required' => 'Le montant est obligatoire.',
+            'amount.numeric' => 'Le montant doit être un nombre.',
+            'amount.min' => 'Le montant doit être supérieur à zéro.',
+            'date.required' => 'La date est obligatoire.',
+            'date.date' => 'La date est invalide.',
+            'church_id.required' => 'L’église est obligatoire.',
+            'partner_id.required' => 'Le partenaire est obligatoire.',
+            'category_id.required' => 'La catégorie est obligatoire.',
+            'church_id.in' => 'Vous n’avez pas accès à cette église.',
+            'partner_id.exists' => 'Ce partenaire est introuvable dans cette église.',
+            'category_id.exists' => 'Cette catégorie est introuvable.',
+        ]);
+
+        if (! $request->user()->hasPermission(PermissionName::READ_OWN_CHURCH_DATA)) {
+            abort(403, 'Accès refusé.');
+        }
+
+        $donation = Donation::query()->create([
+            'amount' => $data['amount'],
+            'date' => $data['date'],
+            'church_id' => $data['church_id'],
+            'partner_id' => $data['partner_id'],
+            'category_id' => $data['category_id'],
+        ]);
+
+        $this->notifier->handle($donation);
+        $donation->load(['partner:id,first_name,last_name', 'church:id,name', 'category:id,name,color']);
+
+        return response()->json([
+            'message' => 'Don enregistré.',
+            'donation' => [
+                'id' => $donation->id,
+                'amount' => (float) $donation->amount,
+                'date' => $donation->date?->toIso8601String(),
+                'church_id' => $donation->church_id,
+                'church' => $donation->church?->name,
+                'partner_id' => $donation->partner_id,
+                'partner' => $donation->partner?->full_name,
+                'category_id' => $donation->category_id,
+                'category' => $donation->category?->name,
+            ],
+        ], 201);
+    }
+}

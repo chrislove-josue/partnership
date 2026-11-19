@@ -8,6 +8,7 @@ use App\Services\PartnershipReportExporter;
 use App\Services\PartnershipReportSender;
 use App\Services\PartnershipReportService;
 use Filament\Actions\Action;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -175,12 +176,21 @@ class PartnershipReport extends Page
                 ->modalDescription(fn (): string => $this->sendModalDescription())
                 ->modalSubmitActionLabel('Confirmer l’envoi')
                 ->modalCancelActionLabel('Annuler')
-                ->action(function (): void {
+                ->schema(fn (): ?array => $this->sendCcSchema())
+                ->action(function (array $data): void {
                     try {
                         [$user, $churchId, $type, $year, $index] = $this->readSelection();
 
                         $result = app(PartnershipReportSender::class)
-                            ->send($user, $churchId, $type, $year, $index, true);
+                            ->send(
+                                $user,
+                                $churchId,
+                                $type,
+                                $year,
+                                $index,
+                                true,
+                                $data['cc_emails'] ?? null,
+                            );
 
                         $body = count($result['to']).' destinataire(s) — '.$result['targetLabel'];
 

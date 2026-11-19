@@ -95,7 +95,7 @@ class ImportLegacyData extends Command
             $this->importMagicTokens($data['magicTokens'] ?? []);
         });
 
-        // Garantir l'accès à l'administrateur courant (compte absent de l'ancienne base).
+        // Garantir l'accès au super admin historique (déjà présent dans l'ancienne base).
         $this->call('db:seed', ['--class' => UserSeeder::class, '--force' => true]);
 
         $this->newLine();

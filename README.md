@@ -49,7 +49,7 @@ Le back-office est accessible sur [http://localhost:8000/dashboard](http://local
 
 Créé par `database/seeders/UserSeeder.php` :
 
-- **Email** : `sounesatchougo@gmail.com` (modifiable dans le seeder)
+- **Email** : `libertsinzo7@gmail.com` (modifiable dans le seeder)
 - **Mot de passe** : `azerty123`
 - **Rôle** : `SUPER_ADMIN` (accès complet)
 
@@ -196,8 +196,9 @@ notifications) puis réimporte en respectant la hiérarchie et les clés étrang
 - Liens magiques importés avec leur jeton déjà haché (SHA-256).
 - Les hachages bcrypt `$2a$`/`$2b$` (générés par Node) sont normalisés en `$2y$` pour que
   Laravel puisse les vérifier. Les mots de passe par défaut de l'ancienne base sont `azerty123`.
-- Le compte administrateur courant (`sounesatchougo@gmail.com`, absent de l'ancienne base) est
-  recréé en `SUPER_ADMIN` à la fin pour ne pas perdre l'accès.
+- Le super admin historique (`libertsinzo7@gmail.com`, présent dans l'ancienne base) est
+  confirmé en `SUPER_ADMIN` à la fin pour ne pas perdre l'accès. Aucun compte n'est créé pour
+  `sounesatchougo@gmail.com`.
 
 La commande est idempotente : on peut la relancer sans risque.
 

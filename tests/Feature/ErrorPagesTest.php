@@ -38,18 +38,18 @@ class ErrorPagesTest extends TestCase
     public function test_every_error_view_is_registered(): void
     {
         foreach (array_keys(self::ERRORS) as $code) {
-            $this->assertTrue(view()->exists("errors::{$code}"), "Vue errors::{$code} absente");
+            $this->assertTrue(view()->exists("errors.{$code}"), "Vue errors.{$code} absente");
         }
 
-        $this->assertTrue(view()->exists('errors::4xx'));
-        $this->assertTrue(view()->exists('errors::5xx'));
-        $this->assertTrue(view()->exists('errors::layout'));
+        $this->assertTrue(view()->exists('errors.4xx'));
+        $this->assertTrue(view()->exists('errors.5xx'));
+        $this->assertTrue(view()->exists('errors.layout'));
     }
 
     public function test_specific_errors_render_a_french_page_with_the_right_status(): void
     {
         foreach (self::ERRORS as $code => $expected) {
-            $response = $this->get(route('test.error', ['code' => $code]));
+            $response = $this->get('/__test-error/'.$code);
 
             $response->assertStatus($code)
                 ->assertSee('ChurchManager', false)
@@ -68,7 +68,7 @@ class ErrorPagesTest extends TestCase
     public function test_auth_errors_offer_a_login_action(): void
     {
         foreach ([401, 403] as $code) {
-            $this->get(route('test.error', ['code' => $code]))
+            $this->get('/__test-error/'.$code)
                 ->assertStatus($code)
                 ->assertSee('Se connecter', false)
                 ->assertSee('href="/login"', false);

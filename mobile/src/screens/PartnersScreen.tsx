@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { api, ApiError } from '../api/client';
+import { api, ApiError, invalidateCache } from '../api/client';
 import type { Cellule, Church, Partner } from '../api/types';
 import {
   Badge,
@@ -55,9 +55,11 @@ export function PartnersScreen() {
         query.set('church_id', churchFilter);
       }
       const [partnerData, churchData, celluleData] = await Promise.all([
-        api<{ data: Partner[] }>(`/partners${query.toString() ? `?${query}` : ''}`),
-        api<{ data: Church[] }>('/churches'),
-        api<{ data: Cellule[] }>('/cellules'),
+        api<{ data: Partner[] }>(`/partners${query.toString() ? `?${query}` : ''}`, {
+          cacheKey: `partners:${search}:${churchFilter}`,
+        }),
+        api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
+        api<{ data: Cellule[] }>('/cellules', { cacheKey: 'cellules' }),
       ]);
       setPartners(partnerData.data);
       setChurches(churchData.data);
@@ -119,6 +121,7 @@ export function PartnersScreen() {
       } else {
         await api('/partners', { method: 'POST', body });
       }
+      invalidateCache();
       setFormOpen(false);
       await load();
     } catch (caught) {

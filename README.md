@@ -50,7 +50,9 @@ La racine `/` et toute route protégée renvoient directement sur la connexion
 
 ### Connexion
 
-La page `/login` affiche des messages explicites, identiques à ceux de l'application Next.js :
+La page `/login` affiche des messages explicites, identiques à ceux de l'application Next.js.
+Chaque message apparaît dans une alerte globale sous les champs, sans encadrer un champ en
+particulier :
 
 | Situation | Message |
 | --- | --- |

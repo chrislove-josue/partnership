@@ -83,6 +83,22 @@ Le modèle `Church` est auto-référencé : `GROUP → SUB_GROUP → LOCAL` via 
 Le service `App\Services\ChurchAccessService` centralise le scopage : chaque utilisateur ne
 voit que les données de sa branche (`accessibleChurchIds()`).
 
+## Rapport de partenariat
+
+Page Filament `/dashboard/partnership-report` (port de `lib/report.ts`) : choisir une église,
+puis un mois, un trimestre ou une année. Les bornes sont strictes (une année = 1er janvier →
+31 décembre). La page affiche les totaux, les dons par catégorie, les partenaires ayant donné
+et ceux sans don sur la période.
+
+- **Exporter en Excel** : classeur 4 feuilles généré avec PhpSpreadsheet.
+- **Envoyer à la hiérarchie** : aperçu des destinataires dans un dialogue de confirmation,
+  puis envoi uniquement après validation (pièce jointe Excel). Aucun envoi automatique.
+  Chaîne : STAFF → pasteur de son église ; pasteur local/sous-groupe → niveau parent ;
+  église groupe → super administrateurs actifs. L'expéditeur est toujours exclu.
+
+Logique dans `App\Services\PartnershipReportService`, `PartnershipReportExporter` et
+`PartnershipReportSender` ; email dans `App\Mail\PartnershipReportMail`.
+
 ## Rôles et permissions
 
 Définis dans `app/Enums/RoleName.php` et `app/Enums/PermissionName.php`, semés par

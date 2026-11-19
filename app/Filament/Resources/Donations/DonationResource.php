@@ -33,6 +33,8 @@ class DonationResource extends Resource
 
     protected static ?string $navigationLabel = 'Dons';
 
+    protected static ?int $navigationSort = 10;
+
     public static function form(Schema $schema): Schema
     {
         return DonationForm::configure($schema);

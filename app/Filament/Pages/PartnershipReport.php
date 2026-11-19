@@ -25,6 +25,8 @@ class PartnershipReport extends Page
 
     protected static string|\UnitEnum|null $navigationGroup = 'Rapports';
 
+    protected static ?int $navigationSort = 10;
+
     protected static ?string $title = 'Rapport de partenariat';
 
     protected string $view = 'filament.pages.partnership-report';

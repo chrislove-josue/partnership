@@ -37,6 +37,7 @@ class AdminPanelProvider extends PanelProvider
             ->darkMode()
             ->defaultThemeMode(ThemeMode::Light)
             ->themeSwitcher()
+            ->navigationGroups(['Rapports', 'Dons', 'Structure', 'Administration', 'Communication'])
             ->sidebarWidth('18rem')
             ->maxContentWidth('80rem')
             ->simplePageMaxContentWidth('28rem')

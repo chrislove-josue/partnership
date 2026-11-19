@@ -55,11 +55,11 @@ class UserForm
                     ->dehydrated(fn (?string $state) => filled($state))
                     ->maxLength(255),
                 Select::make('roles')
-                    ->label('Rôle')
+                    ->label('Rôles')
                     ->options($roleOptions)
                     ->multiple()
-                    ->maxItems(1)
                     ->required()
+                    ->helperText('Un pasteur de sous-groupe est aussi pasteur local ; un pasteur de groupe est aussi pasteur de sous-groupe et pasteur local. Les fonctions impliquées sont ajoutées automatiquement.')
                     ->relationship('roles', 'name'),
                 Select::make('assigned_church_id')
                     ->label('Église assignée')

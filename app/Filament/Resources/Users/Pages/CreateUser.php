@@ -12,6 +12,8 @@ class CreateUser extends CreateRecord
 
     protected function afterCreate(): void
     {
+        $this->record->syncImpliedRoles();
+
         app(UserInviter::class)->sendWelcome(
             $this->record,
             $this->data['password'] ?? null,

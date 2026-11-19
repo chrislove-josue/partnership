@@ -66,6 +66,7 @@ Créé par `database/seeders/UserSeeder.php` :
 | `php artisan db:seed` | Rejouer le seeder complet |
 | `php artisan test` | Lancer les tests (PHPUnit, SQLite en mémoire) |
 | `./vendor/bin/pint` | Formater le code PHP |
+| `php database/convert-pg-dump.php <dump.sql>` | Convertir le dump PostgreSQL en export JSON |
 | `php artisan legacy:import --force` | Importer les données de l'ancienne base (voir « Migration des données ») |
 
 Après modification de `database/migrations/*` ou d'un modèle, un `php artisan serve` relancé

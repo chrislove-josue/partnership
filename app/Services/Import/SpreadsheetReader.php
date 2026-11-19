@@ -20,8 +20,17 @@ class SpreadsheetReader
             throw new RuntimeException('Le fichier téléversé est invalide.');
         }
 
-        $spreadsheet = IOFactory::load($file->getRealPath());
-        $rows = $spreadsheet->getSheet(0)->toArray(null, true, true, false);
+        // Les fichiers temporaires Livewire portent des métadonnées dans leur nom, ce qui casse
+        // le flux zip:// de PhpSpreadsheet. On copie vers un chemin simple avant lecture.
+        $cleanPath = tempnam(sys_get_temp_dir(), 'import').'.xlsx';
+        copy($file->getRealPath(), $cleanPath);
+
+        try {
+            $spreadsheet = IOFactory::createReader('Xlsx')->load($cleanPath);
+            $rows = $spreadsheet->getSheet(0)->toArray(null, true, true, false);
+        } finally {
+            @unlink($cleanPath);
+        }
 
         if (count($rows) < 2) {
             return [];

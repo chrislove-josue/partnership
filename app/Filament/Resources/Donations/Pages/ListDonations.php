@@ -42,7 +42,12 @@ class ListDonations extends ListRecords
                 ->modalSubmitActionLabel('Importer')
                 ->action(function (array $data): void {
                     try {
-                        $rows = app(SpreadsheetReader::class)->read($data['file']);
+                        $uploaded = $data['file'];
+                        if (is_array($uploaded)) {
+                            $uploaded = reset($uploaded);
+                        }
+
+                        $rows = app(SpreadsheetReader::class)->read($uploaded);
 
                         if ($rows === []) {
                             Notification::make()

@@ -99,6 +99,27 @@ et ceux sans don sur la période.
 Logique dans `App\Services\PartnershipReportService`, `PartnershipReportExporter` et
 `PartnershipReportSender` ; email dans `App\Mail\PartnershipReportMail`.
 
+## Imports Excel
+
+Les pages « Partenaires » et « Dons » du back-office proposent **Importer depuis Excel** et
+**Télécharger le modèle** (port des routes Next.js `/api/partners/import` et
+`/api/donations/import`).
+
+- Colonnes du modèle : `firstName`, `lastName`, `email`, `phone`, `handleKC`, `churchName`,
+  `celluleName`, `address`, `birthdate`, `donationAmount`, `donationDate`,
+  `donationCategoryName`.
+- Partenaire retrouvé par email, téléphone ou identifiant KingsChat (insensible à la casse) ;
+  créé automatiquement si `firstName` + `lastName` sont présents.
+- Église, cellule et catégorie manquantes créées automatiquement (église `LOCAL` rattachée au
+  groupe ; catégorie de couleur `#1F4E78`).
+- Dates strictes : `2026-02-31` est rejeté. Un don identique est ignoré (`skipped`) lors de
+  l'import des dons.
+- Chaque ligne est validée séparément : un résultat détaillé indique succès, erreurs et lignes
+  ignorées. Une ligne sur une église hors périmètre est refusée.
+
+Services : `App\Services\Import\PartnerImportService`, `DonationImportService`,
+`SpreadsheetReader` et `ImportTemplateGenerator` (helpers partagés dans `ImportHelpers`).
+
 ## Rôles et permissions
 
 Définis dans `app/Enums/RoleName.php` et `app/Enums/PermissionName.php`, semés par

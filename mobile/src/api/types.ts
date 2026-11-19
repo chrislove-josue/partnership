@@ -81,6 +81,15 @@ export interface Donation {
   color?: string | null;
 }
 
+export interface ImportResult {
+  imported?: number;
+  created?: number;
+  updated?: number;
+  skipped?: number;
+  errors?: string[];
+  message?: string;
+}
+
 export interface AppNotification {
   id: string;
   type: string;

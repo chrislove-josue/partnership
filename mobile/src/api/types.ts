@@ -82,12 +82,12 @@ export interface Donation {
 }
 
 export interface ImportResult {
-  imported?: number;
-  created?: number;
-  updated?: number;
-  skipped?: number;
-  errors?: string[];
-  message?: string;
+  imported: number;
+  skipped: number;
+  error_count: number;
+  errors: string[];
+  total: number;
+  message: string;
 }
 
 export interface AppNotification {

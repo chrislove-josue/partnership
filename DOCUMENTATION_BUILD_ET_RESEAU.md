@@ -209,10 +209,11 @@ npm.cmd start -- --host lan --port 19000 --clear
 ```powershell
 cd C:\Project\partnership
 php artisan test --filter=MobileApiTest
+php artisan test --filter=MobileImportApiTest
 php artisan test
 ```
 
-Dernier résultat connu : **133 tests réussis**.
+Dernier résultat connu : **137 tests réussis (753 assertions)**.
 
 ### Mobile
 
@@ -220,6 +221,35 @@ Dernier résultat connu : **133 tests réussis**.
 cd C:\Project\partnership\mobile
 npm.cmd run typecheck
 ```
+
+---
+
+## 6 bis. Import / export Excel dans l’APK
+
+Les écrans **Dons** et **Partenaires** proposent les mêmes actions que le back-office Filament :
+
+- **Importer depuis Excel** : choisir un fichier `.xlsx` depuis le téléphone ;
+- **Télécharger le modèle** : obtenir et partager `modele_dons.xlsx` ou `modele_partenaires.xlsx`.
+
+Endpoints utilisés par l’application (tous protégés par `auth:sanctum`) :
+
+```text
+POST   /api/donations/import
+GET    /api/donations/template
+POST   /api/partners/import
+GET    /api/partners/template
+```
+
+Les règles sont exactement celles du site web :
+
+- première feuille uniquement, en-têtes normalisés ;
+- église et catégorie créées automatiquement si absentes ;
+- dédup des dons (`partenaire + église + catégorie + montant + date`) ;
+- partenaire retrouvé par email / téléphone / handle KC, ou créé avec `firstName + lastName` ;
+- import partenaires avec cellule, adresse, date de naissance et don optionnel ;
+- contrôle hiérarchique des droits sur l’église, erreurs affichées par ligne.
+
+Le site ne propose pas d’export brut des listes de dons ou de partenaires : le téléchargement disponible est celui des **modèles d’import**. L’export du rapport de partenariat reste dans **Rapports**.
 
 ---
 
@@ -290,12 +320,14 @@ Copier l’APK final :
 ```powershell
 cd C:\Project\partnership
 copy .\mobile\android\app\build\outputs\apk\release\app-release.apk .\mobile\FinanceMobile-1.0.0.apk /Y
+copy .\mobile\FinanceMobile-1.0.0.apk .\mobile\FinanceMobile-1.1.0.apk /Y
 ```
 
-APK prêt à installer :
+APK prêts à installer (contenu identique) :
 
 ```text
 C:\Project\partnership\mobile\FinanceMobile-1.0.0.apk
+C:\Project\partnership\mobile\FinanceMobile-1.1.0.apk
 ```
 
 ### 8.3 Installer sur un téléphone branché en USB

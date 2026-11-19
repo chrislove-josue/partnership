@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DataController;
+use App\Http\Controllers\Api\ImportController;
 use App\Http\Controllers\Api\ManagementController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProfileController;
@@ -28,6 +29,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::get('/partners', [DataController::class, 'partners']);
     Route::post('/partners', [ManagementController::class, 'storePartner']);
+    Route::post('/partners/import', [ImportController::class, 'importPartners']);
+    Route::get('/partners/template', [ImportController::class, 'partnerTemplate']);
     Route::patch('/partners/{partner}', [ManagementController::class, 'updatePartner']);
     Route::delete('/partners/{partner}', [ManagementController::class, 'destroyPartner']);
 

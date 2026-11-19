@@ -19,15 +19,15 @@ use Throwable;
 /** Port de app/dashboard/reports/partnership/page.tsx. */
 class PartnershipReport extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-chart-bar';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-document-chart-bar';
 
     protected static ?string $navigationLabel = 'Rapport de partenariat';
 
-    protected static ?string $navigationGroup = 'Rapports';
+    protected static string|\UnitEnum|null $navigationGroup = 'Rapports';
 
     protected static ?string $title = 'Rapport de partenariat';
 
-    protected static string $view = 'filament.pages.partnership-report';
+    protected string $view = 'filament.pages.partnership-report';
 
     /** @var array<string, mixed> | null */
     public ?array $data = [];

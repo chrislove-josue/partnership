@@ -1,0 +1,274 @@
+<?php
+
+namespace Tests\Feature;
+
+use App\Enums\ChurchType;
+use App\Enums\PeriodType;
+use App\Enums\RoleName;
+use App\Mail\PartnershipReportMail;
+use App\Models\CategoryDon;
+use App\Models\Church;
+use App\Models\Donation;
+use App\Models\Partner;
+use App\Models\User;
+use App\Services\PartnershipReportExporter;
+use App\Services\PartnershipReportSender;
+use App\Services\PartnershipReportService;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use RuntimeException;
+use Tests\TestCase;
+
+class PartnershipReportTest extends TestCase
+{
+    use RefreshDatabase;
+
+    private function makeUser(string $role, int $churchId, string $email, ?int $managerOf = null): User
+    {
+        $user = User::create([
+            'name' => 'User '.$role,
+            'email' => $email,
+            'password' => Hash::make('password'),
+            'assigned_church_id' => $churchId,
+            'is_active' => true,
+        ]);
+        $user->syncRoles([$role]);
+
+        if ($managerOf !== null) {
+            Church::whereKey($managerOf)->update(['manager_id' => $user->id]);
+        }
+
+        return $user;
+    }
+
+    private function makePartner(Church $church, string $email): Partner
+    {
+        return Partner::create([
+            'first_name' => 'Jean',
+            'last_name' => 'Doe',
+            'email' => $email,
+            'church_id' => $church->id,
+        ]);
+    }
+
+    private function makeDonation(Partner $partner, Church $church, CategoryDon $category, string $date, float $amount): Donation
+    {
+        return Donation::create([
+            'amount' => $amount,
+            'date' => $date,
+            'partner_id' => $partner->id,
+            'church_id' => $church->id,
+            'category_id' => $category->id,
+        ]);
+    }
+
+    public function test_period_ranges_are_strictly_bounded(): void
+    {
+        $service = app(PartnershipReportService::class);
+
+        $year = $service->resolvePeriodRange(PeriodType::YEAR, 2025, null);
+        $this->assertSame('2025-01-01', $year['from']->toDateString());
+        $this->assertSame('2025-12-31', $year['to']->toDateString());
+        $this->assertSame('Année 2025', $year['label']);
+
+        $month = $service->resolvePeriodRange(PeriodType::MONTH, 2026, 2);
+        $this->assertSame('2026-02-01', $month['from']->toDateString());
+        $this->assertSame('2026-02-28', $month['to']->toDateString());
+        $this->assertSame('Février 2026', $month['label']);
+
+        $quarter = $service->resolvePeriodRange(PeriodType::QUARTER, 2026, 1);
+        $this->assertSame('2026-01-01', $quarter['from']->toDateString());
+        $this->assertSame('2026-03-31', $quarter['to']->toDateString());
+        $this->assertSame('T1 2026', $quarter['label']);
+    }
+
+    public function test_report_aggregates_only_donations_of_the_selected_year(): void
+    {
+        $this->seed();
+
+        $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $category = CategoryDon::firstOrFail();
+        $partner = $this->makePartner($church, 'jean@example.test');
+
+        $this->makeDonation($partner, $church, $category, '2025-01-01 08:00:00', 1000);
+        $this->makeDonation($partner, $church, $category, '2025-12-31 20:00:00', 2000);
+        $this->makeDonation($partner, $church, $category, '2026-01-01 08:00:00', 5000);
+
+        $service = app(PartnershipReportService::class);
+
+        $report2025 = $service->buildReport($church->id, PeriodType::YEAR, 2025, null);
+        $this->assertSame(3000.0, $report2025['totals']['amount']);
+        $this->assertSame(2, $report2025['totals']['donationCount']);
+        $this->assertSame(3000.0, $report2025['categories'][0]['amount']);
+
+        $report2026 = $service->buildReport($church->id, PeriodType::YEAR, 2026, null);
+        $this->assertSame(5000.0, $report2026['totals']['amount']);
+        $this->assertSame(1, $report2026['totals']['donationCount']);
+    }
+
+    public function test_report_lists_registered_partners_without_donation(): void
+    {
+        $this->seed();
+
+        $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $category = CategoryDon::firstOrFail();
+        $active = $this->makePartner($church, 'actif@example.test');
+        $inactive = $this->makePartner($church, 'inactif@example.test');
+
+        $this->makeDonation($active, $church, $category, '2026-02-10 10:00:00', 4500);
+
+        $report = app(PartnershipReportService::class)
+            ->buildReport($church->id, PeriodType::MONTH, 2026, 2);
+
+        $this->assertSame(1, $report['totals']['partnersWithDonation']);
+        $this->assertSame(1, $report['totals']['partnersWithoutDonation']);
+        $this->assertSame(2, $report['totals']['registeredPartners']);
+        $this->assertSame([$inactive->id], array_column($report['partnersWithoutDonation'], 'id'));
+        $this->assertSame('Jean Doe', $report['partners'][0]['name']);
+    }
+
+    public function test_access_is_checked_before_generating_a_preview(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $sub = Church::create(['name' => 'SUB', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $sub->id]);
+        $otherLocal = Church::create(['name' => 'AUTRE', 'type' => ChurchType::LOCAL, 'parent_id' => $sub->id]);
+
+        $pastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'local@example.test');
+        $sender = app(PartnershipReportSender::class);
+
+        $this->expectException(AuthorizationException::class);
+        $sender->preview($pastor, $otherLocal->id, PeriodType::YEAR, 2026, null);
+    }
+
+    public function test_group_report_is_sent_to_active_super_admins_excluding_sender(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $sender = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $other = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'autre-admin@example.test');
+        $inactive = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'inactif@example.test');
+        $inactive->update(['is_active' => false]);
+
+        $result = app(PartnershipReportService::class)->resolveRecipients($sender, $group->id);
+        $emails = array_column($result['recipients'], 'email');
+
+        $this->assertContains($other->email, $emails);
+        $this->assertNotContains($sender->email, $emails);
+        $this->assertNotContains($inactive->email, $emails);
+        $this->assertSame('hiérarchie nationale (super administrateurs)', $result['targetLabel']);
+    }
+
+    public function test_staff_report_goes_to_own_church_manager(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $group->id]);
+        $pastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'pasteur@example.test', $local->id);
+        $staff = $this->makeUser(RoleName::STAFF->value, $local->id, 'staff@example.test');
+
+        $result = app(PartnershipReportService::class)->resolveRecipients($staff, $local->id);
+
+        $this->assertSame([$pastor->email], array_column($result['recipients'], 'email'));
+        $this->assertSame('pasteur de votre église', $result['targetLabel']);
+    }
+
+    public function test_local_pastor_report_climbs_hierarchy_to_group_manager(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
+        $sub = Church::create(['name' => 'SUB', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $sub->id]);
+        $localPastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'local@example.test', $local->id);
+
+        $result = app(PartnershipReportService::class)->resolveRecipients($localPastor, $local->id);
+
+        $this->assertSame([$groupPastor->email], array_column($result['recipients'], 'email'));
+        $this->assertSame('pasteur de votre groupe', $result['targetLabel']);
+    }
+
+    public function test_sending_requires_explicit_confirmation_and_attaches_the_xlsx(): void
+    {
+        Mail::fake();
+        $this->seed();
+
+        $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $category = CategoryDon::firstOrFail();
+        $partner = $this->makePartner($church, 'jean@example.test');
+        $this->makeDonation($partner, $church, $category, '2026-02-10 10:00:00', 4500);
+
+        $manager = $this->makeUser(RoleName::SUPER_ADMIN->value, $church->id, 'manager@example.test');
+        Church::whereKey($church->id)->update(['manager_id' => $manager->id]);
+        $sender = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+
+        $senderService = app(PartnershipReportSender::class);
+        $parameters = [$sender, $church->id, PeriodType::MONTH, 2026, 2];
+
+        $preview = $senderService->preview(...$parameters);
+        $this->assertFalse($preview['sent']);
+        $this->assertTrue($preview['confirmRequired']);
+        Mail::assertNothingSent();
+
+        $notConfirmed = $senderService->send(...[...$parameters, false]);
+        $this->assertFalse($notConfirmed['sent']);
+        Mail::assertNothingSent();
+
+        $sent = $senderService->send(...[...$parameters, true]);
+        $this->assertTrue($sent['sent']);
+        $this->assertStringEndsWith('.xlsx', $sent['fileName']);
+
+        Mail::assertSent(PartnershipReportMail::class, function (PartnershipReportMail $mail) use ($manager): bool {
+            return $mail->hasTo($manager->email)
+                && count($mail->attachments()) === 1
+                && str_contains($mail->envelope()->subject, 'Février 2026');
+        });
+    }
+
+    public function test_export_builds_four_sheets_with_the_expected_totals(): void
+    {
+        $this->seed();
+
+        $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $category = CategoryDon::firstOrFail();
+        $active = $this->makePartner($church, 'actif@example.test');
+        $this->makePartner($church, 'inactif@example.test');
+        $this->makeDonation($active, $church, $category, '2026-02-10 10:00:00', 4500);
+
+        $report = app(PartnershipReportService::class)
+            ->buildReport($church->id, PeriodType::MONTH, 2026, 2);
+        $xlsx = app(PartnershipReportExporter::class)->toXlsx($report);
+
+        $path = tempnam(sys_get_temp_dir(), 'rapport').'.xlsx';
+        file_put_contents($path, $xlsx);
+
+        try {
+            $workbook = IOFactory::load($path);
+
+            $this->assertSame(
+                ['Résumé', 'Dons par catégorie', 'Partenaires', 'Sans don sur la période'],
+                $workbook->getSheetNames(),
+            );
+            $this->assertSame('4 500 FCFA', $workbook->getSheetByName('Résumé')->getCell('B6')->getValue());
+            $this->assertSame('TOTAL', $workbook->getSheetByName('Dons par catégorie')->getCell('A3')->getValue());
+        } finally {
+            @unlink($path);
+        }
+    }
+
+    public function test_missing_church_raises_a_clear_error(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Église introuvable');
+
+        app(PartnershipReportService::class)->buildReport(999999, PeriodType::YEAR, 2026, null);
+    }
+}

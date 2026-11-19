@@ -69,11 +69,16 @@ Aucun compte n'est créé pour `sounesatchougo@gmail.com`.
 
 Le back-office reprend l'identité visuelle de l'application Next.js : violet `#9333EA` à indigo
 `#4F46E5`, fond `#F9FAFB`, cartes blanches, police Geist et sidebar de `18rem`. La page de
-connexion utilise le fond sombre dégradé et la carte en verre dépoli de Next.js.
+connexion utilise le fond sombre dégradé et la carte en verre dépoli de Next.js. Le sélecteur
+clair/sombre/système reste disponible dans la barre latérale ; le mode clair est utilisé par défaut.
 
 La configuration du panneau se trouve dans `app/Providers/Filament/AdminPanelProvider.php` ;
 les surcharges CSS sont dans `public/css/filament/admin/theme.css` (elles importent le thème
 Filament compilé). Aucun build Vite n'est nécessaire pour le panneau.
+
+Les widgets du tableau de bord sont rendus immédiatement, sans squelette « Chargement… ». Les
+libellés internes Filament absents de la traduction française sont complétés dans
+`app/Providers/AppServiceProvider.php`.
 
 ### Compte initial
 

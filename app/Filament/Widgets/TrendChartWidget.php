@@ -14,6 +14,8 @@ abstract class TrendChartWidget extends ChartWidget
 {
     protected int|string|array $columnSpan = 'full';
 
+    protected static bool $isLazy = false;
+
     /**
      * @param  array<int, int>  $churchIds
      * @return array{labels: array<int, string>, series: array<int, array{label: string, data: array<int, float>}>}

@@ -16,6 +16,8 @@ class LatestDonations extends TableWidget
 
     protected static ?int $sort = 10;
 
+    protected static bool $isLazy = false;
+
     protected int|string|array $columnSpan = 'full';
 
     public function table(Table $table): Table

@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
 use App\Http\Middleware\Authenticate;
+use Filament\Enums\ThemeMode;
 use Filament\Enums\UserMenuPosition;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -33,7 +34,9 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->profile()
             ->userMenu(position: UserMenuPosition::Sidebar)
-            ->darkMode(false)
+            ->darkMode()
+            ->defaultThemeMode(ThemeMode::Light)
+            ->themeSwitcher()
             ->sidebarWidth('18rem')
             ->maxContentWidth('80rem')
             ->simplePageMaxContentWidth('28rem')

@@ -7,6 +7,7 @@ use App\Filament\Widgets\LatestDonations;
 use App\Filament\Widgets\StatsOverview;
 use App\Filament\Widgets\TopChurchesWidget;
 use App\Filament\Widgets\TrendChartWidget;
+use App\Models\User;
 use Filament\Enums\ThemeMode;
 use Filament\Facades\Filament;
 use Tests\TestCase;

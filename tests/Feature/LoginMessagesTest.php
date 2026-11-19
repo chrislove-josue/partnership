@@ -54,11 +54,8 @@ class LoginMessagesTest extends TestCase
         \Livewire\Features\SupportTesting\Testable $test,
         string $code,
     ): void {
-        $message = Login::LOGIN_MESSAGES[$code];
-
-        $test->assertHasErrors([
-            'data.email' => fn (array $rules, ?array $messages): bool => in_array($message, $messages ?? [], true),
-        ]);
+        $test->assertSet('loginError', Login::LOGIN_MESSAGES[$code])
+            ->assertHasNoErrors();
     }
 
     public function test_root_and_guests_are_redirected_directly_to_login(): void
@@ -150,7 +147,8 @@ class LoginMessagesTest extends TestCase
             ->set('data.email', 'admin@example.test')
             ->set('data.password', 'azerty123')
             ->call('authenticate')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertSet('loginError', null);
 
         $this->assertAuthenticatedAs($user);
     }

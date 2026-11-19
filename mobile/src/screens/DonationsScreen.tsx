@@ -99,6 +99,7 @@ export function DonationsScreen() {
 
     try {
       await api(`/donations/${confirmDelete.id}`, { method: 'DELETE' });
+      invalidateCache();
       setConfirmDelete(null);
       await load();
     } catch (caught) {
@@ -121,6 +122,7 @@ export function DonationsScreen() {
           category_id: Number(categoryId),
         },
       });
+      invalidateCache();
       setFormOpen(false);
       await load();
     } catch (caught) {

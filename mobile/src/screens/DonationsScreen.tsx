@@ -218,7 +218,7 @@ export function DonationsScreen() {
         message="Cette action est réservée aux super administrateurs."
         confirmLabel="Supprimer"
         onCancel={() => setConfirmDelete(null)}
-        onConfirm={() => setConfirmDelete(null)}
+        onConfirm={() => void remove()}
       />
     </Screen>
   );
@@ -231,4 +231,6 @@ const styles = StyleSheet.create({
   meta: { fontSize: 12, color: colors.muted, marginTop: 4 },
   close: { color: colors.blue, fontWeight: '700' },
   error: { color: colors.red, marginBottom: 12 },
+  delete: { alignSelf: 'flex-start', marginTop: 10 },
+  deleteText: { color: colors.red, fontSize: 13, fontWeight: '600' },
 });

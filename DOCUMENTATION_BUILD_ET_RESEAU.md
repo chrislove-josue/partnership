@@ -441,7 +441,7 @@ Recompiler puis recopier :
 cd C:\Project\partnership\mobile\android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
-copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.2.0.apk /Y
+copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.0.apk /Y
 ```
 
 ---
@@ -463,7 +463,7 @@ npx.cmd expo prebuild --platform android
 cd android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
-copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.2.0.apk /Y
+copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.0.apk /Y
 ```
 
 Adresse à saisir dans l’application :

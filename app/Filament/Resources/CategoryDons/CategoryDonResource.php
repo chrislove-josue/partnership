@@ -27,7 +27,9 @@ class CategoryDonResource extends Resource
 
     protected static ?string $pluralModelLabel = 'catégories de dons';
 
-    protected static ?string $navigationLabel = 'Catégories';
+    protected static ?string $navigationLabel = 'Catégories de dons';
+
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {

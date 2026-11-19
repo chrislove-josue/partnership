@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { api, ApiError } from '../api/client';
+import { api, ApiError, invalidateCache } from '../api/client';
 import type { AppNotification } from '../api/types';
 import {
   Badge,
@@ -24,7 +24,9 @@ export function NotificationsScreen() {
     setLoading(true);
     setError('');
     try {
-      const response = await api<{ data: AppNotification[]; unread_count: number }>('/notifications');
+      const response = await api<{ data: AppNotification[]; unread_count: number }>('/notifications', {
+        cacheKey: 'notifications',
+      });
       setNotifications(response.data);
       setUnread(response.unread_count);
     } catch (caught) {
@@ -45,6 +47,7 @@ export function NotificationsScreen() {
   const markRead = async (id: string) => {
     try {
       await api(`/notifications/${id}/read`, { method: 'POST' });
+      invalidateCache('notifications');
       await load();
     } catch (caught) {
       setError(caught instanceof ApiError ? caught.message : 'Mise à jour impossible.');

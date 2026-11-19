@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { api, ApiError, getApiUrl, setApiUrl, setAuthToken } from '../api/client';
+import { api, ApiError, clearCache, getApiUrl, setApiUrl, setAuthToken } from '../api/client';
 import type { User } from '../api/types';
 
 const TOKEN_KEY = 'churchmanager_token';

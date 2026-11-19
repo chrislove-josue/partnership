@@ -359,8 +359,10 @@ class PartnershipReportService
             RoleName::SUPER_ADMIN->value,
         ];
 
-        // Personnel : rattaché à une seule église locale, envoi au pasteur local.
-        if (! in_array($user->roleName(), $pastorRoles, true)) {
+        // Personnel d'une église locale : envoi au pasteur local. Un membre
+        // rattaché à un sous-groupe suit la même chaîne que son pasteur : le
+        // rapport part directement au pasteur du groupe.
+        if (! in_array($user->roleName(), $pastorRoles, true) && $church->type !== ChurchType::SUB_GROUP) {
             if ($church->type !== ChurchType::LOCAL) {
                 throw new RuntimeException('Un personnel doit être rattaché à une église locale.');
             }

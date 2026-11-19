@@ -95,10 +95,8 @@ export function LoginScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, justifyContent: 'center', padding: 24 },
-  hero: { alignItems: 'center', marginBottom: 30 },
-  logo: { width: 260, height: 104, marginBottom: 4 },
-  appName: { fontSize: 22, fontWeight: '800', color: colors.navy, marginTop: 8 },
-  tagline: { fontSize: 13, color: colors.muted, marginTop: 4, textAlign: 'center' },
+  hero: { alignItems: 'center', marginBottom: 26 },
+  logo: { width: 310, height: 124 },
   form: {
     backgroundColor: colors.surface,
     borderRadius: 20,

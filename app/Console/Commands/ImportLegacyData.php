@@ -92,6 +92,7 @@ class ImportLegacyData extends Command
             $this->linkCelluleLeaders($data['cellules'] ?? []);
             $this->importDonations($data['donations'] ?? []);
             $this->importNotifications($data['notifications'] ?? []);
+            $this->importMagicTokens($data['magicTokens'] ?? []);
         });
 
         // Garantir l'accès à l'administrateur courant (compte absent de l'ancienne base).
@@ -365,6 +366,28 @@ class ImportLegacyData extends Command
 
         foreach (array_chunk($batch, 500) as $chunk) {
             Notification::query()->insert($chunk);
+        }
+    }
+
+    /**
+     * @param  array<int,array<string,mixed>>  $rows
+     */
+    private function importMagicTokens(array $rows): void
+    {
+        $batch = [];
+
+        foreach ($rows as $row) {
+            $batch[] = [
+                'token' => $row['token'],
+                'email' => $row['email'],
+                'expires_at' => Carbon::parse($row['expiresAt']),
+                'used' => ! empty($row['used']) ? 1 : 0,
+                'created_at' => Carbon::parse($row['createdAt']),
+            ];
+        }
+
+        foreach (array_chunk($batch, 500) as $chunk) {
+            DB::table('magic_tokens')->insert($chunk);
         }
     }
 }

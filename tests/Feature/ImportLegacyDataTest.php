@@ -10,6 +10,7 @@ use App\Models\Partner;
 use App\Models\User;
 use Database\Seeders\RoleAndPermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
@@ -93,6 +94,13 @@ class ImportLegacyDataTest extends TestCase
                     'userId' => 'user_super', 'createdAt' => '2026-04-07T23:00:00.000Z',
                 ],
             ],
+            'magicTokens' => [
+                [
+                    'id' => 'token_1', 'token' => hash('sha256', 'lien-magique'),
+                    'email' => 'ancien.admin@example.test', 'expiresAt' => '2026-04-08T23:00:00.000Z',
+                    'used' => false, 'createdAt' => '2026-04-07T23:00:00.000Z',
+                ],
+            ],
         ];
 
         $this->fixturePath = sys_get_temp_dir().DIRECTORY_SEPARATOR.'legacy-fixture-'.uniqid().'.json';
@@ -149,5 +157,9 @@ class ImportLegacyDataTest extends TestCase
 
         // Notification -> utilisateur
         $this->assertSame($superAdmin->id, Notification::firstOrFail()->user_id);
+
+        // Lien magique importé avec son token haché
+        $magicToken = DB::table('magic_tokens')->where('email', 'ancien.admin@example.test')->firstOrFail();
+        $this->assertSame(hash('sha256', 'lien-magique'), $magicToken->token);
     }
 }

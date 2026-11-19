@@ -19,7 +19,7 @@ import {
 } from '../components/ui';
 
 export function ProfileScreen() {
-  const { user, refreshUser, logout, apiUrl, updateApiUrl } = useAuth();
+  const { user, session, refreshUser, logout, apiUrl, updateApiUrl } = useAuth();
   const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -119,6 +119,12 @@ export function ProfileScreen() {
         <Text style={styles.help}>
           Consultez les connexions et déconnexions enregistrées pour votre compte, sur le site et sur l’application mobile.
         </Text>
+        {session ? (
+          <Text style={styles.help}>
+            Session ouverte le {formatSessionDate(session.connectedAt)}{'\n'}
+            Dernière synchronisation : {formatSessionDate(session.lastSyncAt)}
+          </Text>
+        ) : null}
         <SecondaryButton
           title="Historique de connexion"
           onPress={() => navigation.navigate('HistoriqueConnexion')}

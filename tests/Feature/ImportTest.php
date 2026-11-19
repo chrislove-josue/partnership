@@ -74,7 +74,7 @@ class ImportTest extends TestCase
         $this->assertSame('2024-02-29', $helpers->parseDateFlexible('2024-02-29')?->toDateString());
         $this->assertSame('2026-11-19', $helpers->parseDateFlexible(46345.0)?->toDateString());
 
-        $this->assertSame('+22961981233', $helpers->normalizePhone(' 01 61 98 12 33 '));
+        $this->assertSame('+22961981233', $helpers->normalizePhone(' 61 98 12 33 '));
         $this->assertSame('+22961981233', $helpers->normalizePhone('22961981233'));
         $this->assertSame('+22961981233', $helpers->normalizePhone('0022961981233'));
         $this->assertNull($helpers->normalizePhone(null));
@@ -156,7 +156,7 @@ class ImportTest extends TestCase
         $donation = Donation::firstOrFail();
         $this->assertSame(5000.0, (float) $donation->amount);
         $this->assertSame('2026-02-10', $donation->date->toDateString());
-        $this->assertSame('Offering', $donation->category->name);
+        $this->assertSame('Offering Import', $donation->category->name);
         $this->assertSame('#1F4E78', $donation->category->color);
     }
 

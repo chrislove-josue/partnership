@@ -28,6 +28,7 @@ L’APK de release se trouve ici :
 ```
 mobile/FinanceMobile-1.0.0.apk
 mobile/FinanceMobile-1.1.0.apk
+mobile/FinanceMobile-1.2.0.apk
 ```
 
 Il est signé avec la clé de debug générée par Expo : il s’installe directement sur Android, mais n’est pas destiné au Play Store. L’adresse de l’API peut être modifiée **depuis l’application**, sans recompiler :
@@ -50,6 +51,7 @@ Les réponses GET sont mises en cache dans le dossier temporaire de l’applicat
 - Rapport de partenariat : génération, export Excel, aperçu des destinataires, copies cochées par défaut et envoi après confirmation explicite.
 - Notifications : liste et marquage comme lues.
 - Profil : nom, email, téléphone, identifiant KingsChat et mot de passe.
+- Historique de connexion : consultation des connexions et déconnexions du compte (site web et application mobile), avec date, source et adresse IP.
 - Administration : églises, cellules, catégories de dons, utilisateurs et rôles (selon les droits du compte connecté).
 
 ## Vérification
@@ -63,4 +65,5 @@ Les tests back-end de l’API se lancent depuis la racine Laravel :
 ```bash
 php artisan test --filter=MobileApiTest
 php artisan test --filter=MobileImportApiTest
+php artisan test --filter=LoginHistoryTest
 ```

@@ -309,7 +309,7 @@ export function AdminScreen() {
                 <SelectField
                   label="Responsable (partenaire)"
                   value={leaderId}
-                  options={[{ label: 'Aucun', value: '' }]}
+                  options={[{ label: 'Aucun', value: '' }, ...partnerOptions]}
                   onChange={setLeaderId}
                 />
               </>

@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->font('Geist', 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap')
             ->monoFont('Geist Mono', 'https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap')
             ->login(Login::class)
-            ->profile()
+            ->profile(isSimple: false)
             ->userMenu(position: UserMenuPosition::Sidebar)
             ->darkMode()
             ->defaultThemeMode(ThemeMode::Light)

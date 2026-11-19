@@ -251,6 +251,13 @@ Les règles sont exactement celles du site web :
 
 Le site ne propose pas d’export brut des listes de dons ou de partenaires : le téléchargement disponible est celui des **modèles d’import**. L’export du rapport de partenariat reste dans **Rapports**.
 
+### Destinataires des rapports de partenariat
+
+- Rapport d’une **église locale** : pasteur de la locale, avec copies du pasteur de sous-groupe, du pasteur de groupe et des super administrateurs.
+- Rapport d’une **église sous-groupe** (pasteur ou membre rattaché) : envoi direct au **pasteur du groupe**, avec copies des autres pasteurs de sous-groupe et des super administrateurs.
+- Rapport de l’**église groupe** : hiérarchie nationale (super administrateurs).
+- L’expéditeur est exclu des destinataires. Aucun envoi n’est effectué sans `confirm: true`.
+
 ---
 
 ## 6 ter. Historique des connexions et déconnexions
@@ -343,7 +350,7 @@ Copier l’APK final :
 
 ```powershell
 cd C:\Project\partnership
-copy .\mobile\android\app\build\outputs\apk\release\app-release.apk .\mobile\FinanceMobile-1.3.0.apk /Y
+copy .\mobile\android\app\build\outputs\apk\release\app-release.apk .\mobile\FinanceMobile-1.3.1.apk /Y
 ```
 
 Le numéro de version est aligné dans `mobile/app.json`, `mobile/package.json` et `mobile/android/app/build.gradle` (`versionCode` / `versionName`). Pour une nouvelle version, incrémenter ces trois fichiers avant le build. Attention : `expo prebuild` réécrit `build.gradle` et remet `versionCode 1` — le remettre à la valeur voulue **après** le prebuild, avant Gradle.
@@ -354,14 +361,15 @@ APK prêts à installer :
 C:\Project\partnership\mobile\FinanceMobile-1.0.0.apk   (ancienne version)
 C:\Project\partnership\mobile\FinanceMobile-1.1.0.apk   (ancienne version)
 C:\Project\partnership\mobile\FinanceMobile-1.2.0.apk   (ancienne version, historique de connexion)
-C:\Project\partnership\mobile\FinanceMobile-1.3.0.apk   (version actuelle, tableau de bord enrichi)
+C:\Project\partnership\mobile\FinanceMobile-1.3.0.apk   (ancienne version, tableau de bord enrichi)
+C:\Project\partnership\mobile\FinanceMobile-1.3.1.apk   (version actuelle, comptage des églises corrigé)
 ```
 
 ### 8.3 Installer sur un téléphone branché en USB
 
 ```powershell
 cd C:\Project\partnership\mobile
-adb install -r FinanceMobile-1.3.0.apk
+adb install -r FinanceMobile-1.3.1.apk
 ```
 
 Ou copier simplement le fichier `.apk` sur le téléphone et l’ouvrir.
@@ -441,7 +449,7 @@ Recompiler puis recopier :
 cd C:\Project\partnership\mobile\android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
-copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.0.apk /Y
+copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.1.apk /Y
 ```
 
 ---
@@ -463,7 +471,7 @@ npx.cmd expo prebuild --platform android
 cd android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
-copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.0.apk /Y
+copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.1.apk /Y
 ```
 
 Adresse à saisir dans l’application :

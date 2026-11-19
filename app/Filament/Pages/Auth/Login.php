@@ -9,17 +9,22 @@ use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Html;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\HtmlString;
 
 /**
  * Port de lib/auth.config.ts + components/login-form.tsx : la connexion renvoie
- * un code explicite traduit en message français, affiché directement sur la page.
+ * un code explicite traduit en message français, affiché dans une alerte globale
+ * sous les champs (et non dans le cadre d'un seul champ).
  */
 class Login extends BaseLogin
 {
     /** Évite l'enregistrement comme page navigable par la découverte Filament. */
     protected static bool $isDiscovered = false;
+
+    public ?string $loginError = null;
 
     public const LOGIN_MESSAGES = [
         'missing_fields' => "Veuillez renseigner l'email et le mot de passe.",
@@ -41,6 +46,8 @@ class Login extends BaseLogin
 
     public function authenticate(): ?LoginResponse
     {
+        $this->loginError = null;
+
         try {
             $this->rateLimit(5);
         } catch (TooManyRequestsException $exception) {
@@ -54,25 +61,25 @@ class Login extends BaseLogin
         $password = (string) ($data['password'] ?? '');
 
         if ($email === '' || $password === '') {
-            $this->failLogin('missing_fields');
+            return $this->failLogin('missing_fields');
         }
 
         $user = User::query()->where('email', $email)->first();
 
         if (! $user) {
-            $this->failLogin('user_not_found');
+            return $this->failLogin('user_not_found');
         }
 
         if (! $user->password) {
-            $this->failLogin('no_password');
+            return $this->failLogin('no_password');
         }
 
         if (! $user->is_active) {
-            $this->failLogin('account_disabled');
+            return $this->failLogin('account_disabled');
         }
 
         if (! Hash::check($password, $user->password)) {
-            $this->failLogin('wrong_password');
+            return $this->failLogin('wrong_password');
         }
 
         Filament::auth()->login($user, (bool) ($data['remember'] ?? false));
@@ -81,12 +88,49 @@ class Login extends BaseLogin
         return app(LoginResponse::class);
     }
 
-    private function failLogin(string $code): never
+    /** Stocke le message pour l'alerte globale au lieu de le rattacher à un champ. */
+    private function failLogin(string $code): ?LoginResponse
     {
-        throw ValidationException::withMessages([
-            'data.email' => self::LOGIN_MESSAGES[$code]
-                ?? 'Échec de la connexion. Vérifiez vos identifiants et réessayez.',
-        ]);
+        $this->loginError = self::LOGIN_MESSAGES[$code]
+            ?? 'Échec de la connexion. Vérifiez vos identifiants et réessayez.';
+
+        return null;
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return parent::form($schema)
+            ->components([
+                ...$this->getFormComponents(),
+                $this->getLoginErrorComponent(),
+            ]);
+    }
+
+    /** @return array<int, Component> */
+    private function getFormComponents(): array
+    {
+        return [
+            $this->getEmailFormComponent(),
+            $this->getPasswordFormComponent(),
+            $this->getRememberFormComponent(),
+        ];
+    }
+
+    private function getLoginErrorComponent(): Component
+    {
+        return Html::make(function (): ?HtmlString {
+            if (! filled($this->loginError)) {
+                return null;
+            }
+
+            return new HtmlString(
+                '<div role="alert" class="flex items-start gap-2 rounded-lg border border-danger-500/40 bg-danger-500/10 p-3 text-sm text-danger-700 dark:text-danger-300">'
+                . '<svg class="mt-0.5 h-4 w-4 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.5h.008v.008H12v-.008Z" /></svg>'
+                . '<span>'.e($this->loginError).'</span>'
+                . '</div>',
+            );
+        })
+            ->visible(fn (): bool => filled($this->loginError));
     }
 
     /** Sans `required()` : le champ vide remonte le code `missing_fields` depuis authenticate(). */

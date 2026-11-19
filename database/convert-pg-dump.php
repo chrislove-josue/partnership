@@ -6,7 +6,6 @@
  *
  * Usage : php database/convert-pg-dump.php <dump.sql> [--output=<fichier.json>]
  */
-
 $arguments = array_slice($argv, 1);
 $options = array_values(array_filter($arguments, fn (string $argument): bool => str_starts_with($argument, '--output=')));
 $paths = array_values(array_filter($arguments, fn (string $argument): bool => ! str_starts_with($argument, '--')));

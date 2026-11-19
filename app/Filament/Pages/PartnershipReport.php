@@ -245,6 +245,43 @@ class PartnershipReport extends Page
         return [$type, $year, $index];
     }
 
+    /**
+     * Cases à cocher des copies : toutes cochées par défaut, l'utilisateur peut
+     * en décocher pour exclure une personne de l'envoi.
+     *
+     * @return array<int, CheckboxList> | null
+     */
+    private function sendCcSchema(): ?array
+    {
+        try {
+            [$user, $churchId, $type, $year, $index] = $this->readSelection();
+            $cc = app(PartnershipReportSender::class)
+                ->preview($user, $churchId, $type, $year, $index)['cc'] ?? [];
+
+            if ($cc === []) {
+                return null;
+            }
+
+            $options = [];
+
+            foreach ($cc as $recipient) {
+                $email = (string) $recipient['email'];
+                $name = trim((string) ($recipient['name'] ?? ''));
+                $options[$email] = $name === '' ? $email : $name.' <'.$email.'>';
+            }
+
+            return [
+                CheckboxList::make('cc_emails')
+                    ->label('Copie — destinataires à conserver')
+                    ->options($options)
+                    ->default(array_keys($options))
+                    ->helperText('Décochez une personne pour ne pas l’envoyer en copie.'),
+            ];
+        } catch (Throwable) {
+            return null;
+        }
+    }
+
     /** Description du dialogue de confirmation : church, période, total et destinataires. */
     private function sendModalDescription(): string
     {

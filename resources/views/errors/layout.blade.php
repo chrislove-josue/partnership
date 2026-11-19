@@ -179,11 +179,16 @@
 
     <main class="card" role="alert">
         @php
-            $status = (int) ($status ?? 500);
+            $status = $status ?? (($exception ?? null) instanceof \Symfony\Component\HttpKernel\Exception\HttpExceptionInterface
+                ? $exception->getStatusCode()
+                : 500);
+            $status = (int) $status;
             $family = substr((string) $status, 0, 1).'xx';
             $isAuthError = in_array($status, [401, 403], true);
             $actionUrl = $actionUrl ?? ($isAuthError ? '/login' : '/dashboard');
             $actionLabel = $actionLabel ?? ($isAuthError ? 'Se connecter' : 'Retour au tableau de bord');
+            $secondaryUrl = $isAuthError ? '/dashboard' : '/login';
+            $secondaryLabel = $isAuthError ? 'Tableau de bord' : 'Connexion';
         @endphp
 
         <span class="badge">Erreur {{ $family }}</span>

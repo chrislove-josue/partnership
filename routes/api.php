@@ -38,6 +38,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::get('/donations', [DataController::class, 'donations']);
     Route::post('/donations', [DataController::class, 'storeDonation']);
+    Route::patch('/donations/{donation}', [DataController::class, 'updateDonation']);
+    Route::delete('/donations/{donation}', [DataController::class, 'destroyDonation']);
 
     Route::get('/users', [ManagementController::class, 'users']);
     Route::post('/users', [ManagementController::class, 'storeUser']);

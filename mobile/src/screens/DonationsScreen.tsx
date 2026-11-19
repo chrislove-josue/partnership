@@ -92,6 +92,21 @@ export function DonationsScreen() {
     setFormOpen(true);
   };
 
+  const remove = async () => {
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      await api(`/donations/${confirmDelete.id}`, { method: 'DELETE' });
+      setConfirmDelete(null);
+      await load();
+    } catch (caught) {
+      setError(caught instanceof ApiError ? caught.message : 'Suppression impossible.');
+      setConfirmDelete(null);
+    }
+  };
+
   const save = async () => {
     setSaving(true);
     setFormError('');
@@ -152,6 +167,9 @@ export function DonationsScreen() {
               </View>
               <Text style={styles.partner}>{donation.partner ?? 'Partenaire inconnu'}</Text>
               <Text style={styles.meta}>{donation.church ?? '—'} · {formatDate(donation.date)}</Text>
+              <Pressable style={styles.delete} onPress={() => setConfirmDelete(donation)}>
+                <Text style={styles.deleteText}>Supprimer</Text>
+              </Pressable>
             </Card>
           ))}
         </>

@@ -12,10 +12,6 @@ class Authenticate extends FilamentAuthenticate
 {
     protected function redirectTo($request): ?string
     {
-        if (route('login', absolute: false)) {
-            return route('login', absolute: false);
-        }
-
-        return Filament::getLoginUrl();
+        return route('login');
     }
 }

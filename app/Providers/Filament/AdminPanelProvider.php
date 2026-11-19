@@ -2,8 +2,9 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
+use App\Http\Middleware\Authenticate;
 use Filament\Enums\UserMenuPosition;
-use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -27,7 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('dashboard')
             ->brandName('Suivi des Partenariats')
-            ->login()
+            ->login(Login::class)
             ->profile()
             ->userMenu(position: UserMenuPosition::Sidebar)
             ->colors([

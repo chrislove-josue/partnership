@@ -28,6 +28,15 @@ class AuthTest extends TestCase
         $this->get('/dashboard')->assertRedirect('/login');
     }
 
+    public function test_logout_redirects_directly_to_login(): void
+    {
+        $this->seed();
+
+        $this->actingAs($this->superAdmin())
+            ->post('/dashboard/logout')
+            ->assertRedirect('/login');
+    }
+
     public function test_magic_link_authenticates_the_user(): void
     {
         $this->seed();

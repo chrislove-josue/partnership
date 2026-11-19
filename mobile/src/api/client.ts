@@ -1,3 +1,5 @@
+import { File, Paths } from 'expo-file-system';
+
 export const API_URL =
   process.env.EXPO_PUBLIC_API_URL ?? 'http://10.0.2.2:8000/api';
 
@@ -95,11 +97,8 @@ export async function apiDownload(path: string, fileName: string): Promise<strin
     reader.readAsDataURL(blob);
   });
 
-  const FileSystem = await import('expo-file-system');
-  const uri = `${FileSystem.cacheDirectory}${fileName}`;
-  await FileSystem.writeAsStringAsync(uri, base64, {
-    encoding: FileSystem.EncodingType.Base64,
-  });
+  const file = new File(Paths.cache, fileName);
+  file.write(base64, { encoding: 'base64' });
 
-  return uri;
+  return file.uri;
 }

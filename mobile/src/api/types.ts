@@ -19,7 +19,7 @@ export interface User {
   is_active?: boolean;
 }
 
-export interface Role {
+export interface RoleOption {
   id: number;
   name: string;
   label: string;

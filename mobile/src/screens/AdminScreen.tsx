@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { api, ApiError } from '../api/client';
-import type { Category, Cellule, Church, Partner, Role, User } from '../api/types';
+import type { Category, Cellule, Church, Partner, RoleOption, User } from '../api/types';
 import {
   Badge,
   Card,
@@ -38,7 +38,7 @@ export function AdminScreen() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
-  const [roles, setRoles] = useState<Role[]>([]);
+  const [roles, setRoles] = useState<RoleOption[]>([]);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Editable | null>(null);
   const [toDelete, setToDelete] = useState<Editable | null>(null);
@@ -69,7 +69,7 @@ export function AdminScreen() {
         api<{ data: Category[] }>('/categories'),
         api<{ data: User[] }>('/users'),
         api<{ data: Partner[] }>('/partners'),
-        api<{ data: Role[] }>('/roles'),
+        api<{ data: RoleOption[] }>('/roles'),
       ]);
       setChurches(churchData.data);
       setCellules(celluleData.data);
@@ -257,7 +257,7 @@ export function AdminScreen() {
               <Badge text={user.role ?? '—'} color={user.is_active ? colors.green : colors.red} />
             </View>
             <Text style={styles.meta}>{user.email}</Text>
-            <Text style={styles.meta}>{user.assigned_church ?? '—'}</Text>
+            <Text style={styles.meta}>{user.assigned_church?.name ?? '—'}</Text>
             <View style={styles.actions}>
               <Pressable onPress={() => openForm(user)}><Text style={styles.edit}>Modifier</Text></Pressable>
               <Pressable onPress={() => setToDelete(user)}><Text style={styles.delete}>Supprimer</Text></Pressable>

@@ -9,21 +9,21 @@ class ErrorPagesTest extends TestCase
 {
     /** @var array<int, array{title: string, message: string}> */
     private const ERRORS = [
-        400 => ['Requête invalide', "La requête envoyée n'a pas pu être comprise."],
-        401 => ['Authentification requise', 'Vous devez vous connecter pour accéder à cette page.'],
-        402 => ['Paiement requis', 'Cette ressource nécessite un paiement.'],
-        403 => ['Accès refusé', "Vous n'avez pas les autorisations nécessaires."],
-        404 => ['Page introuvable', "La page recherchée n'existe pas ou a été déplacée."],
-        405 => ['Action non autorisée', "Cette action n'est pas disponible pour cette page."],
-        408 => ['Délai dépassé', 'La demande a mis trop de temps à aboutir.'],
-        419 => ['Session expirée', 'Votre session a expiré pour des raisons de sécurité.'],
-        422 => ['Données invalides', "Certaines informations envoyées ne sont pas valides."],
-        429 => ['Trop de demandes', 'Vous avez effectué trop de demandes.'],
-        500 => ['Erreur interne du serveur', 'Une erreur inattendue est survenue.'],
-        501 => ['Fonctionnalité indisponible', "Cette fonctionnalité n'est pas encore disponible."],
-        502 => ['Passerelle indisponible', 'Le serveur a reçu une réponse invalide.'],
-        503 => ['Service temporairement indisponible', 'Le service est temporairement indisponible.'],
-        504 => ['Délai de la passerelle dépassé', "Le serveur n'a pas répondu à temps."],
+        400 => ['title' => 'Requête invalide', 'message' => "La requête envoyée n'a pas pu être comprise."],
+        401 => ['title' => 'Authentification requise', 'message' => 'Vous devez vous connecter pour accéder à cette page.'],
+        402 => ['title' => 'Paiement requis', 'message' => 'Cette ressource nécessite un paiement.'],
+        403 => ['title' => 'Accès refusé', 'message' => "Vous n'avez pas les autorisations nécessaires."],
+        404 => ['title' => 'Page introuvable', 'message' => "La page recherchée n'existe pas ou a été déplacée."],
+        405 => ['title' => 'Action non autorisée', 'message' => "Cette action n'est pas disponible pour cette page."],
+        408 => ['title' => 'Délai dépassé', 'message' => 'La demande a mis trop de temps à aboutir.'],
+        419 => ['title' => 'Session expirée', 'message' => 'Votre session a expiré pour des raisons de sécurité.'],
+        422 => ['title' => 'Données invalides', 'message' => "Certaines informations envoyées ne sont pas valides."],
+        429 => ['title' => 'Trop de demandes', 'message' => 'Vous avez effectué trop de demandes.'],
+        500 => ['title' => 'Erreur interne du serveur', 'message' => 'Une erreur inattendue est survenue.'],
+        501 => ['title' => 'Fonctionnalité indisponible', 'message' => "Cette fonctionnalité n'est pas encore disponible."],
+        502 => ['title' => 'Passerelle indisponible', 'message' => 'Le serveur a reçu une réponse invalide.'],
+        503 => ['title' => 'Service temporairement indisponible', 'message' => 'Le service est temporairement indisponible.'],
+        504 => ['title' => 'Délai de la passerelle dépassé', 'message' => "Le serveur n'a pas répondu à temps."],
     ];
 
     protected function setUp(): void
@@ -55,8 +55,8 @@ class ErrorPagesTest extends TestCase
                 ->assertSee('ChurchManager', false)
                 ->assertSee('Erreur '.substr((string) $code, 0, 1).'xx', false)
                 ->assertSee((string) $code, false)
-                ->assertSee($expected['title'], false)
-                ->assertSee($expected['message'], false)
+                ->assertSee($expected['title'])
+                ->assertSee($expected['message'])
                 ->assertSee('Retour au tableau de bord', false)
                 ->assertDontSee('Whoops', false)
                 ->assertDontSee('Symfony', false)
@@ -87,7 +87,7 @@ class ErrorPagesTest extends TestCase
             ->assertSee('Erreur 4xx', false)
             ->assertSee('418', false)
             ->assertSee('Requête invalide', false)
-            ->assertSee("La requête n'a pas pu être traitée.", false);
+            ->assertSee("La requête n'a pas pu être traitée.");
 
         $this->get('/__test-error/599')
             ->assertStatus(599)

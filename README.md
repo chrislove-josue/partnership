@@ -65,6 +65,16 @@ particulier :
 Logique dans `App\Filament\Pages\Auth\Login`, redirection dans `App\Http\Middleware\Authenticate`.
 Aucun compte n'est créé pour `sounesatchougo@gmail.com`.
 
+### Design
+
+Le back-office reprend l'identité visuelle de l'application Next.js : violet `#9333EA` à indigo
+`#4F46E5`, fond `#F9FAFB`, cartes blanches, police Geist et sidebar de `18rem`. La page de
+connexion utilise le fond sombre dégradé et la carte en verre dépoli de Next.js.
+
+La configuration du panneau se trouve dans `app/Providers/Filament/AdminPanelProvider.php` ;
+les surcharges CSS sont dans `public/css/filament/admin/theme.css` (elles importent le thème
+Filament compilé). Aucun build Vite n'est nécessaire pour le panneau.
+
 ### Compte initial
 
 Créé par `database/seeders/UserSeeder.php` :

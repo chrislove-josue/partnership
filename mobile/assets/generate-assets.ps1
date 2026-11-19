@@ -116,17 +116,17 @@ $graphics.Clear($white)
 $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
 $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
 $graphics.TextRenderingHint = [System.Drawing.Text.TextRenderingHint]::ClearTypeGridFit
-Draw-AppIcon $graphics 70 80 480 $true
+Draw-AppIcon $graphics 40 70 500 $true
 
 $navyBrush = New-Brush $navy
 $goldBrush = New-Brush $gold
 $mutedBrush = New-Brush $muted
-$titleFont = New-Object System.Drawing.Font('Segoe UI', 96, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
-$taglineFont = New-Object System.Drawing.Font('Segoe UI', 38, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Pixel)
+$titleFont = New-Object System.Drawing.Font('Segoe UI', 120, [System.Drawing.FontStyle]::Bold, [System.Drawing.GraphicsUnit]::Pixel)
+$taglineFont = New-Object System.Drawing.Font('Segoe UI', 64, [System.Drawing.FontStyle]::Regular, [System.Drawing.GraphicsUnit]::Pixel)
 
-$graphics.DrawString('FinanceMobile', $titleFont, $navyBrush, 600, 205)
-$graphics.FillRectangle($goldBrush, 606, 330, 620, 8)
-$graphics.DrawString(('Gestion financi' + [char]0x00E8 + 're'), $taglineFont, $mutedBrush, 610, 365)
+$graphics.DrawString('FinanceMobile', $titleFont, $navyBrush, 570, 185)
+$graphics.FillRectangle($goldBrush, 578, 335, 720, 10)
+$graphics.DrawString(('Gestion financi' + [char]0x00E8 + 're'), $taglineFont, $mutedBrush, 582, 380)
 
 $titleFont.Dispose()
 $taglineFont.Dispose()

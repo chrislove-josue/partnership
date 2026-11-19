@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Resources\Concerns\RedirectsToListAfterSave;
 use App\Filament\Resources\Users\UserResource;
 use App\Services\UserInviter;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateUser extends CreateRecord
 {
+    use RedirectsToListAfterSave;
+
     protected static string $resource = UserResource::class;
 
     protected function afterCreate(): void

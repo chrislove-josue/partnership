@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\Donations\Pages;
 
+use App\Filament\Resources\Concerns\RedirectsToListAfterSave;
 use App\Filament\Resources\Donations\DonationResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditDonation extends EditRecord
 {
+    use RedirectsToListAfterSave;
+
     protected static string $resource = DonationResource::class;
 
     protected function getHeaderActions(): array

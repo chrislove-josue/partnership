@@ -4,7 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\LoginHistory as LoginHistoryModel;
 use Filament\Pages\Page;
-use Illuminate\Contracts\Pagination\LengthPaginator;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class LoginHistory extends Page
@@ -21,8 +21,8 @@ class LoginHistory extends Page
 
     protected string $view = 'filament.pages.login-history';
 
-    /** @return LengthPaginator<int, LoginHistoryModel> */
-    public function getEntries(): LengthPaginator
+    /** @return LengthAwarePaginator<int, LoginHistoryModel> */
+    public function getEntries(): LengthAwarePaginator
     {
         return LoginHistoryModel::query()
             ->where('user_id', Auth::id())

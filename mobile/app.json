@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
+    "icon": "./assets/icon.png",
     "ios": {
       "supportsTablet": true
     },
@@ -12,7 +13,11 @@
       "package": "com.churchmanager.benin",
       "permissions": [
         "INTERNET"
-      ]
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F2B46"
+      }
     },
     "web": {
       "bundler": "metro"

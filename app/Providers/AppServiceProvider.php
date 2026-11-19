@@ -4,6 +4,12 @@ namespace App\Providers;
 
 use App\Auth\LogoutResponse;
 use App\Listeners\RecordLoginHistory;
+use App\Models\CategoryDon;
+use App\Models\Cellule;
+use App\Models\Church;
+use App\Models\Donation;
+use App\Models\Partner;
+use App\Services\ReportCache;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
@@ -55,5 +61,13 @@ class AppServiceProvider extends ServiceProvider
         ], 'fr', 'filament-forms');
 
         Event::listen([Login::class, Logout::class], RecordLoginHistory::class);
+
+        $invalidateReports = fn () => app(ReportCache::class)->invalidate();
+
+        foreach ([Donation::class, Partner::class, Church::class, CategoryDon::class, Cellule::class] as $model) {
+            $model::created($invalidateReports);
+            $model::updated($invalidateReports);
+            $model::deleted($invalidateReports);
+        }
     }
 }

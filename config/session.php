@@ -133,6 +133,18 @@ return [
     ),
 
     /*
+    | Cookie d'accusé de réception des cookies
+    |--------------------------------------------------------------------------
+    |
+    | Ce cookie est posé côté navigateur (et non chiffré par Laravel) afin que
+    | la bannière d'information ne revienne pas à chaque visite. Son nom doit
+    | rester dans la liste des cookies exclus du chiffrement (voir bootstrap/app.php).
+    |
+    */
+
+    'consent_cookie' => env('SESSION_CONSENT_COOKIE', 'churchmanager_cookie_consent'),
+
+    /*
     |--------------------------------------------------------------------------
     | Session Cookie Path
     |--------------------------------------------------------------------------

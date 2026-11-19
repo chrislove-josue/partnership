@@ -21,6 +21,8 @@ use RuntimeException;
  */
 class PartnershipReportService
 {
+    public function __construct(private readonly ReportCache $cache) {}
+
     private const MONTH_LABELS = [
         'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
         'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
@@ -69,6 +71,18 @@ class PartnershipReportService
      * @return array<string, mixed>
      */
     public function buildReport(int $churchId, PeriodType $type, int $year, ?int $index): array
+    {
+        return $this->cache->remember(
+            $churchId,
+            $type,
+            $year,
+            $index,
+            fn (): array => $this->buildFreshReport($churchId, $type, $year, $index),
+        );
+    }
+
+    /** @return array<string, mixed> */
+    private function buildFreshReport(int $churchId, PeriodType $type, int $year, ?int $index): array
     {
         $church = Church::with('parent:id,name')->find($churchId);
 

@@ -19,6 +19,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Durée de vie du cache des rapports
+    |--------------------------------------------------------------------------
+    |
+    | Les rapports de partenariat sont recalculés à chaque rendu Filament et à
+    | chaque aperçu d'envoi. Ce cache court circuite ces calculs ; toute écriture
+    | sur les données concernées incrémente la version et force un recalcul.
+    |
+    */
+
+    'report_ttl' => (int) env('REPORT_CACHE_TTL', 300),
+
+    /*
+    |--------------------------------------------------------------------------
     | Cache Stores
     |--------------------------------------------------------------------------
     |

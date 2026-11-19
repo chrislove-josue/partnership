@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Ce cookie est écrit par le navigateur : Laravel ne doit pas tenter de le déchiffrer.
+        // `env()` ici car le dépôt de configuration n'est pas encore disponible à ce stade.
+        $middleware->encryptCookies(except: [env('SESSION_CONSENT_COOKIE', 'churchmanager_cookie_consent')]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

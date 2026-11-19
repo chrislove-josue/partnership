@@ -31,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('dashboard')
             ->theme(asset('css/filament/admin/theme.css'))
             ->renderHook(PanelsRenderHook::BODY_END, fn () => view('filament.components.support-fab'))
+            ->renderHook(PanelsRenderHook::BODY_END, fn () => view('filament.components.cookie-consent'))
             ->brandName('ChurchManager')
             ->font('Geist', 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap')
             ->monoFont('Geist Mono', 'https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap')

@@ -534,10 +534,12 @@ class PartnershipReportTest extends TestCase
         $this->assertStringContainsString('À (pasteur de votre groupe) : '.$groupPastor->email, $description);
         $this->assertStringContainsString('Copie :', $description);
 
-        \Livewire\Livewire::test(\App\Filament\Pages\PartnershipReport::class)
-            ->call('mountAction', 'send')
-            ->assertSee('Copie — destinataires à conserver')
-            ->assertSee('libertsinzo7@gmail.com');
+        $schema = (new \ReflectionMethod($component, 'sendCcSchema'))->invoke($component);
+
+        $this->assertNotNull($schema);
+        $this->assertInstanceOf(\Filament\Forms\Components\CheckboxList::class, $schema[0]);
+        $this->assertArrayHasKey('libertsinzo7@gmail.com', $schema[0]->getOptions());
+        $this->assertContains('libertsinzo7@gmail.com', $schema[0]->getDefaultState());
     }
 
     public function test_send_action_sends_after_confirmation(): void

@@ -199,7 +199,7 @@
 
         <div class="actions">
             <a class="button button-primary" href="{{ $actionUrl }}">{{ $actionLabel }}</a>
-            <a class="button button-secondary" href="/login">Connexion</a>
+            <a class="button button-secondary" href="{{ $secondaryUrl }}">{{ $secondaryLabel }}</a>
             <a class="button button-secondary" href="/">Accueil</a>
         </div>
     </main>

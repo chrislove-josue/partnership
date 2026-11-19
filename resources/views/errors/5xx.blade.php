@@ -1,4 +1,4 @@
-@extends('errors::layout', ['status' => 500])
+@extends('errors::layout')
 
 @section('title', 'Erreur du serveur')
 @section('message', 'Une erreur est survenue au niveau du serveur. Réessayez dans quelques instants.')

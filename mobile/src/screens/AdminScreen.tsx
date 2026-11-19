@@ -63,17 +63,19 @@ export function AdminScreen() {
     setLoading(true);
     setError('');
     try {
-      const [churchData, celluleData, categoryData, userData, roleData] = await Promise.all([
+      const [churchData, celluleData, categoryData, userData, partnerData, roleData] = await Promise.all([
         api<{ data: Church[] }>('/churches'),
         api<{ data: Cellule[] }>('/cellules'),
         api<{ data: Category[] }>('/categories'),
         api<{ data: User[] }>('/users'),
+        api<{ data: Partner[] }>('/partners'),
         api<{ data: Role[] }>('/roles'),
       ]);
       setChurches(churchData.data);
       setCellules(celluleData.data);
       setCategories(categoryData.data);
       setUsers(userData.data);
+      setPartners(partnerData.data);
       setRoles(roleData.data);
       setChurchId((current) => current || churchData.data[0]?.id.toString() || '');
       setAssignedChurchId((current) => current || churchData.data[0]?.id.toString() || '');

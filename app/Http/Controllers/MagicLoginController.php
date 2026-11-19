@@ -15,7 +15,7 @@ class MagicLoginController extends Controller
         $magic = $token !== '' ? $tokens->consume($token) : null;
 
         if (! $magic) {
-            return redirect('/dashboard/login')->withErrors([
+            return redirect('/login')->withErrors([
                 'email' => 'Ce lien de connexion est invalide ou a expiré.',
             ]);
         }
@@ -23,7 +23,7 @@ class MagicLoginController extends Controller
         $user = User::query()->where('email', $magic->email)->first();
 
         if (! $user || ! $user->is_active) {
-            return redirect('/dashboard/login')->withErrors([
+            return redirect('/login')->withErrors([
                 'email' => 'Compte introuvable ou désactivé.',
             ]);
         }

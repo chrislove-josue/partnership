@@ -59,13 +59,13 @@ abstract class BaseImportService
         $conditions = [];
 
         if (! empty($row['email'])) {
-            $conditions['email'] = mb_strtolower(trim((string) $row['email']));
+            $conditions[] = ['column' => 'email', 'value' => mb_strtolower(trim((string) $row['email']))];
         }
         if ($phone) {
-            $conditions['phone'] = mb_strtolower($phone);
+            $conditions[] = ['column' => 'phone', 'value' => mb_strtolower($phone)];
         }
         if ($handleKC) {
-            $conditions['handlekc'] = mb_strtolower($handleKC);
+            $conditions[] = ['column' => 'handle_kc', 'value' => mb_strtolower($handleKC)];
         }
 
         if ($conditions === []) {
@@ -74,8 +74,8 @@ abstract class BaseImportService
 
         return Partner::query()
             ->where(function ($query) use ($conditions): void {
-                foreach ($conditions as $column => $value) {
-                    $query->orWhereRaw("LOWER({$column}) = ?", [$value]);
+                foreach ($conditions as $condition) {
+                    $query->orWhereRaw("LOWER({$condition['column']}) = ?", [$condition['value']]);
                 }
             })
             ->first();

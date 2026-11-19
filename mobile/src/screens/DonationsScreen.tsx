@@ -45,10 +45,10 @@ export function DonationsScreen() {
     setError('');
     try {
       const [donationData, churchData, partnerData, categoryData] = await Promise.all([
-        api<{ data: Donation[] }>('/donations'),
-        api<{ data: Church[] }>('/churches'),
-        api<{ data: Partner[] }>('/partners'),
-        api<{ data: Category[] }>('/categories'),
+        api<{ data: Donation[] }>('/donations', { cacheKey: 'donations' }),
+        api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
+        api<{ data: Partner[] }>('/partners', { cacheKey: 'partners' }),
+        api<{ data: Category[] }>('/categories', { cacheKey: 'categories' }),
       ]);
       setDonations(donationData.data);
       setChurches(churchData.data);

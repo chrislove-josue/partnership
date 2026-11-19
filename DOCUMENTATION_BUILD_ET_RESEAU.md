@@ -336,6 +336,18 @@ Vérifier dans cet ordre :
 4. Adresse dans l’app : `http://IP_PC:8000/api`.
 5. IP actuelle de la machine (elle peut changer).
 6. `MOBILE_APP_ORIGINS=*` puis `php artisan optimize:clear`.
+7. L’APK autorise le trafic HTTP clair (`android:usesCleartextTraffic="true"` dans `AndroidManifest.xml`).
+
+### `http://IP:8000/api` renvoie 404
+
+C’est normal : il n’existe pas de route `/api` racine. Utiliser plutôt :
+
+```text
+http://IP:8000/api/login   (POST)
+http://IP:8000/api/me      (GET, avec token)
+```
+
+Une réponse `405` sur `/api/login` en GET est également normale : cette route attend un POST.
 
 ### `php` affiche encore 8.5
 

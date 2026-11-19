@@ -65,7 +65,10 @@ class AdminThemeTest extends TestCase
             ->assertSee('Pour toute assistance, veuillez contacter +22998123353')
             ->assertSee('Contacter le support sur WhatsApp au +22998123353')
             ->assertSee('https://wa.me/22998123353', false)
-            ->assertSee('M17.472 14.382', false);
+            ->assertSee('M17.472 14.382', false)
+            ->assertSee('support-fab__toggle', false)
+            ->assertSee('Replier le bouton d’assistance')
+            ->assertSee('Déplier le bouton d’assistance');
     }
 
     public function test_support_button_is_visible_in_the_dashboard(): void
@@ -80,6 +83,9 @@ class AdminThemeTest extends TestCase
             ->assertSee('Pour toute assistance, veuillez contacter +22998123353')
             ->assertSee('Contacter le support sur WhatsApp au +22998123353')
             ->assertSee('https://wa.me/22998123353', false)
-            ->assertSee('M17.472 14.382', false);
+            ->assertSee('M17.472 14.382', false)
+            ->assertSee('support-fab__toggle', false)
+            ->assertSee('Replier le bouton d’assistance')
+            ->assertSee('Déplier le bouton d’assistance');
     }
 }

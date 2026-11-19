@@ -19,6 +19,29 @@ import {
 type Stat = { label: string; value: string; hint: string };
 type CategoryTotal = { name: string; color: string; amount: number; count: number };
 
+/**
+ * L’église de groupe cumule les trois rôles : elle est à la fois groupe,
+ * sous-groupe et église locale (cas de CE SIKECODJI). Les autres églises
+ * conservent le type enregistré dans la base.
+ */
+function countChurchRoles(churches: Church[]) {
+  const roles = { GROUP: 0, SUB_GROUP: 0, LOCAL: 0 };
+
+  churches.forEach((church) => {
+    if (church.type === 'GROUP') {
+      roles.GROUP += 1;
+      roles.SUB_GROUP += 1;
+      roles.LOCAL += 1;
+      return;
+    }
+    if (church.type in roles) {
+      roles[church.type as keyof typeof roles] += 1;
+    }
+  });
+
+  return roles;
+}
+
 export function DashboardScreen({ navigation }: { navigation: { navigate: (name: string) => void } }) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -92,12 +115,7 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 4);
 
-    const churchTypes = { GROUP: 0, SUB_GROUP: 0, LOCAL: 0 };
-    churches.forEach((church) => {
-      if (church.type in churchTypes) {
-        churchTypes[church.type as keyof typeof churchTypes] += 1;
-      }
-    });
+    const churchTypes = countChurchRoles(churches);
 
     const recentDonations = [...donations]
       .sort((a, b) => String(b.date).localeCompare(String(a.date)))
@@ -261,6 +279,9 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
               <Text style={styles.churchLabel}>Locale</Text>
             </Card>
           </View>
+          <Text style={styles.churchNote}>
+            L’église de groupe est aussi comptée comme sous-groupe et comme église locale.
+          </Text>
 
           <SectionTitle>Actions rapides</SectionTitle>
           <View style={styles.actions}>

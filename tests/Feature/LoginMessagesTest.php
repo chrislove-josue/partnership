@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Enums\RoleName;
 use App\Filament\Pages\Auth\Login;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -26,10 +26,14 @@ class LoginMessagesTest extends TestCase
         $user = User::create([
             'name' => 'Utilisateur test',
             'email' => $email,
-            'password' => $password === null ? null : Hash::make($password),
+            'password' => Hash::make($password ?? 'azerty123'),
             'is_active' => $isActive,
         ]);
-        $user->syncRoles([RoleName::SUPER_ADMIN->value]);
+
+        // Un compte sans mot de passe (OAuth) est représenté par une chaîne vide en base.
+        if ($password === null) {
+            DB::table('users')->where('id', $user->id)->update(['password' => '']);
+        }
 
         return $user;
     }

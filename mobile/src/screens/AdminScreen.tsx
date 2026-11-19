@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { api, ApiError } from '../api/client';
+import { api, ApiError, invalidateCache } from '../api/client';
 import type { Category, Cellule, Church, Partner, RoleOption, User } from '../api/types';
 import {
   Badge,
@@ -64,12 +64,12 @@ export function AdminScreen() {
     setError('');
     try {
       const [churchData, celluleData, categoryData, userData, partnerData, roleData] = await Promise.all([
-        api<{ data: Church[] }>('/churches'),
-        api<{ data: Cellule[] }>('/cellules'),
-        api<{ data: Category[] }>('/categories'),
-        api<{ data: User[] }>('/users'),
-        api<{ data: Partner[] }>('/partners'),
-        api<{ data: RoleOption[] }>('/roles'),
+        api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
+        api<{ data: Cellule[] }>('/cellules', { cacheKey: 'cellules' }),
+        api<{ data: Category[] }>('/categories', { cacheKey: 'categories' }),
+        api<{ data: User[] }>('/users', { cacheKey: 'users' }),
+        api<{ data: Partner[] }>('/partners', { cacheKey: 'partners' }),
+        api<{ data: RoleOption[] }>('/roles', { cacheKey: 'roles' }),
       ]);
       setChurches(churchData.data);
       setCellules(celluleData.data);
@@ -156,6 +156,7 @@ export function AdminScreen() {
       const endpoint = endpointFor(section);
       const uri = editing ? `${endpoint}/${editing.id}` : endpoint;
       await api(uri, { method: editing ? 'PATCH' : 'POST', body: payloadFor() });
+      invalidateCache();
       setFormOpen(false);
       await load();
     } catch (caught) {

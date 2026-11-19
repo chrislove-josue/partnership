@@ -137,6 +137,7 @@ export function PartnersScreen() {
     }
     try {
       await api(`/partners/${toDelete.id}`, { method: 'DELETE' });
+      invalidateCache();
       setToDelete(null);
       await load();
     } catch (caught) {

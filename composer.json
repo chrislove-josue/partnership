@@ -10,6 +10,7 @@
         "filament/filament": "4.15",
         "laravel/framework": "^13.0",
         "laravel/tinker": "^3.0",
+        "phpoffice/phpspreadsheet": "5.11",
         "spatie/laravel-permission": "^8.3",
         "symfony/polyfill-mbstring": "1.32"
     },

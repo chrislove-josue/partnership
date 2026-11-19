@@ -11,6 +11,7 @@ use App\Filament\Resources\Donations\Tables\DonationsTable;
 use App\Models\Donation;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
@@ -44,7 +45,29 @@ class DonationResource extends Resource
 
     public static function getGloballySearchableAttributes(): array
     {
-        return ['partner.full_name', 'church.name', 'category.name'];
+        // `full_name` est un accesseur Eloquent : la recherche SQL doit porter
+        // sur les colonnes réelles du partenaire.
+        return ['partner.first_name', 'partner.last_name', 'church.name', 'category.name'];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string
+    {
+        /** @var Donation $record */
+        return sprintf(
+            '%s — %s XOF',
+            $record->partner?->full_name ?? 'Partenaire inconnu',
+            number_format((float) $record->amount, 0, ',', ' '),
+        );
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        /** @var Donation $record */
+        return [
+            'Église' => $record->church?->name ?? '—',
+            'Catégorie' => $record->category?->name ?? '—',
+            'Date' => $record->date?->format('d/m/Y') ?? '—',
+        ];
     }
 
     public static function getPages(): array

@@ -22,6 +22,50 @@ enum RoleName: string
     }
 
     /**
+     * Rang utilisé pour déterminer le rôle principal d'un compte qui cumule
+     * plusieurs fonctions. Le rang le plus élevé prend le pas.
+     */
+    public function rank(): int
+    {
+        return match ($this) {
+            self::SUPER_ADMIN => 5,
+            self::GROUP_PASTOR => 4,
+            self::SUBGROUP_PASTOR => 3,
+            self::LOCAL_PASTOR => 2,
+            self::STAFF => 1,
+        };
+    }
+
+    /**
+     * Fonctions inférieures remplies par ce rôle.
+     * Un pasteur de sous-groupe est aussi pasteur local ; un pasteur de groupe
+     * est aussi pasteur de sous-groupe et pasteur local.
+     *
+     * @return array<int, self>
+     */
+    public function impliedRoles(): array
+    {
+        return match ($this) {
+            self::GROUP_PASTOR => [self::SUBGROUP_PASTOR, self::LOCAL_PASTOR],
+            self::SUBGROUP_PASTOR => [self::LOCAL_PASTOR],
+            default => [],
+        };
+    }
+
+    /**
+     * Ce rôle et toutes les fonctions qu'il implique.
+     *
+     * @return array<int, self>
+     */
+    public function withImpliedRoles(): array
+    {
+        return collect([$this, ...$this->impliedRoles()])
+            ->unique(fn (self $role): string => $role->value)
+            ->values()
+            ->all();
+    }
+
+    /**
      * Permissions attribuées par défaut à ce rôle (miroir de types/auth.ts).
      *
      * @return array<int, PermissionName>

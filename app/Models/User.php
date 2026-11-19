@@ -75,7 +75,14 @@ class User extends Authenticatable implements FilamentUser
 
     public function roleName(): ?string
     {
-        return $this->getRoleNames()->first();
+        $roles = $this->getRoleNames();
+
+        return $roles
+            ->map(fn (string $name): ?RoleName => RoleName::tryFrom($name))
+            ->filter()
+            ->sortByDesc(fn (RoleName $role): int => $role->rank())
+            ->first()?->value
+            ?? $roles->first();
     }
 
     /**

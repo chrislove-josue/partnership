@@ -222,13 +222,13 @@ class PartnershipReportService
     /**
      * Résolution de la chaîne hiérarchique des destinataires.
      *
-     * Personnel (rattaché à une église locale) → responsable de cette église.
-     * Pasteur d'une église locale → pasteur de son sous-groupe si elle est sous
-     * un sous-groupe, sinon pasteur du groupe ; le niveau supérieur et les super
-     * administrateurs sont en copie. Pasteur de sous-groupe → pasteur du groupe,
-     * avec les autres pasteurs de sous-groupe et les super administrateurs en
-     * copie. Groupe / SUPER_ADMIN → super administrateurs. L'adresse de
-     * l'expéditeur est toujours exclue.
+     * Règle de remontée d'un niveau, le niveau suivant étant toujours en copie :
+     * personnel d'une locale → pasteur de cette locale ; pasteur d'une locale →
+     * pasteur de son sous-groupe ; pasteur d'un sous-groupe → pasteur du groupe.
+     * Une locale rattachée directement au groupe remonte au pasteur du groupe.
+     * Les super administrateurs sont en copie de chaque niveau, et destinataires
+     * pour une église groupe ou un SUPER_ADMIN. L'adresse de l'expéditeur est
+     * toujours exclue.
      *
      * @return array{
      *     recipients: array<int, array{email: string, name: string}>,
@@ -373,32 +373,12 @@ class PartnershipReportService
             RoleName::SUPER_ADMIN->value,
         ];
 
-        // Personnel d'une église locale : envoi au pasteur local. Un membre
-        // rattaché à un sous-groupe suit la même chaîne que son pasteur : le
-        // rapport part directement au pasteur du groupe.
-        if (! in_array($user->roleName(), $pastorRoles, true) && $church->type !== ChurchType::SUB_GROUP) {
-            if ($church->type !== ChurchType::LOCAL) {
-                throw new RuntimeException('Un personnel doit être rattaché à une église locale.');
-            }
+        $isStaff = ! in_array($user->roleName(), $pastorRoles, true);
 
-            $pastors = $pastorsFor($church, RoleName::LOCAL_PASTOR->value);
-
-            foreach ($pastors as $pastor) {
-                if ($pastor->email && $pastor->email !== $senderEmail) {
-                    $addTo($pastor, "pasteur de votre église ({$church->name})");
-                }
-            }
-
-            if ($to === []) {
-                throw new RuntimeException('Aucun pasteur local actif n’est assigné à cette église.');
-            }
-
-            return [
-                'recipients' => array_values($to),
-                'cc' => [],
-                'targetLabel' => 'pasteur de votre église',
-                'chain' => $chain,
-            ];
+        // Personnel rattaché directement au groupe : aucun niveau local à
+        // solliciter, la hiérarchie nationale est le seul interlocuteur.
+        if ($isStaff && $church->type === ChurchType::GROUP) {
+            throw new RuntimeException('Un personnel doit être rattaché à une église locale.');
         }
 
         // Une église groupe est le sommet de la chaîne locale pour un pasteur.
@@ -424,6 +404,38 @@ class PartnershipReportService
             }
 
             $cursor = $cursor->parent_id ? Church::find($cursor->parent_id) : null;
+        }
+
+        // Personnel d'une église locale : envoi au pasteur de cette église,
+        // avec le niveau suivant (sous-groupe puis groupe) en copie.
+        if ($isStaff && $church->type === ChurchType::LOCAL) {
+            foreach ($pastorsFor($church, RoleName::LOCAL_PASTOR->value) as $pastor) {
+                $addTo($pastor, "pasteur de votre église ({$church->name})");
+            }
+
+            if ($to === []) {
+                throw new RuntimeException('Aucun pasteur local actif n’est assigné à cette église.');
+            }
+
+            if ($parent?->type === ChurchType::SUB_GROUP) {
+                foreach ($pastorsFor($parent, RoleName::SUBGROUP_PASTOR->value) as $pastor) {
+                    $addCc($pastor, "pasteur de sous-groupe ({$parent->name})");
+                }
+            }
+
+            if ($group) {
+                foreach ($pastorsFor($group, RoleName::GROUP_PASTOR->value) as $pastor) {
+                    $addCc($pastor, "pasteur de groupe ({$group->name})");
+                }
+            }
+            $addSuperAdmins('cc');
+
+            return [
+                'recipients' => array_values($to),
+                'cc' => array_values($cc),
+                'targetLabel' => 'pasteur de votre église',
+                'chain' => $chain,
+            ];
         }
 
         $targetLabel = 'pasteur de votre groupe';

@@ -385,14 +385,15 @@ C:\Project\partnership\mobile\FinanceMobile-1.0.0.apk   (ancienne version)
 C:\Project\partnership\mobile\FinanceMobile-1.1.0.apk   (ancienne version)
 C:\Project\partnership\mobile\FinanceMobile-1.2.0.apk   (ancienne version, historique de connexion)
 C:\Project\partnership\mobile\FinanceMobile-1.3.0.apk   (ancienne version, tableau de bord enrichi)
-C:\Project\partnership\mobile\FinanceMobile-1.3.1.apk   (version actuelle, comptage des églises corrigé)
+C:\Project\partnership\mobile\FinanceMobile-1.3.1.apk   (ancienne version, comptage des églises corrigé)
+C:\Project\partnership\mobile\FinanceMobile-1.3.2.apk   (version actuelle, session/cache/cookies)
 ```
 
 ### 8.3 Installer sur un téléphone branché en USB
 
 ```powershell
 cd C:\Project\partnership\mobile
-adb install -r FinanceMobile-1.3.1.apk
+adb install -r FinanceMobile-1.3.2.apk
 ```
 
 Ou copier simplement le fichier `.apk` sur le téléphone et l’ouvrir.
@@ -472,7 +473,7 @@ Recompiler puis recopier :
 cd C:\Project\partnership\mobile\android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
-copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.1.apk /Y
+copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.2.apk /Y
 ```
 
 ---
@@ -494,7 +495,7 @@ npx.cmd expo prebuild --platform android
 cd android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
-copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.1.apk /Y
+copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.2.apk /Y
 ```
 
 Adresse à saisir dans l’application :

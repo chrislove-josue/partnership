@@ -389,4 +389,7 @@ class ImportLegacyData extends Command
         }
 
         foreach (array_chunk($batch, 500) as $chunk) {
-   
+            DB::table('magic_tokens')->insert($chunk);
+        }
+    }
+}

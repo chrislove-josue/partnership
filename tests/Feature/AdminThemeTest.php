@@ -63,7 +63,7 @@ class AdminThemeTest extends TestCase
         $this->get('/login')
             ->assertOk()
             ->assertSee('Pour toute assistance, veuillez contacter +22998123353')
-            ->assertSee('tel:+22998123353', false);
+            ->assertSee('https://wa.me/22998123353', false);
     }
 
     public function test_support_button_is_visible_in_the_dashboard(): void
@@ -76,6 +76,6 @@ class AdminThemeTest extends TestCase
             ->get('/dashboard')
             ->assertOk()
             ->assertSee('Pour toute assistance, veuillez contacter +22998123353')
-            ->assertSee('tel:+22998123353', false);
+            ->assertSee('https://wa.me/22998123353', false);
     }
 }

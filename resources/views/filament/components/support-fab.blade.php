@@ -1,11 +1,13 @@
 <a
     class="support-fab"
-    href="tel:+22998123353"
-    aria-label="Appeler le support au +22998123353"
-    title="Appeler le support au +22998123353"
+    href="https://wa.me/22998123353"
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label="Contacter le support sur WhatsApp au +22998123353"
+    title="Contacter le support sur WhatsApp au +22998123353"
 >
     <svg class="support-fab__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h1.5c.966 0 1.75-.784 1.75-1.75v-2.5a1.75 1.75 0 0 0-1.75-1.75h-2.19a1.75 1.75 0 0 0-1.717 1.397l-.312 1.56a13.5 13.5 0 0 1-5.948-5.948l1.56-.312A1.75 1.75 0 0 0 11.5 8.94V6.75c0-.966-.784-1.75-1.75-1.75H4a1.75 1.75 0 0 0-1.75 1.75Z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5Z" />
     </svg>
     <span class="support-fab__label">Pour toute assistance, veuillez contacter +22998123353</span>
 </a>

@@ -19,12 +19,13 @@ class AuthTest extends TestCase
 
     public function test_login_page_renders(): void
     {
+        $this->get('/login')->assertOk();
         $this->get('/dashboard/login')->assertOk();
     }
 
     public function test_guest_is_redirected_to_login(): void
     {
-        $this->get('/dashboard')->assertRedirect('/dashboard/login');
+        $this->get('/dashboard')->assertRedirect('/login');
     }
 
     public function test_magic_link_authenticates_the_user(): void
@@ -53,7 +54,7 @@ class AuthTest extends TestCase
         $this->get($path)->assertRedirect('/dashboard');
         $this->post('/dashboard/logout');
 
-        $this->get($path)->assertRedirect('/dashboard/login');
+        $this->get($path)->assertRedirect('/login');
         $this->assertGuest();
     }
 }

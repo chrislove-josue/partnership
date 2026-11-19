@@ -110,17 +110,21 @@ class LoginHistoryTest extends TestCase
 
     public function test_filament_history_page_shows_only_the_authenticated_user_entries(): void
     {
+        $this->seed();
+
         $user = $this->user();
         $other = $this->user('autre-page@example.test');
 
         $user->loginHistories()->create([
             'event' => LoginHistory::EVENT_LOGIN,
             'source' => LoginHistory::SOURCE_MOBILE,
+            'ip_address' => '10.0.0.1',
             'created_at' => now(),
         ]);
         $other->loginHistories()->create([
             'event' => LoginHistory::EVENT_LOGOUT,
             'source' => LoginHistory::SOURCE_WEB,
+            'ip_address' => '10.0.0.2',
             'created_at' => now(),
         ]);
 
@@ -128,8 +132,8 @@ class LoginHistoryTest extends TestCase
             ->get('/dashboard/login-history')
             ->assertOk()
             ->assertSee('Historique de connexion')
-            ->assertSee('Connexion')
             ->assertSee('Application mobile')
-            ->assertDontSee('Déconnexion');
+            ->assertSee('10.0.0.1')
+            ->assertDontSee('10.0.0.2');
     }
 }

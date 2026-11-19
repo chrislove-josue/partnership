@@ -12,6 +12,7 @@ use App\Services\Import\ImportHelpers;
 use App\Services\Import\ImportTemplateGenerator;
 use App\Services\Import\PartnerImportService;
 use App\Services\Import\SpreadsheetReader;
+use App\Support\DonationCategoryNames;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -131,7 +132,7 @@ class ImportTest extends TestCase
             'birthdate' => '1990-05-12',
             'donationamount' => '5 000',
             'donationdate' => '2026-02-10',
-            'donationcategoryname' => 'Offering Import',
+            'donationcategoryname' => 'Offrandes Import',
         ]];
 
         $result = app(PartnerImportService::class)->import($admin, $rows);
@@ -156,7 +157,7 @@ class ImportTest extends TestCase
         $donation = Donation::firstOrFail();
         $this->assertSame(5000.0, (float) $donation->amount);
         $this->assertSame('2026-02-10', $donation->date->toDateString());
-        $this->assertSame('Offering Import', $donation->category->name);
+        $this->assertSame('Offrandes Import', $donation->category->name);
         $this->assertSame('#1F4E78', $donation->category->color);
     }
 
@@ -198,7 +199,7 @@ class ImportTest extends TestCase
             'churchname' => $church->name,
             'donationamount' => 5000,
             'donationdate' => '2026-02-31',
-            'donationcategoryname' => 'Offering',
+            'donationcategoryname' => 'Offrandes',
         ]]);
 
         $this->assertSame(0, $result['success']);
@@ -220,7 +221,7 @@ class ImportTest extends TestCase
             'churchname' => $church->name,
             'donationamount' => '5 000',
             'donationdate' => '2026-02-10',
-            'donationcategoryname' => 'Tithe',
+            'donationcategoryname' => 'Dîmes',
         ];
 
         $service = app(DonationImportService::class);
@@ -291,7 +292,7 @@ class ImportTest extends TestCase
             'churchname' => $other->name,
             'donationamount' => 5000,
             'donationdate' => '2026-02-10',
-            'donationcategoryname' => 'Offering',
+            'donationcategoryname' => 'Offrandes',
         ]]);
 
         $this->assertSame(0, $result['success']);

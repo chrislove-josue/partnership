@@ -172,6 +172,7 @@ export function AdminScreen() {
     }
     try {
       await api(`${endpointFor(section)}/${toDelete.id}`, { method: 'DELETE' });
+      invalidateCache();
       setToDelete(null);
       await load();
     } catch (caught) {

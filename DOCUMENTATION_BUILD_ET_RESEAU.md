@@ -415,6 +415,7 @@ cd C:\Project\partnership\mobile\android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
 copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.0.0.apk /Y
+copy .\FinanceMobile-1.0.0.apk .\FinanceMobile-1.1.0.apk /Y
 ```
 
 ---
@@ -437,6 +438,7 @@ cd android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
 copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.0.0.apk /Y
+copy .\FinanceMobile-1.0.0.apk .\FinanceMobile-1.1.0.apk /Y
 ```
 
 Adresse à saisir dans l’application :

@@ -1,0 +1,399 @@
+@import url('../filament/app.css');
+
+/*
+ * Identité visuelle portée depuis l'application Next.js :
+ * violet #9333EA -> indigo #4F46E5, fond #F9FAFB, cartes blanches,
+ * bordures #E5E7EB et rayons shadcn (8 / 10 / 14 px).
+ */
+:root {
+    --primary-50: #faf5ff;
+    --primary-100: #f3e8ff;
+    --primary-200: #e9d5ff;
+    --primary-300: #d8b4fe;
+    --primary-400: #c084fc;
+    --primary-500: #a855f7;
+    --primary-600: #9333ea;
+    --primary-700: #7e22ce;
+    --primary-800: #6b21a8;
+    --primary-900: #581c87;
+    --primary-950: #3b0764;
+
+    --danger-50: #fef2f2;
+    --danger-100: #fee2e2;
+    --danger-200: #fecaca;
+    --danger-300: #fca5a5;
+    --danger-400: #f87171;
+    --danger-500: #ef4444;
+    --danger-600: #e7000b;
+    --danger-700: #b91c1c;
+    --danger-800: #991b1b;
+    --danger-900: #7f1d1d;
+    --danger-950: #450a0a;
+
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --gray-950: #030712;
+
+    --info-50: #eff6ff;
+    --info-100: #dbeafe;
+    --info-200: #bfdbfe;
+    --info-300: #93c5fd;
+    --info-400: #60a5fa;
+    --info-500: #3b82f6;
+    --info-600: #2563eb;
+    --info-700: #1d4ed8;
+    --info-800: #1e40af;
+    --info-900: #1e3a8a;
+    --info-950: #172554;
+
+    --success-50: #ecfdf5;
+    --success-100: #d1fae5;
+    --success-200: #a7f3d0;
+    --success-300: #6ee7b7;
+    --success-400: #34d399;
+    --success-500: #10b981;
+    --success-600: #059669;
+    --success-700: #047857;
+    --success-800: #065f46;
+    --success-900: #064e3b;
+    --success-950: #022c22;
+
+    --warning-50: #fffbeb;
+    --warning-100: #fef3c7;
+    --warning-200: #fde68a;
+    --warning-300: #fcd34d;
+    --warning-400: #fbbf24;
+    --warning-500: #f59e0b;
+    --warning-600: #d97706;
+    --warning-700: #b45309;
+    --warning-800: #92400e;
+    --warning-900: #78350f;
+    --warning-950: #451a03;
+}
+
+.fi-body {
+    background-color: var(--gray-50);
+}
+
+.fi-sidebar {
+    background-color: #fff;
+    box-shadow: none;
+    border-inline-end: 1px solid var(--gray-200);
+}
+
+.fi-sidebar.fi-sidebar-open {
+    box-shadow: none;
+}
+
+.fi-logo {
+    font-size: 1.125rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--primary-600), #4f46e5);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    background-color: var(--primary-50);
+    color: var(--primary-700);
+    font-weight: 600;
+    box-shadow: inset -4px 0 0 var(--primary-600);
+}
+
+.fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon {
+    color: var(--primary-600);
+}
+
+.fi-section:not(.fi-section-not-contained),
+.fi-wi-stats-overview-stat {
+    background-color: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 0.875rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.fi-btn,
+.fi-input-wrp,
+.fi-input {
+    border-radius: 0.5rem;
+}
+
+.fi-ta-table {
+    border-color: var(--gray-200);
+}
+
+.fi-ta-table thead {
+    background-color: #fff;
+}
+
+.fi-ta-table th {
+    color: var(--gray-500);
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.fi-ta-row:hover {
+    background-color: var(--primary-50);
+}
+
+/* Connexion : fond dégradé sombre et carte en verre dépoli, comme dans Next.js. */
+.fi-simple-layout {
+    background: linear-gradient(135deg, #0f172a 0%, #581c87 50%, #0f172a 100%);
+}
+
+.fi-simple-layout .fi-logo {
+    background: none;
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+    font-size: 1.5rem;
+}
+
+.fi-simple-main {
+    max-width: 28rem;
+    padding: 1.5rem;
+    background-color: rgb(255 255 255 / 0.1);
+    border: 1px solid rgb(255 255 255 / 0.2);
+    border-radius: 1rem;
+    box-shadow: none;
+    backdrop-filter: blur(12px);
+    color: #fff;
+}
+
+.fi-simple-header-heading {
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.fi-simple-page-content .fi-header {
+    text-align: center;
+}
+
+.fi-simple-layout .fi-fo-field-label {
+    color: #fff;
+}
+
+.fi-simple-layout .fi-input-wrp {
+    background-color: rgb(255 255 255 / 0.1);
+    border-color: rgb(255 255 255 / 0.2);
+}
+
+.fi-simple-layout .fi-input {
+    background-color: transparent;
+    color: #fff;
+    border-color: transparent;
+}
+
+.fi-simple-layout .fi-input::placeholder {
+    color: var(--gray-400);
+}
+
+.fi-simple-layout .fi-checkbox-input {
+    background-color: rgb(255 255 255 / 0.1);
+    border-color: rgb(255 255 255 / 0.2);
+}
+
+.fi-simple-layout .fi-btn.fi-color-primary {
+    background-image: linear-gradient(90deg, var(--primary-600), #db2777);
+    color: #fff;
+    border-color: transparent;
+}
+
+.fi-simple-layout .fi-btn.fi-color-primary:hover {
+    background-image: linear-gradient(90deg, var(--primary-700), #be185d);
+}
+
+.fi-simple-layout [role='alert'] {
+    border-color: rgb(248 113 113 / 0.4);
+    background-color: rgb(239 68 68 / 0.1);
+    color: #fecaca;
+}
+
+/* Mode sombre : mêmes teintes que les tokens .dark de l'application Next.js. */
+.dark .fi-body {
+    background-color: var(--gray-950);
+}
+
+.dark .fi-sidebar {
+    background-color: var(--gray-900);
+    border-inline-end-color: rgb(255 255 255 / 0.1);
+}
+
+.dark .fi-sidebar-item.fi-active > .fi-sidebar-item-btn {
+    background-color: var(--primary-950);
+    color: var(--primary-300);
+    box-shadow: inset -4px 0 0 var(--primary-500);
+}
+
+.dark .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon {
+    color: var(--primary-400);
+}
+
+.dark .fi-section:not(.fi-section-not-contained),
+.dark .fi-wi-stats-overview-stat {
+    background-color: var(--gray-900);
+    border-color: var(--gray-700);
+}
+
+.dark .fi-ta-table {
+    border-color: var(--gray-700);
+}
+
+.dark .fi-ta-table thead {
+    background-color: var(--gray-900);
+}
+
+.dark .fi-ta-table th {
+    color: var(--gray-400);
+}
+
+.dark .fi-ta-row:hover {
+    background-color: var(--primary-950);
+}
+
+/*
+ * Rapport de partenariat : le thème du panneau étant écrit à la main (aucun build
+ * Vite), les utilitaires Tailwind ne sont pas disponibles dans cette vue. Ces
+ * classes dédiées reprennent les mêmes teintes que le reste du back-office.
+ */
+.rp-alert {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    background-color: var(--danger-50);
+    color: var(--danger-700);
+}
+
+.dark .rp-alert {
+    background-color: var(--danger-950);
+    color: #fecaca;
+}
+
+.rp-stats {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+@media (min-width: 640px) {
+    .rp-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (min-width: 1280px) {
+    .rp-stats { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.rp-stat,
+.rp-card {
+    background-color: #fff;
+    border: 1px solid var(--gray-200);
+    border-radius: 0.75rem;
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.dark .rp-stat,
+.dark .rp-card {
+    background-color: var(--gray-900);
+    border-color: var(--gray-700);
+}
+
+.rp-stat { padding: 1.25rem; }
+
+.rp-label {
+    font-size: 0.875rem;
+    color: var(--gray-500);
+}
+
+.dark .rp-label { color: var(--gray-400); }
+
+.rp-value {
+    margin-top: 0.25rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
+    font-weight: 700;
+    color: var(--gray-900);
+}
+
+.dark .rp-value { color: #fff; }
+
+.rp-value-primary { color: var(--primary-600); }
+.dark .rp-value-primary { color: var(--primary-400); }
+
+.rp-card {
+    margin-top: 1.5rem;
+    overflow-x: auto;
+}
+
+.rp-card-head {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.dark .rp-card-head { border-bottom-color: var(--gray-700); }
+
+.rp-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+.dark .rp-card-title { color: #fff; }
+
+.rp-table {
+    width: 100%;
+    font-size: 0.875rem;
+    white-space: nowrap;
+}
+
+.rp-table thead {
+    background-color: var(--gray-50);
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--gray-500);
+}
+
+.dark .rp-table thead {
+    background-color: var(--gray-800);
+    color: var(--gray-400);
+}
+
+.rp-table th,
+.rp-table td { padding: 0.75rem 1.25rem; }
+
+.rp-table tbody tr + tr { border-top: 1px solid var(--gray-200); }
+.dark .rp-table tbody tr + tr { border-top-color: var(--gray-700); }
+
+.rp-table tbody td { color: var(--gray-600); }
+.dark .rp-table tbody td { color: var(--gray-300); }
+
+.rp-table tbody td.rp-strong { font-weight: 500; color: var(--gray-900); }
+.dark .rp-table tbody td.rp-strong { color: #fff; }
+
+.rp-table tfoot {
+    background-color: var(--gray-50);
+    font-weight: 600;
+}
+
+.dark .rp-table tfoot { background-color: var(--gray-800); }
+
+.rp-center { text-align: center; }
+.rp-right { text-align: right; }
+
+.rp-empty {
+    padding: 1.5rem 1.25rem;
+    text-align: center;
+    color: var(--gray-500);
+}

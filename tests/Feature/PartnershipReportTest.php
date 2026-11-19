@@ -221,13 +221,17 @@ class PartnershipReportTest extends TestCase
 
         $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
         $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
+        $otherGroupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'autre-groupe@example.test');
         $sub = Church::create(['name' => 'SUB', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
         $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $sub->id]);
         $localPastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'local@example.test', $local->id);
 
         $result = app(PartnershipReportService::class)->resolveRecipients($localPastor, $local->id);
+        $emails = array_column($result['recipients'], 'email');
 
-        $this->assertSame([$groupPastor->email], array_column($result['recipients'], 'email'));
+        $this->assertContains($groupPastor->email, $emails);
+        $this->assertContains($otherGroupPastor->email, $emails);
+        $this->assertCount(2, $emails);
         $this->assertSame('pasteur de votre groupe', $result['targetLabel']);
     }
 
@@ -239,6 +243,8 @@ class PartnershipReportTest extends TestCase
         $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
         $sub = Church::create(['name' => 'SUB', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
         $subPastor = $this->makeUser(RoleName::SUBGROUP_PASTOR->value, $sub->id, 'sous-groupe@example.test', $sub->id);
+        $otherSub = Church::create(['name' => 'AUTRE SUB', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
+        $otherSubPastor = $this->makeUser(RoleName::SUBGROUP_PASTOR->value, $otherSub->id, 'autre-sous-groupe@example.test', $otherSub->id);
         $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $sub->id]);
         $localPastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'local@example.test', $local->id);
         $admin = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'admin@example.test');
@@ -248,6 +254,7 @@ class PartnershipReportTest extends TestCase
 
         $this->assertSame([$groupPastor->email], array_column($result['recipients'], 'email'));
         $this->assertContains($subPastor->email, $cc);
+        $this->assertContains($otherSubPastor->email, $cc);
         $this->assertContains($admin->email, $cc);
         $this->assertContains('libertsinzo7@gmail.com', $cc);
         $this->assertNotContains($localPastor->email, $cc);
@@ -263,7 +270,7 @@ class PartnershipReportTest extends TestCase
         $staff = $this->makeUser(RoleName::STAFF->value, $local->id, 'staff@example.test');
 
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Aucun pasteur d’église');
+        $this->expectExceptionMessage('Aucun pasteur local actif');
 
         app(PartnershipReportService::class)->resolveRecipients($staff, $local->id);
     }

@@ -373,30 +373,32 @@ class PartnershipReportTest extends TestCase
         $this->assertSame('pasteur de votre groupe', $result['targetLabel']);
     }
 
-    public function test_local_pastor_report_copies_subgroup_pastor_and_super_admins(): void
+    public function test_local_pastor_reports_to_subgroup_pastor_with_group_pastor_in_copy(): void
     {
         $this->seed();
 
         $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
         $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
-        $sub = Church::create(['name' => 'SUB', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
+        $sub = Church::create(['name' => 'CE CALAVI', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
         $subPastor = $this->makeUser(RoleName::SUBGROUP_PASTOR->value, $sub->id, 'sous-groupe@example.test', $sub->id);
         $otherSub = Church::create(['name' => 'AUTRE SUB', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
         $otherSubPastor = $this->makeUser(RoleName::SUBGROUP_PASTOR->value, $otherSub->id, 'autre-sous-groupe@example.test', $otherSub->id);
-        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $sub->id]);
+        $local = Church::create(['name' => 'CE PARAKOU', 'type' => ChurchType::LOCAL, 'parent_id' => $sub->id]);
         $localPastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'local@example.test', $local->id);
         $admin = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'admin@example.test');
 
         $result = app(PartnershipReportService::class)->resolveRecipients($localPastor, $local->id);
         $cc = array_column($result['cc'], 'email');
 
-        $this->assertSame([$groupPastor->email], array_column($result['recipients'], 'email'));
-        $this->assertContains($subPastor->email, $cc);
-        $this->assertContains($otherSubPastor->email, $cc);
+        $this->assertSame([$subPastor->email], array_column($result['recipients'], 'email'));
+        $this->assertContains($groupPastor->email, $cc);
         $this->assertContains($admin->email, $cc);
         $this->assertContains('libertsinzo7@gmail.com', $cc);
+        $this->assertNotContains($otherSubPastor->email, $cc);
         $this->assertNotContains($localPastor->email, $cc);
-        $this->assertSame('pasteur de votre groupe', $result['targetLabel']);
+        $this->assertSame('pasteur de votre sous-groupe', $result['targetLabel']);
+        $this->assertContains('pasteur de sous-groupe (CE CALAVI)', $result['chain']);
+        $this->assertContains('pasteur de groupe (CE SIKECODJI) (copie)', $result['chain']);
     }
 
     public function test_staff_report_without_a_church_pastor_fails_clearly(): void

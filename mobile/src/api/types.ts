@@ -19,6 +19,12 @@ export interface User {
   is_active?: boolean;
 }
 
+export interface Role {
+  id: number;
+  name: string;
+  label: string;
+}
+
 export interface Church {
   id: number;
   name: string;

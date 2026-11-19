@@ -32,6 +32,8 @@ class ChurchResource extends Resource
 
     protected static ?string $navigationLabel = 'Églises';
 
+    protected static ?int $navigationSort = 10;
+
     public static function churchScopeColumn(): string
     {
         return 'id';

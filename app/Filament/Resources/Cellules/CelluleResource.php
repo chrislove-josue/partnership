@@ -32,6 +32,8 @@ class CelluleResource extends Resource
 
     protected static ?string $navigationLabel = 'Cellules';
 
+    protected static ?int $navigationSort = 20;
+
     public static function form(Schema $schema): Schema
     {
         return CelluleForm::configure($schema);

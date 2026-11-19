@@ -196,6 +196,66 @@ class PartnershipReportTest extends TestCase
         $this->assertSame('pasteur de votre groupe', $result['targetLabel']);
     }
 
+    public function test_local_pastor_report_copies_subgroup_pastor_and_super_admins(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
+        $sub = Church::create(['name' => 'SUB', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $group->id]);
+        $subPastor = $this->makeUser(RoleName::SUBGROUP_PASTOR->value, $sub->id, 'sous-groupe@example.test', $sub->id);
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $sub->id]);
+        $localPastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'local@example.test', $local->id);
+        $admin = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'admin@example.test');
+
+        $result = app(PartnershipReportService::class)->resolveRecipients($localPastor, $local->id);
+        $cc = array_column($result['cc'], 'email');
+
+        $this->assertSame([$groupPastor->email], array_column($result['recipients'], 'email'));
+        $this->assertContains($subPastor->email, $cc);
+        $this->assertContains($admin->email, $cc);
+        $this->assertContains('libertsinzo7@gmail.com', $cc);
+        $this->assertNotContains($localPastor->email, $cc);
+        $this->assertSame('pasteur de votre groupe', $result['targetLabel']);
+    }
+
+    public function test_staff_report_without_a_church_pastor_fails_clearly(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $group->id]);
+        $staff = $this->makeUser(RoleName::STAFF->value, $local->id, 'staff@example.test');
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Aucun pasteur d’église');
+
+        app(PartnershipReportService::class)->resolveRecipients($staff, $local->id);
+    }
+
+    public function test_sending_copies_the_hierarchy_when_confirmed(): void
+    {
+        Mail::fake();
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $group->id]);
+        $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
+        $localPastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'local@example.test', $local->id);
+        $admin = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'admin@example.test');
+
+        $sent = app(PartnershipReportSender::class)
+            ->send($localPastor, $local->id, PeriodType::MONTH, 2026, 2, true);
+
+        $this->assertTrue($sent['sent']);
+        $this->assertSame([$groupPastor->email], array_column($sent['to'], 'email'));
+        $this->assertContains($admin->email, array_column($sent['cc'], 'email'));
+
+        Mail::assertSent(PartnershipReportMail::class, function (PartnershipReportMail $mail) use ($groupPastor, $admin): bool {
+            return $mail->hasTo($groupPastor->email) && $mail->hasCc($admin->email);
+        });
+    }
+
     public function test_sending_requires_explicit_confirmation_and_attaches_the_xlsx(): void
     {
         Mail::fake();
@@ -262,6 +322,23 @@ class PartnershipReportTest extends TestCase
         } finally {
             @unlink($path);
         }
+    }
+
+    public function test_send_dialog_shows_the_group_pastor_and_the_copies(): void
+    {
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $group->id]);
+        $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
+        $localPastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'local@example.test', $local->id);
+        $this->actingAs($localPastor);
+
+        $component = \Livewire\Livewire::test(\App\Filament\Pages\PartnershipReport::class)->instance();
+        $description = (new \ReflectionMethod($component, 'sendModalDescription'))->invoke($component);
+
+        $this->assertStringContainsString('À (pasteur de votre groupe) : '.$groupPastor->email, $description);
+        $this->assertStringContainsString('Copie :', $description);
     }
 
     public function test_send_action_sends_after_confirmation(): void

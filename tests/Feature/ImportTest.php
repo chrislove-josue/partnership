@@ -271,7 +271,7 @@ class ImportTest extends TestCase
         $this->assertSame(2, $result['success']);
         $this->assertSame(0, $result['errors']);
         $this->assertSame(2, Church::count());
-        $this->assertSame(1, \App\Models\CategoryDon::where('name', 'Offering')->count());
+        $this->assertSame(1, \App\Models\CategoryDon::where('name', 'Offrandes')->count());
         $church = Church::where('name', 'eglise nouvelle')->firstOrFail();
         $this->assertSame($group->id, $church->parent_id);
         $this->assertSame(2, Donation::where('church_id', $church->id)->count());
@@ -299,6 +299,16 @@ class ImportTest extends TestCase
         $this->assertSame(1, $result['errors']);
         $this->assertStringContainsString('Permission refusée pour l\'église AUTRE LOCAL', $result['errorDetails'][0]);
         $this->assertSame(0, Donation::count());
+    }
+
+    public function test_legacy_category_names_are_normalized_to_french(): void
+    {
+        $this->assertSame('Dîmes', DonationCategoryNames::normalize('Tithe'));
+        $this->assertSame('Offrandes', DonationCategoryNames::normalize('offering'));
+        $this->assertSame('Rhapsodie des Réalités', DonationCategoryNames::normalize('Rhapsody of Realities'));
+        $this->assertSame('Mission Urbaine', DonationCategoryNames::normalize('InnerCity Mission'));
+        $this->assertSame('École de Guérisons', DonationCategoryNames::normalize('Healing Streams'));
+        $this->assertSame('Offrandes', DonationCategoryNames::normalize('Offrandes'));
     }
 
     public function test_template_generator_exposes_headers_and_help_sheet(): void

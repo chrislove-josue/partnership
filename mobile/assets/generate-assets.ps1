@@ -126,7 +126,7 @@ $taglineFont = New-Object System.Drawing.Font('Segoe UI', 38, [System.Drawing.Fo
 
 $graphics.DrawString('FinanceMobile', $titleFont, $navyBrush, 600, 205)
 $graphics.FillRectangle($goldBrush, 606, 330, 620, 8)
-$graphics.DrawString('Gestion financière', $taglineFont, $mutedBrush, 610, 365)
+$graphics.DrawString(('Gestion financi' + [char]0x00E8 + 're'), $taglineFont, $mutedBrush, 610, 365)
 
 $titleFont.Dispose()
 $taglineFont.Dispose()

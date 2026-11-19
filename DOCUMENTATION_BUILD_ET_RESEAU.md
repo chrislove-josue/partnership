@@ -343,24 +343,25 @@ Copier l’APK final :
 
 ```powershell
 cd C:\Project\partnership
-copy .\mobile\android\app\build\outputs\apk\release\app-release.apk .\mobile\FinanceMobile-1.2.0.apk /Y
+copy .\mobile\android\app\build\outputs\apk\release\app-release.apk .\mobile\FinanceMobile-1.3.0.apk /Y
 ```
 
-Le numéro de version est aligné dans `mobile/app.json`, `mobile/package.json` et `mobile/android/app/build.gradle` (`versionCode` / `versionName`). Pour une nouvelle version, incrémenter ces trois fichiers avant le build.
+Le numéro de version est aligné dans `mobile/app.json`, `mobile/package.json` et `mobile/android/app/build.gradle` (`versionCode` / `versionName`). Pour une nouvelle version, incrémenter ces trois fichiers avant le build. Attention : `expo prebuild` réécrit `build.gradle` et remet `versionCode 1` — le remettre à la valeur voulue **après** le prebuild, avant Gradle.
 
 APK prêts à installer :
 
 ```text
 C:\Project\partnership\mobile\FinanceMobile-1.0.0.apk   (ancienne version)
 C:\Project\partnership\mobile\FinanceMobile-1.1.0.apk   (ancienne version)
-C:\Project\partnership\mobile\FinanceMobile-1.2.0.apk   (version actuelle, avec historique de connexion)
+C:\Project\partnership\mobile\FinanceMobile-1.2.0.apk   (ancienne version, historique de connexion)
+C:\Project\partnership\mobile\FinanceMobile-1.3.0.apk   (version actuelle, tableau de bord enrichi)
 ```
 
 ### 8.3 Installer sur un téléphone branché en USB
 
 ```powershell
 cd C:\Project\partnership\mobile
-adb install -r FinanceMobile-1.2.0.apk
+adb install -r FinanceMobile-1.3.0.apk
 ```
 
 Ou copier simplement le fichier `.apk` sur le téléphone et l’ouvrir.

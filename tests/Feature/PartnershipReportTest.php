@@ -264,6 +264,18 @@ class PartnershipReportTest extends TestCase
         }
     }
 
+    public function test_export_action_downloads_the_xlsx(): void
+    {
+        $this->seed();
+
+        $admin = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $this->actingAs($admin);
+
+        \Livewire\Livewire::test(\App\Filament\Pages\PartnershipReport::class)
+            ->call('mountAction', 'export')
+            ->assertFileDownloaded();
+    }
+
     public function test_page_recomputes_the_report_when_the_year_changes(): void
     {
         $this->seed();

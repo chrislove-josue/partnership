@@ -11,10 +11,10 @@ use App\Filament\Resources\Donations\Tables\DonationsTable;
 use App\Models\Donation;
 use BackedEnum;
 use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Model;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class DonationResource extends Resource

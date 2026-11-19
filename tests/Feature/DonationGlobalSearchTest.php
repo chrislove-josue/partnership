@@ -32,7 +32,7 @@ class DonationGlobalSearchTest extends TestCase
             'church_id' => $church->id,
         ]);
 
-        $donation = Donation::create([
+        Donation::create([
             'amount' => 15000,
             'date' => '2026-05-12',
             'partner_id' => $partner->id,
@@ -44,6 +44,5 @@ class DonationGlobalSearchTest extends TestCase
 
         $this->assertCount(1, $results);
         $this->assertStringContainsString('Nestor Kouassi', (string) $results->first()->title);
-        $this->assertNotEmpty($donation->fresh());
     }
 }

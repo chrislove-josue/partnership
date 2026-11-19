@@ -13,6 +13,8 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function __construct(private readonly LoginHistoryService $history) {}
+
     public function login(Request $request): JsonResponse
     {
         $data = $request->validate([
@@ -40,17 +42,63 @@ class AuthController extends Controller
 
         $user->tokens()->where('name', 'mobile')->delete();
 
+        $token = $user->createToken('mobile');
+        $this->history->record(
+            $user,
+            LoginHistory::EVENT_LOGIN,
+            LoginHistory::SOURCE_MOBILE,
+            $request,
+            (string) $token->accessToken->id,
+        );
+
         return response()->json([
-            'token' => $user->createToken('mobile')->plainTextToken,
+            'token' => $token->plainTextToken,
             'user' => $this->userPayload($user),
         ]);
     }
 
     public function logout(Request $request): JsonResponse
     {
-        $request->user()->currentAccessToken()?->delete();
+        $user = $request->user();
+        $token = $user->currentAccessToken();
+        $this->history->record(
+            $user,
+            LoginHistory::EVENT_LOGOUT,
+            LoginHistory::SOURCE_MOBILE,
+            $request,
+            $token ? (string) $token->id : null,
+        );
+        $token?->delete();
 
         return response()->json(['message' => 'Déconnexion effectuée.']);
+    }
+
+    public function history(Request $request): JsonResponse
+    {
+        $perPage = max(1, min((int) $request->query('per_page', 30), 100));
+        $history = $request->user()
+            ->loginHistories()
+            ->latest()
+            ->paginate($perPage);
+
+        return response()->json([
+            'data' => $history->getCollection()->map(fn (LoginHistory $entry): array => [
+                'id' => $entry->id,
+                'event' => $entry->event,
+                'event_label' => $entry->eventLabel(),
+                'source' => $entry->source,
+                'source_label' => $entry->sourceLabel(),
+                'ip_address' => $entry->ip_address,
+                'user_agent' => $entry->user_agent,
+                'happened_at' => $entry->created_at?->toISOString(),
+            ])->values()->all(),
+            'meta' => [
+                'current_page' => $history->currentPage(),
+                'last_page' => $history->lastPage(),
+                'per_page' => $history->perPage(),
+                'total' => $history->total(),
+            ],
+        ]);
     }
 
     public function me(Request $request): JsonResponse

@@ -216,7 +216,7 @@ class PartnershipReportTest extends TestCase
         $this->assertContains(RoleName::LOCAL_PASTOR->value, $roles);
     }
 
-    public function test_group_pastor_can_be_the_subgroup_manager_copy(): void
+    public function test_subgroup_manager_is_the_recipient_for_a_local_report(): void
     {
         $this->seed();
 
@@ -232,9 +232,10 @@ class PartnershipReportTest extends TestCase
         $to = array_column($result['recipients'], 'email');
         $cc = array_column($result['cc'], 'email');
 
-        $this->assertSame([$groupPastor->email], $to);
-        $this->assertContains($subManager->email, $cc);
-        $this->assertNotContains($subManager->email, $to);
+        $this->assertSame([$subManager->email], $to);
+        $this->assertContains($groupPastor->email, $cc);
+        $this->assertNotContains($groupPastor->email, $to);
+        $this->assertSame('pasteur de votre sous-groupe', $result['targetLabel']);
     }
 
     public function test_staff_on_a_group_church_is_rejected(): void

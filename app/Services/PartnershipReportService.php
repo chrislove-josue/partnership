@@ -222,13 +222,13 @@ class PartnershipReportService
     /**
      * Résolution de la chaîne hiérarchique des destinataires.
      *
-     * Personnel (rattaché à une église locale) → responsable de cette église,
-     * ou tout pasteur local actif (y compris un pasteur de sous-groupe ou de
-     * groupe, qui occupe aussi cette fonction) ; pasteur local ou de sous-groupe
-     * → responsable du groupe ou pasteurs de groupe actifs, avec les responsables
-     * de sous-groupes et les super administrateurs en copie ; pasteur de groupe /
-     * SUPER_ADMIN → super administrateurs. L'adresse de l'expéditeur est toujours
-     * exclue.
+     * Personnel (rattaché à une église locale) → responsable de cette église.
+     * Pasteur d'une église locale → pasteur de son sous-groupe si elle est sous
+     * un sous-groupe, sinon pasteur du groupe ; le niveau supérieur et les super
+     * administrateurs sont en copie. Pasteur de sous-groupe → pasteur du groupe,
+     * avec les autres pasteurs de sous-groupe et les super administrateurs en
+     * copie. Groupe / SUPER_ADMIN → super administrateurs. L'adresse de
+     * l'expéditeur est toujours exclue.
      *
      * @return array{
      *     recipients: array<int, array{email: string, name: string}>,
@@ -413,9 +413,9 @@ class PartnershipReportService
             ];
         }
 
-        // Pasteur d'église ou de sous-groupe : envoi direct au(x) pasteur(s) de groupe.
+        $parent = $church->parent_id ? Church::find($church->parent_id) : null;
         $group = null;
-        $cursor = $church->parent_id ? Church::find($church->parent_id) : null;
+        $cursor = $parent;
 
         while ($cursor) {
             if ($cursor->type === ChurchType::GROUP) {
@@ -426,10 +426,40 @@ class PartnershipReportService
             $cursor = $cursor->parent_id ? Church::find($cursor->parent_id) : null;
         }
 
-        if ($group) {
-            $groupPastors = $pastorsFor($group, RoleName::GROUP_PASTOR->value);
+        $targetLabel = 'pasteur de votre groupe';
 
-            foreach ($groupPastors as $pastor) {
+        // Une église locale remonte d'abord à son sous-groupe : c'est son
+        // pasteur de sous-groupe qui reçoit le rapport, pas celui du groupe.
+        if ($church->type === ChurchType::LOCAL && $parent?->type === ChurchType::SUB_GROUP) {
+            $targetLabel = 'pasteur de votre sous-groupe';
+
+            foreach ($pastorsFor($parent, RoleName::SUBGROUP_PASTOR->value) as $pastor) {
+                $addTo($pastor, "pasteur de sous-groupe ({$parent->name})");
+            }
+
+            if ($to !== []) {
+                if ($group) {
+                    foreach ($pastorsFor($group, RoleName::GROUP_PASTOR->value) as $pastor) {
+                        $addCc($pastor, "pasteur de groupe ({$group->name})");
+                    }
+                }
+                $addSuperAdmins('cc');
+
+                return [
+                    'recipients' => array_values($to),
+                    'cc' => array_values($cc),
+                    'targetLabel' => $targetLabel,
+                    'chain' => $chain,
+                ];
+            }
+
+            // Aucun pasteur de sous-groupe actif : on remonte au groupe.
+            $targetLabel = 'pasteur de votre groupe';
+        }
+
+        // Pasteur de sous-groupe (ou locale sans sous-groupe) : envoi au pasteur de groupe.
+        if ($group) {
+            foreach ($pastorsFor($group, RoleName::GROUP_PASTOR->value) as $pastor) {
                 $addTo($pastor, "pasteur de groupe ({$group->name})");
             }
         }
@@ -447,13 +477,12 @@ class PartnershipReportService
             ];
         }
 
-        // Copie hiérarchique : tous les pasteurs de sous-groupe du groupe et
-        // les super administrateurs actifs.
-        foreach ($group ? $subGroupChurches($group) : [] as $subGroup) {
-            $subPastors = $pastorsFor($subGroup, RoleName::SUBGROUP_PASTOR->value);
-
-            foreach ($subPastors as $pastor) {
-                $addCc($pastor, "pasteur de sous-groupe ({$subGroup->name})");
+        // Un rapport de sous-groupe copie les autres sous-groupes du groupe.
+        if ($church->type === ChurchType::SUB_GROUP) {
+            foreach ($group ? $subGroupChurches($group) : [] as $subGroup) {
+                foreach ($pastorsFor($subGroup, RoleName::SUBGROUP_PASTOR->value) as $pastor) {
+                    $addCc($pastor, "pasteur de sous-groupe ({$subGroup->name})");
+                }
             }
         }
         $addSuperAdmins('cc');
@@ -461,7 +490,7 @@ class PartnershipReportService
         return [
             'recipients' => array_values($to),
             'cc' => array_values($cc),
-            'targetLabel' => 'pasteur de votre groupe',
+            'targetLabel' => $targetLabel,
             'chain' => $chain,
         ];
     }

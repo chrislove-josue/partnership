@@ -1,4 +1,7 @@
 import { File, Paths } from 'expo-file-system';
+import { readCache, readStaleCache, writeCache } from './cache';
+
+export { clearCache, invalidateCache } from './cache';
 
 const DEFAULT_API_URL =
   process.env.EXPO_PUBLIC_API_URL ?? 'http://172.16.206.66:8000/api';
@@ -38,6 +41,12 @@ interface RequestOptions {
   method?: 'GET' | 'POST' | 'PATCH' | 'DELETE';
   body?: Record<string, unknown>;
   authenticated?: boolean;
+  /** Clé de cache pour les requêtes GET ; les données sont renvoyées instantanément. */
+  cacheKey?: string;
+  /** Durée de validité du cache en millisecondes (5 minutes par défaut). */
+  cacheTtl?: number;
+  /** Ignore le cache et recharge depuis le serveur. */
+  refresh?: boolean;
 }
 
 async function parseResponse(response: Response): Promise<Record<string, unknown>> {
@@ -58,7 +67,22 @@ export async function api<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { method = 'GET', body, authenticated = true } = options;
+  const {
+    method = 'GET',
+    body,
+    authenticated = true,
+    cacheKey,
+    cacheTtl,
+    refresh = false,
+  } = options;
+
+  if (method === 'GET' && cacheKey && !refresh) {
+    const cached = readCache<T>(cacheKey, cacheTtl);
+    if (cached !== null) {
+      return cached;
+    }
+  }
+
   const headers: Record<string, string> = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -68,14 +92,32 @@ export async function api<T>(
     headers.Authorization = `Bearer ${authToken}`;
   }
 
-  const response = await fetch(`${apiUrl}${path}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${apiUrl}${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (error) {
+    if (method === 'GET' && cacheKey) {
+      const stale = readStaleCache<T>(cacheKey);
+      if (stale !== null) {
+        return stale;
+      }
+    }
+    throw error;
+  }
+
   const data = await parseResponse(response);
 
   if (!response.ok) {
+    if (method === 'GET' && cacheKey) {
+      const stale = readStaleCache<T>(cacheKey);
+      if (stale !== null) {
+        return stale;
+      }
+    }
     const errors = (data.errors ?? undefined) as Record<string, string[]> | undefined;
     throw new ApiError(
       String(data.message ?? 'Une erreur est survenue. Veuillez réessayer.'),
@@ -84,7 +126,12 @@ export async function api<T>(
     );
   }
 
-  return data as T;
+  const result = data as T;
+  if (method === 'GET' && cacheKey) {
+    writeCache(cacheKey, result);
+  }
+
+  return result;
 }
 
 export async function apiDownload(path: string, fileName: string): Promise<string> {

@@ -20,10 +20,12 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
     setError('');
     try {
       const [churches, donations, partners, notifications] = await Promise.all([
-        api<{ data: Church[] }>('/churches'),
-        api<{ data: Donation[] }>('/donations'),
-        api<{ data: Partner[] }>('/partners'),
-        api<{ data: AppNotification[]; unread_count: number }>('/notifications'),
+        api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
+        api<{ data: Donation[] }>('/donations', { cacheKey: 'donations' }),
+        api<{ data: Partner[] }>('/partners', { cacheKey: 'partners' }),
+        api<{ data: AppNotification[]; unread_count: number }>('/notifications', {
+          cacheKey: `notifications:${user?.id ?? 'me'}`,
+        }),
       ]);
 
       const total = donations.data.reduce((sum, donation) => sum + Number(donation.amount), 0);
@@ -39,7 +41,7 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   useEffect(() => {
     void load();

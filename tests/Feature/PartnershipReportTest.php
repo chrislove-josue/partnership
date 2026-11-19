@@ -186,12 +186,16 @@ class PartnershipReportTest extends TestCase
 
         $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
         $pastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'pasteur-groupe@example.test', $group->id);
+        $otherPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'autre-pasteur@example.test');
         $admin = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'admin@example.test');
         $staff = $this->makeUser(RoleName::STAFF->value, $group->id, 'staff@example.test');
 
         $result = app(PartnershipReportService::class)->resolveRecipients($staff, $group->id);
+        $emails = array_column($result['recipients'], 'email');
 
-        $this->assertSame([$pastor->email], array_column($result['recipients'], 'email'));
+        $this->assertContains($pastor->email, $emails);
+        $this->assertContains($otherPastor->email, $emails);
+        $this->assertCount(2, $emails);
         $this->assertSame([], $result['cc']);
         $this->assertNotContains($admin->email, array_column($result['recipients'], 'email'));
         $this->assertNotContains('libertsinzo7@gmail.com', array_column($result['recipients'], 'email'));

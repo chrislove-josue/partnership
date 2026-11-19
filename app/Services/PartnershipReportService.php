@@ -208,8 +208,9 @@ class PartnershipReportService
     /**
      * Résolution de la chaîne hiérarchique des destinataires.
      *
-     * Personnel → pasteur de sa propre église ; pasteur d'église ou de sous-groupe
-     * → pasteur de groupe (avec les pasteurs de sous-groupe et les super
+     * Personnel → pasteur(s) de sa propre église (tous les pasteurs de groupe
+     * actifs pour une église groupe) ; pasteur d'église ou de sous-groupe →
+     * pasteur de groupe (avec les pasteurs de sous-groupe et les super
      * administrateurs en copie) ; pasteur de groupe / SUPER_ADMIN → super
      * administrateurs. L'adresse de l'expéditeur est toujours exclue.
      *
@@ -286,17 +287,38 @@ class PartnershipReportService
             RoleName::SUPER_ADMIN->value,
         ];
 
-        // Personnel : envoi uniquement au pasteur de sa propre église, même si
-        // cette église est une église groupe. Le type d'église ne remplace jamais
-        // la chaîne hiérarchique du personnel.
+        // Personnel : envoi aux pasteurs de sa propre église, même si cette
+        // église est une église groupe. Pour une église groupe, tous les
+        // pasteurs de groupe actifs rattachés à l'église reçoivent le rapport.
         if (! in_array($user->roleName(), $pastorRoles, true)) {
-            $manager = $managerOf($church);
+            $pastors = [];
 
-            if (! $manager || ! $manager->email || $manager->email === $senderEmail) {
-                throw new RuntimeException('Aucun pasteur d’église n’est assigné à cette église.');
+            if ($church->type === ChurchType::GROUP) {
+                $pastors = User::role(RoleName::GROUP_PASTOR->value)
+                    ->where('is_active', true)
+                    ->where('assigned_church_id', $church->id)
+                    ->get(['id', 'email', 'name'])
+                    ->all();
             }
 
-            $addTo($manager, "pasteur de votre église ({$church->name})");
+            // Sans pasteur de groupe actif, on retombe sur le responsable de l'église.
+            if ($pastors === []) {
+                $manager = $managerOf($church);
+
+                if ($manager) {
+                    $pastors = [$manager];
+                }
+            }
+
+            foreach ($pastors as $pastor) {
+                if ($pastor->email && $pastor->email !== $senderEmail) {
+                    $addTo($pastor, "pasteur de votre église ({$church->name})");
+                }
+            }
+
+            if ($to === []) {
+                throw new RuntimeException('Aucun pasteur d’église actif n’est assigné à cette église.');
+            }
 
             return [
                 'recipients' => array_values($to),

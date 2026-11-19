@@ -14,6 +14,7 @@ import { ReportsScreen } from '../screens/ReportsScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { AdminScreen } from '../screens/AdminScreen';
+import { LoginHistoryScreen } from '../screens/LoginHistoryScreen';
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
@@ -67,7 +68,10 @@ export function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          <Stack.Screen name="Application" component={MainTabs} />
+          <>
+            <Stack.Screen name="Application" component={MainTabs} />
+            <Stack.Screen name="HistoriqueConnexion" component={LoginHistoryScreen} />
+          </>
         ) : (
           <Stack.Screen name="Connexion" component={LoginScreen} />
         )}

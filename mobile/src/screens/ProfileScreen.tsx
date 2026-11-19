@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { api, ApiError } from '../api/client';
 import type { User } from '../api/types';
 import { useAuth } from '../context/AuthContext';
@@ -11,12 +12,14 @@ import {
   LoadingView,
   PrimaryButton,
   Screen,
+  SecondaryButton,
   SectionTitle,
   TextField,
 } from '../components/ui';
 
 export function ProfileScreen() {
   const { user, refreshUser, logout, apiUrl, updateApiUrl } = useAuth();
+  const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -108,6 +111,17 @@ export function ProfileScreen() {
         <Text style={styles.help}>
           Utilisez l’adresse de la machine qui héberge Laravel, suivie de /api. Sur un téléphone physique, remplacez localhost par l’IP de cette machine.
         </Text>
+      </Card>
+
+      <Card>
+        <SectionTitle>Sécurité</SectionTitle>
+        <Text style={styles.help}>
+          Consultez les connexions et déconnexions enregistrées pour votre compte, sur le site et sur l’application mobile.
+        </Text>
+        <SecondaryButton
+          title="Historique de connexion"
+          onPress={() => navigation.navigate('HistoriqueConnexion')}
+        />
       </Card>
 
       <Card>

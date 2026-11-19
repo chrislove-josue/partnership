@@ -2,6 +2,7 @@
 
 namespace App\Services\Import;
 
+use App\Support\DonationCategoryNames;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;

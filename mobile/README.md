@@ -34,6 +34,10 @@ Il est signé avec la clé de debug générée par Expo : il s’installe direct
 
 Pour un téléphone physique, utilisez l’IP de la machine qui héberge Laravel, par exemple `http://192.168.1.10:8000/api`. Le PC et le téléphone doivent être sur le même réseau, et le serveur doit écouter sur `0.0.0.0` (`php artisan serve --host=0.0.0.0`).
 
+## Cache local
+
+Les réponses GET sont mises en cache dans le dossier temporaire de l’application (`expo-file-system`) pendant **5 minutes**. Les écrans s’affichent donc instantanément, même avec une connexion lente, et les données sont rafraîchies automatiquement à l’ouverture suivante. En cas de perte réseau, la dernière version connue est utilisée. Le cache est vidé à la déconnexion et après chaque modification (don, partenaire, utilisateur…).
+
 ## Fonctionnalités
 
 - Connexion email / mot de passe avec jeton Sanctum stocké de façon sécurisée.

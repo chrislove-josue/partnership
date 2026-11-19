@@ -2,6 +2,8 @@
 
 Application Expo / React Native pour le back-office ChurchManager (Christ Embassy Bénin). Elle consomme l’API Laravel du projet (`/api`) avec les mêmes règles d’accès que Filament.
 
+> Documentation complète des commandes de build et de démarrage réseau : [`DOCUMENTATION_BUILD_ET_RESEAU.md`](../DOCUMENTATION_BUILD_ET_RESEAU.md).
+
 ## Démarrage
 
 ```bash

@@ -67,6 +67,9 @@ export function Screen({
       </View>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {children}
+        <View style={styles.appFooter}>
+          <Text style={styles.appFooterText}>Conçu et Développé par Nestor ATCHOUGO</Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -328,7 +331,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 22, fontWeight: '700', color: colors.navy },
   subtitle: { fontSize: 13, color: colors.muted, marginTop: 3 },
   scroll: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 32 },
+  scrollContent: { padding: 16, paddingBottom: 32, flexGrow: 1 },
   card: {
     backgroundColor: colors.surface,
     borderRadius: 16,
@@ -433,4 +436,6 @@ const styles = StyleSheet.create({
   errorCard: { borderColor: colors.red },
   errorText: { color: colors.red, marginBottom: 12 },
   row: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end', marginTop: 12 },
+  appFooter: { marginTop: 'auto', paddingTop: 28, alignItems: 'center' },
+  appFooterText: { fontSize: 11, color: colors.muted, textAlign: 'center' },
 });

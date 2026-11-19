@@ -17,7 +17,22 @@ Dans `.env`, renseignez `EXPO_PUBLIC_API_URL` :
 - simulateur iOS : `http://localhost:8000/api`
 - téléphone physique : `http://IP_DE_LA_MACHINE:8000/api` (même réseau Wi-Fi)
 
-Le serveur Laravel doit tourner sur `http://localhost:8000` avec la base migrée (y compris la table `personal_access_tokens`).
+Le serveur Laravel doit tourner sur `http://localhost:8000` avec la base migrée (y compris la table `personal_access_tokens`). Le projet Laravel est aligné sur **PHP 8.3** (`composer.json` : `platform.php = 8.3.35`, Laravel 12).
+
+## APK prêt à installer
+
+L’APK de release se trouve ici :
+
+```
+mobile/ChurchManager-1.0.0.apk
+```
+
+Il est signé avec la clé de debug générée par Expo : il s’installe directement sur Android, mais n’est pas destiné au Play Store. L’adresse de l’API peut être modifiée **depuis l’application**, sans recompiler :
+
+- à la connexion : champ **Adresse du serveur** puis **Utiliser cette adresse** ;
+- ensuite dans **Profil → Connexion au serveur**.
+
+Pour un téléphone physique, utilisez l’IP de la machine qui héberge Laravel, par exemple `http://192.168.1.10:8000/api`. Le PC et le téléphone doivent être sur le même réseau, et le serveur doit écouter sur `0.0.0.0` (`php artisan serve --host=0.0.0.0`).
 
 ## Fonctionnalités
 

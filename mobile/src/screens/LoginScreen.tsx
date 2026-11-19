@@ -81,6 +81,7 @@ export function LoginScreen() {
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <PrimaryButton title="Se connecter" onPress={submit} loading={loading} disabled={!email || !password} />
         <Text style={styles.footer}>Pour toute assistance : +229 98 12 33 53</Text>
+        <Text style={styles.credit}>Conçu et Développé par Nestor ATCHOUGO</Text>
       </View>
     </KeyboardAvoidingView>
   );
@@ -114,4 +115,5 @@ const styles = StyleSheet.create({
   serverButton: { alignSelf: 'flex-start', marginBottom: 16 },
   serverButtonText: { color: colors.blue, fontWeight: '700', fontSize: 13 },
   footer: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 18 },
+  credit: { textAlign: 'center', color: colors.muted, fontSize: 11, marginTop: 10 },
 });

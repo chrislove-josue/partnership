@@ -1,0 +1,90 @@
+import React, { useState } from 'react';
+import { Image, KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import { useAuth } from '../context/AuthContext';
+import { ApiError } from '../api/client';
+import { colors, PrimaryButton, TextField } from '../components/ui';
+
+export function LoginScreen() {
+  const { login } = useAuth();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const submit = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await login(email.trim(), password);
+    } catch (caught) {
+      setError(caught instanceof ApiError ? caught.message : 'Connexion impossible.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      <View style={styles.hero}>
+        <View style={styles.logo}>
+          <Text style={styles.logoText}>CE</Text>
+        </View>
+        <Text style={styles.appName}>ChurchManager</Text>
+        <Text style={styles.tagline}>Partenariat &amp; dons — Christ Embassy Bénin</Text>
+      </View>
+
+      <View style={styles.form}>
+        <Text style={styles.title}>Connexion</Text>
+        <Text style={styles.help}>Utilisez votre email et votre mot de passe du back-office.</Text>
+        <TextField
+          label="Adresse email"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="vous@exemple.com"
+          keyboardType="email-address"
+        />
+        <TextField
+          label="Mot de passe"
+          value={password}
+          onChangeText={setPassword}
+          placeholder="Mot de passe"
+          secureTextEntry
+        />
+        {error ? <Text style={styles.error}>{error}</Text> : null}
+        <PrimaryButton title="Se connecter" onPress={submit} loading={loading} disabled={!email || !password} />
+        <Text style={styles.footer}>Pour toute assistance : +229 98 12 33 53</Text>
+      </View>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: colors.background, justifyContent: 'center', padding: 24 },
+  hero: { alignItems: 'center', marginBottom: 30 },
+  logo: {
+    width: 76,
+    height: 76,
+    borderRadius: 22,
+    backgroundColor: colors.navy,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
+  },
+  logoText: { color: colors.gold, fontSize: 28, fontWeight: '800' },
+  appName: { fontSize: 24, fontWeight: '800', color: colors.navy },
+  tagline: { fontSize: 13, color: colors.muted, marginTop: 4, textAlign: 'center' },
+  form: {
+    backgroundColor: colors.surface,
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  title: { fontSize: 20, fontWeight: '700', color: colors.navy, marginBottom: 4 },
+  help: { fontSize: 13, color: colors.muted, marginBottom: 18 },
+  error: { color: colors.red, marginBottom: 12, fontSize: 14 },
+  footer: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 18 },
+});

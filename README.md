@@ -80,6 +80,15 @@ Les widgets du tableau de bord sont rendus immédiatement, sans squelette « Cha
 libellés internes Filament absents de la traduction française sont complétés dans
 `app/Providers/AppServiceProvider.php`.
 
+### Pages d'erreur
+
+Les erreurs HTTP 4xx et 5xx sont rendues par des vues françaises dans `resources/views/errors/` :
+une vue par code (400, 401, 402, 403, 404, 405, 408, 419, 422, 429, 500, 501, 502, 503, 504)
+et deux vues génériques `4xx.blade.php` / `5xx.blade.php` pour les codes non couverts. Elles
+partagent `layout.blade.php` : carte ChurchManager, code de statut, message clair et boutons de
+retour au tableau de bord ou de connexion. Le sélecteur clair/sombre/système (clair par défaut)
+reste cohérent avec celui du panneau Filament. Aucun détail technique de l'exception n'est affiché.
+
 ### Compte initial
 
 Créé par `database/seeders/UserSeeder.php` :
@@ -188,7 +197,7 @@ database/
   migrations/            Churches, Church columns, Cellules, Partners, CategoryDons, Donations, Notifications, MagicTokens, Accounts
   seeders/               RoleAndPermission, Church, User, CategoryDon, DatabaseSeeder
 resources/views/emails/  user-welcome, donation-confirmation
-tests/Feature/           AuthTest, ChurchAccessTest, MailTest, DonationNotificationTest, CreateDonationPageTest, FilamentScopingQueryTest, ImportLegacyDataTest
+tests/Feature/           AuthTest, ChurchAccessTest, MailTest, DonationNotificationTest, CreateDonationPageTest, FilamentScopingQueryTest, ImportLegacyDataTest, ErrorPagesTest
 ```
 
 ## Emails

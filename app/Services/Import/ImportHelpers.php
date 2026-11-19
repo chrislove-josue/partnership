@@ -47,12 +47,22 @@ class ImportHelpers
             $first = (int) $matches[1];
             $second = (int) $matches[2];
             $year = (int) $matches[3];
-            $month = $first > 12 ? $second : $first;
-            $day = $first > 12 ? $first : $second;
 
-            return checkdate($month, $day, $year)
-                ? Carbon::create($year, $month, $day, 0, 0, 0)
-                : null;
+            $candidates = [];
+            if ($first <= 12) {
+                $candidates[] = [$first, $second]; // MM/JJ/AAAA
+            }
+            if ($second <= 12) {
+                $candidates[] = [$second, $first]; // JJ/MM/AAAA
+            }
+
+            foreach ($candidates as [$month, $day]) {
+                if (checkdate($month, $day, $year)) {
+                    return Carbon::create($year, $month, $day, 0, 0, 0);
+                }
+            }
+
+            return null;
         }
 
         try {
@@ -97,7 +107,7 @@ class ImportHelpers
 
         $normalized = preg_replace('/\s+/', '', trim((string) $handle));
 
-        return '@'.ltrim($normalized, '@');
+        return '@'.ltrim((string) $normalized, '@');
     }
 
     /** Tolère « 5 000 », « 5.000 », « 5,000 », « 50x00FCFA ». */
@@ -129,6 +139,6 @@ class ImportHelpers
     /** Clé de colonne normalisée (firstName → firstname, donationCategoryName → donationcategoryname). */
     public function normalizeHeader(mixed $header): string
     {
-        return strtolower(preg_replace('/[^a-zA-Z0-9]/', '', (string) $header) ?? '');
+        return strtolower((string) preg_replace('/[^a-zA-Z0-9]/', '', (string) $header));
     }
 }

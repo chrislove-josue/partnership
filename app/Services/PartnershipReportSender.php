@@ -58,34 +58,44 @@ class PartnershipReportSender
     /**
      * Envoie le rapport (uniquement si $confirm vaut true).
      *
+     * @param  array<int, string> | null  $ccEmails  Copies cochées par l'utilisateur ; null conserve toutes les copies proposées.
      * @return array<string, mixed>
      */
-    public function send(User $user, int $churchId, PeriodType $type, int $year, ?int $index, bool $confirm): array
+    public function send(User $user, int $churchId, PeriodType $type, int $year, ?int $index, bool $confirm, ?array $ccEmails = null): array
     {
         if (! $confirm) {
             return $this->preview($user, $churchId, $type, $year, $index);
         }
 
         $preview = $this->preview($user, $churchId, $type, $year, $index);
+        $cc = $preview['cc'];
+
+        if ($ccEmails !== null) {
+            $cc = array_values(array_filter(
+                $cc,
+                fn (array $recipient): bool => in_array($recipient['email'], $ccEmails, true),
+            ));
+        }
+
         $report = $this->reports->buildReport($churchId, $type, $year, $index);
         $xlsx = $this->exporter->toXlsx($report);
         $fileName = $this->reports->fileName($report);
 
         $mail = Mail::to(array_column($preview['recipients'], 'email'));
 
-        if ($preview['cc'] !== []) {
-            $mail->cc(array_column($preview['cc'], 'email'));
+        if ($cc !== []) {
+            $mail->cc(array_column($cc, 'email'));
         }
 
         $mail->send(new PartnershipReportMail($report, $preview['recipients'], $user, $fileName, $xlsx));
 
         Log::info('Rapport de partenariat envoyé : '.$report['church']['name'].' ('.$report['period']['label'].') → '.implode(', ', array_column($preview['recipients'], 'email'))
-            .($preview['cc'] !== [] ? ' (copie : '.implode(', ', array_column($preview['cc'], 'email')).')' : ''));
+            .($cc !== [] ? ' (copie : '.implode(', ', array_column($cc, 'email')).')' : ''));
 
         return [
             'sent' => true,
             'to' => $preview['recipients'],
-            'cc' => $preview['cc'],
+            'cc' => $cc,
             'targetLabel' => $preview['targetLabel'],
             'fileName' => $fileName,
             'report' => $report['totals'],

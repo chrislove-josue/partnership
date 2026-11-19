@@ -298,7 +298,7 @@ class PartnershipReport extends Page
                 .' · À ('.$preview['targetLabel'].') : '.$emails;
 
             if (($preview['cc'] ?? []) !== []) {
-                $description .= ' · Copie : '.implode(', ', array_column($preview['cc'], 'email'));
+                $description .= ' · Copie : '.count($preview['cc']).' destinataire(s), à confirmer ci-dessous';
             }
 
             return $description;

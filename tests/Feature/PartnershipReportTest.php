@@ -401,6 +401,55 @@ class PartnershipReportTest extends TestCase
         });
     }
 
+    public function test_send_uses_only_the_checked_copies(): void
+    {
+        Mail::fake();
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        Church::whereKey($group->id)->update(['manager_id' => null]);
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $group->id]);
+        $groupPastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
+        $localPastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'local@example.test', $local->id);
+        $kept = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'copie-conservee@example.test');
+        $removed = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'copie-retiree@example.test');
+
+        $sent = app(PartnershipReportSender::class)
+            ->send($localPastor, $local->id, PeriodType::MONTH, 2026, 2, true, [$kept->email]);
+
+        $this->assertSame([$kept->email], array_column($sent['cc'], 'email'));
+        $this->assertNotContains($removed->email, array_column($sent['cc'], 'email'));
+
+        Mail::assertSent(PartnershipReportMail::class, function (PartnershipReportMail $mail) use ($groupPastor, $kept, $removed): bool {
+            return $mail->hasTo($groupPastor->email)
+                && $mail->hasCc($kept->email)
+                && ! $mail->hasCc($removed->email)
+                && ! $mail->hasCc('libertsinzo7@gmail.com');
+        });
+    }
+
+    public function test_send_can_remove_all_copies(): void
+    {
+        Mail::fake();
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        Church::whereKey($group->id)->update(['manager_id' => null]);
+        $local = Church::create(['name' => 'LOCAL', 'type' => ChurchType::LOCAL, 'parent_id' => $group->id]);
+        $this->makeUser(RoleName::GROUP_PASTOR->value, $group->id, 'groupe@example.test', $group->id);
+        $localPastor = $this->makeUser(RoleName::LOCAL_PASTOR->value, $local->id, 'local@example.test', $local->id);
+        $admin = $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'admin@example.test');
+
+        $sent = app(PartnershipReportSender::class)
+            ->send($localPastor, $local->id, PeriodType::MONTH, 2026, 2, true, []);
+
+        $this->assertSame([], $sent['cc']);
+
+        Mail::assertSent(PartnershipReportMail::class, function (PartnershipReportMail $mail) use ($admin): bool {
+            return ! $mail->hasCc($admin->email) && ! $mail->hasCc('libertsinzo7@gmail.com');
+        });
+    }
+
     public function test_sending_requires_explicit_confirmation_and_attaches_the_xlsx(): void
     {
         Mail::fake();
@@ -484,6 +533,11 @@ class PartnershipReportTest extends TestCase
 
         $this->assertStringContainsString('À (pasteur de votre groupe) : '.$groupPastor->email, $description);
         $this->assertStringContainsString('Copie :', $description);
+
+        \Livewire\Livewire::test(\App\Filament\Pages\PartnershipReport::class)
+            ->call('mountAction', 'send')
+            ->assertSee('Copie — destinataires à conserver')
+            ->assertSee('libertsinzo7@gmail.com');
     }
 
     public function test_send_action_sends_after_confirmation(): void

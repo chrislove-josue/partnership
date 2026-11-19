@@ -55,13 +55,13 @@ class MobileImportApiTest extends TestCase
             ->get('/api/donations/template')
             ->assertOk()
             ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            ->assertHeader('content-disposition', 'attachment; filename="modele_dons.xlsx"');
+            ->assertHeader('content-disposition', 'attachment; filename=modele_dons.xlsx');
 
         $this->actingAs($user, 'sanctum')
             ->get('/api/partners/template')
             ->assertOk()
             ->assertHeader('content-type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            ->assertHeader('content-disposition', 'attachment; filename="modele_partenaires.xlsx"');
+            ->assertHeader('content-disposition', 'attachment; filename=modele_partenaires.xlsx');
     }
 
     public function test_mobile_donation_import_uses_the_web_rules_and_skips_duplicates(): void
@@ -128,7 +128,7 @@ class MobileImportApiTest extends TestCase
 
     public function test_import_endpoints_require_authentication(): void
     {
-        $this->post('/api/donations/import')->assertUnauthorized();
-        $this->get('/api/partners/template')->assertUnauthorized();
+        $this->postJson('/api/donations/import')->assertUnauthorized();
+        $this->getJson('/api/partners/template')->assertUnauthorized();
     }
 }

@@ -154,7 +154,10 @@ export async function apiUpload<T>(
 
   const response = await fetch(`${apiUrl}${path}`, {
     method: 'POST',
-    headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    headers: {
+      Accept: 'application/json',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    },
     body: form,
   });
 
@@ -173,7 +176,10 @@ export async function apiUpload<T>(
 
 export async function apiDownload(path: string, fileName: string): Promise<string> {
   const response = await fetch(`${apiUrl}${path}`, {
-    headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    headers: {
+      Accept: 'application/json, application/octet-stream',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    },
   });
 
   if (!response.ok) {

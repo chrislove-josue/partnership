@@ -325,7 +325,10 @@ class ImportTest extends TestCase
             $this->assertSame('firstName', $sheet->getCell('A1')->getValue());
             $this->assertSame('donationCategoryName', $sheet->getCell('I1')->getValue());
             $this->assertSame('Nestor', $sheet->getCell('A2')->getValue());
+            $this->assertSame('Offrandes', $sheet->getCell('I2')->getValue());
+            $this->assertSame('Dîmes', $sheet->getCell('I3')->getValue());
             $this->assertSame('Colonne', $workbook->getSheetByName('Aide')->getCell('A1')->getValue());
+            $this->assertSame('Ex : Offrandes, Dîmes (créée si absente)', $workbook->getSheetByName('Aide')->getCell('B10')->getValue());
         } finally {
             @unlink($path);
         }

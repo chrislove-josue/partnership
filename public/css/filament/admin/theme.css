@@ -438,7 +438,7 @@
     flex-shrink: 0;
 }
 
-.support-fab__number { white-space: nowrap; }
+.support-fab__label { white-space: nowrap; }
 
 @media (max-width: 640px) {
     .support-fab {

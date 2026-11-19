@@ -10,10 +10,13 @@ use App\Filament\Widgets\TrendChartWidget;
 use App\Models\User;
 use Filament\Enums\ThemeMode;
 use Filament\Facades\Filament;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AdminThemeTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_admin_panel_uses_the_migrated_nextjs_design(): void
     {
         $panel = Filament::getPanel('admin');
@@ -65,6 +68,8 @@ class AdminThemeTest extends TestCase
 
     public function test_support_button_is_visible_in_the_dashboard(): void
     {
+        $this->seed();
+
         $user = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
 
         $this->actingAs($user)

@@ -264,6 +264,23 @@ class PartnershipReportTest extends TestCase
         }
     }
 
+    public function test_send_action_sends_after_confirmation(): void
+    {
+        Mail::fake();
+        $this->seed();
+
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $this->makeUser(RoleName::SUPER_ADMIN->value, $group->id, 'destinataire@example.test');
+        $admin = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $this->actingAs($admin);
+
+        \Livewire\Livewire::test(\App\Filament\Pages\PartnershipReport::class)
+            ->call('mountAction', 'send')
+            ->call('callMountedAction');
+
+        Mail::assertSent(PartnershipReportMail::class, fn (PartnershipReportMail $mail): bool => $mail->hasTo('destinataire@example.test'));
+    }
+
     public function test_export_action_downloads_the_xlsx(): void
     {
         $this->seed();

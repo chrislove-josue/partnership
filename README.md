@@ -167,6 +167,16 @@ via un export JSON intermédiaire.
    (l'export précédent est conservé en `.bak`). Les identifiants Prisma sont conservés pour
    reconstruire les relations.
 
+   Pour récupérer une version plus récente depuis la base Neon en ligne, générer d'abord le dump :
+   retirer les paramètres Prisma `pool_timeout`, `connection_limit` et `connect_timeout` de
+   `DATABASE_URL` (non reconnus par `pg_dump`), puis :
+
+   ```bash
+   pg_dump --dbname="<DATABASE_URL>" --column-inserts --no-owner --no-privileges \
+     --file=storage/app/neondb-backup.sql
+   php database/convert-pg-dump.php storage/app/neondb-backup.sql
+   ```
+
 2. Recréer les tables, puis importer :
 
    ```bash
@@ -183,6 +193,7 @@ notifications) puis réimporte en respectant la hiérarchie et les clés étrang
 - Utilisateurs importés avec leurs rôles (résolus par nom) et leur église assignée.
 - Cellules/partenaires importés en deux passes (relation circulaire `leader_id` ↔ `cellule_id`).
 - Dons et notifications réattachés par identifiants mappés.
+- Liens magiques importés avec leur jeton déjà haché (SHA-256).
 - Les hachages bcrypt `$2a$`/`$2b$` (générés par Node) sont normalisés en `$2y$` pour que
   Laravel puisse les vérifier. Les mots de passe par défaut de l'ancienne base sont `azerty123`.
 - Le compte administrateur courant (`sounesatchougo@gmail.com`, absent de l'ancienne base) est

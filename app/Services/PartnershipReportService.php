@@ -236,15 +236,60 @@ class PartnershipReportService
         ];
 
         $managerOf = function (Church $church): ?User {
-            return Church::with('manager:id,email,name')->find($church->id)?->manager;
+            return Church::with('manager:id,email,name,is_active')->find($church->id)?->manager;
         };
 
-        $activeRoleUsers = function (string $role, Church $church): array {
-            return User::role($role)
+        /**
+         * Rôles permettant d'occuper une fonction : un pasteur de sous-groupe
+         * est aussi pasteur local, et un pasteur de groupe remplit les deux
+         * fonctions inférieures.
+         *
+         * @return array<int, string>
+         */
+        $eligibleRoles = function (string $role): array {
+            $wanted = RoleName::tryFrom($role);
+            $names = [$role];
+
+            if ($wanted) {
+                foreach (RoleName::cases() as $candidate) {
+                    if (in_array($wanted, $candidate->impliedRoles(), true)) {
+                        $names[] = $candidate->value;
+                    }
+                }
+            }
+
+            return array_values(array_unique($names));
+        };
+
+        $hasEligibleRole = function (User $user, string $role) use ($eligibleRoles): bool {
+            return collect($user->getRoleNames())
+                ->intersect($eligibleRoles($role))
+                ->isNotEmpty();
+        };
+
+        /** Le responsable de l'église est le destinataire prioritaire. */
+        $managerFor = function (Church $church, string $role) use ($managerOf, $hasEligibleRole): ?User {
+            $manager = $managerOf($church);
+
+            if (! $manager || ! $manager->is_active || ! $hasEligibleRole($manager, $role)) {
+                return null;
+            }
+
+            return $manager;
+        };
+
+        $activeRoleUsers = function (string $role, Church $church) use ($eligibleRoles): array {
+            return User::whereHas('roles', fn ($query) => $query->whereIn('name', $eligibleRoles($role)))
                 ->where('is_active', true)
                 ->where('assigned_church_id', $church->id)
                 ->get(['id', 'email', 'name'])
                 ->all();
+        };
+
+        $pastorsFor = function (Church $church, string $role) use ($managerFor, $activeRoleUsers): array {
+            $manager = $managerFor($church, $role);
+
+            return $manager ? [$manager] : $activeRoleUsers($role, $church);
         };
 
         /** Toutes les églises sous-groupes situées sous une église groupe. */
@@ -318,15 +363,7 @@ class PartnershipReportService
                 throw new RuntimeException('Un personnel doit être rattaché à une église locale.');
             }
 
-            $pastors = $activeRoleUsers(RoleName::LOCAL_PASTOR->value, $church);
-
-            if ($pastors === []) {
-                $manager = $managerOf($church);
-
-                if ($manager) {
-                    $pastors = [$manager];
-                }
-            }
+            $pastors = $pastorsFor($church, RoleName::LOCAL_PASTOR->value);
 
             foreach ($pastors as $pastor) {
                 if ($pastor->email && $pastor->email !== $senderEmail) {
@@ -372,15 +409,7 @@ class PartnershipReportService
         }
 
         if ($group) {
-            $groupPastors = $activeRoleUsers(RoleName::GROUP_PASTOR->value, $group);
-
-            if ($groupPastors === []) {
-                $manager = $managerOf($group);
-
-                if ($manager) {
-                    $groupPastors = [$manager];
-                }
-            }
+            $groupPastors = $pastorsFor($group, RoleName::GROUP_PASTOR->value);
 
             foreach ($groupPastors as $pastor) {
                 $addTo($pastor, "pasteur de groupe ({$group->name})");

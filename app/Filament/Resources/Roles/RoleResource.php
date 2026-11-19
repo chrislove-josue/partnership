@@ -21,13 +21,15 @@ class RoleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Utilisateurs';
+    protected static string|UnitEnum|null $navigationGroup = 'Administration';
 
     protected static ?string $modelLabel = 'rôle';
 
     protected static ?string $pluralModelLabel = 'rôles';
 
     protected static ?string $navigationLabel = 'Rôles';
+
+    protected static ?int $navigationSort = 20;
 
     public static function form(Schema $schema): Schema
     {

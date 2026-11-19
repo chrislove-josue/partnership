@@ -24,13 +24,15 @@ class UserResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
 
-    protected static string|UnitEnum|null $navigationGroup = 'Utilisateurs';
+    protected static string|UnitEnum|null $navigationGroup = 'Administration';
 
     protected static ?string $modelLabel = 'utilisateur';
 
     protected static ?string $pluralModelLabel = 'utilisateurs';
 
     protected static ?string $navigationLabel = 'Utilisateurs';
+
+    protected static ?int $navigationSort = 10;
 
     public static function churchScopeColumn(): string
     {

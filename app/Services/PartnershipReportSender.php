@@ -45,6 +45,7 @@ class PartnershipReportSender
             'sent' => false,
             'confirmRequired' => true,
             'recipients' => $resolved['recipients'],
+            'cc' => $resolved['cc'] ?? [],
             'targetLabel' => $resolved['targetLabel'],
             'chain' => $resolved['chain'],
             'church' => $report['church'],
@@ -70,14 +71,21 @@ class PartnershipReportSender
         $xlsx = $this->exporter->toXlsx($report);
         $fileName = $this->reports->fileName($report);
 
-        Mail::to(array_column($preview['recipients'], 'email'))
-            ->send(new PartnershipReportMail($report, $preview['recipients'], $user, $fileName, $xlsx));
+        $mail = Mail::to(array_column($preview['recipients'], 'email'));
 
-        Log::info('Rapport de partenariat envoyé : '.$report['church']['name'].' ('.$report['period']['label'].') → '.implode(', ', array_column($preview['recipients'], 'email')));
+        if ($preview['cc'] !== []) {
+            $mail->cc(array_column($preview['cc'], 'email'));
+        }
+
+        $mail->send(new PartnershipReportMail($report, $preview['recipients'], $user, $fileName, $xlsx));
+
+        Log::info('Rapport de partenariat envoyé : '.$report['church']['name'].' ('.$report['period']['label'].') → '.implode(', ', array_column($preview['recipients'], 'email'))
+            .($preview['cc'] !== [] ? ' (copie : '.implode(', ', array_column($preview['cc'], 'email')).')' : ''));
 
         return [
             'sent' => true,
             'to' => $preview['recipients'],
+            'cc' => $preview['cc'],
             'targetLabel' => $preview['targetLabel'],
             'fileName' => $fileName,
             'report' => $report['totals'],

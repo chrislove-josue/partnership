@@ -182,9 +182,15 @@ class PartnershipReport extends Page
                         $result = app(PartnershipReportSender::class)
                             ->send($user, $churchId, $type, $year, $index, true);
 
+                        $body = count($result['to']).' destinataire(s) — '.$result['targetLabel'];
+
+                        if (($result['cc'] ?? []) !== []) {
+                            $body .= ' · '.count($result['cc']).' en copie';
+                        }
+
                         Notification::make()
                             ->title('Rapport envoyé')
-                            ->body(count($result['to']).' destinataire(s) — '.$result['targetLabel'])
+                            ->body($body)
                             ->success()
                             ->send();
                     } catch (Throwable $exception) {
@@ -240,10 +246,15 @@ class PartnershipReport extends Page
             $reports = app(PartnershipReportService::class);
             $total = $reports->formatAmount($preview['totals']['amount']);
             $emails = implode(', ', array_column($preview['recipients'], 'email'));
-
-            return $preview['church']['name'].' · '.$preview['period']['label']
+            $description = $preview['church']['name'].' · '.$preview['period']['label']
                 .' · Total : '.$total.' sur '.$preview['totals']['donationCount'].' don(s)'
-                .' · Destinataires ('.$preview['targetLabel'].') : '.$emails;
+                .' · À ('.$preview['targetLabel'].') : '.$emails;
+
+            if (($preview['cc'] ?? []) !== []) {
+                $description .= ' · Copie : '.implode(', ', array_column($preview['cc'], 'email'));
+            }
+
+            return $description;
         } catch (Throwable $exception) {
             return $exception->getMessage();
         }

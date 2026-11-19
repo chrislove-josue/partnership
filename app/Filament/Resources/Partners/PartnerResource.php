@@ -32,6 +32,8 @@ class PartnerResource extends Resource
 
     protected static ?string $navigationLabel = 'Partenaires';
 
+    protected static ?int $navigationSort = 30;
+
     public static function form(Schema $schema): Schema
     {
         return PartnerForm::configure($schema);

@@ -70,7 +70,7 @@ export function Screen({
         {children}
         <View style={styles.appFooter}>
           <Pressable onPress={() => void Linking.openURL('https://wa.me/22998123353')}>
-            <Text style={styles.appFooterLink}>Pour toute assistance : +229 98 12 33 53</Text>
+            <Text style={styles.appFooterLink}>Pour toute assistance : +229 01 98 12 33 53</Text>
           </Pressable>
           <Text style={styles.appFooterText}>Conçu et Développé par Nestor ATCHOUGO</Text>
         </View>

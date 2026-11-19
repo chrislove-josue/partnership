@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, ApiError, invalidateCache } from '../api/client';
 import type { Category, Church, Donation, Partner } from '../api/types';
+import { ImportExportCard } from '../components/ImportExportCard';
 import {
   Badge,
   Card,
@@ -143,6 +144,15 @@ export function DonationsScreen() {
 
       {!loading && !error ? (
         <>
+          <ImportExportCard
+            title="Dons Excel"
+            help="Colonnes : churchName (ou church), donationAmount, donationDate, donationCategoryName, puis email/phone/handleKC d’un partenaire existant ou firstName + lastName pour en créer un."
+            importPath="/donations/import"
+            templatePath="/donations/template"
+            templateFileName="modele_dons.xlsx"
+            onImported={() => void load()}
+          />
+
           <Card>
             <SectionTitle>Filtres</SectionTitle>
             <SelectField

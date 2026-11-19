@@ -85,7 +85,7 @@ export function LoginScreen() {
           style={styles.assistanceLink}
           onPress={() => void Linking.openURL('https://wa.me/22998123353')}
         >
-          <Text style={styles.footer}>Pour toute assistance : +229 98 12 33 53</Text>
+          <Text style={styles.footer}>Pour toute assistance : +229 01 98 12 33 53</Text>
         </Pressable>
         <Text style={styles.credit}>Conçu et Développé par Nestor ATCHOUGO</Text>
       </View>

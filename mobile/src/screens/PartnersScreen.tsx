@@ -3,6 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, ApiError, invalidateCache } from '../api/client';
 import type { Cellule, Church, Partner } from '../api/types';
+import { ImportExportCard } from '../components/ImportExportCard';
 import {
   Badge,
   Card,

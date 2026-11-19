@@ -208,50 +208,67 @@ class PartnershipReportService
     /**
      * Résolution de la chaîne hiérarchique des destinataires.
      *
-     * STAFF → pasteur de son église ; pasteur LOCAL/SUBGROUP → niveau parent ;
-     * pasteur de groupe / SUPER_ADMIN → super administrateurs.
-     * L'adresse de l'expéditeur est toujours exclue.
+     * Personnel → pasteur de sa propre église ; pasteur d'église ou de sous-groupe
+     * → pasteur de groupe (avec les pasteurs de sous-groupe et les super
+     * administrateurs en copie) ; pasteur de groupe / SUPER_ADMIN → super
+     * administrateurs. L'adresse de l'expéditeur est toujours exclue.
      *
-     * @return array{recipients: array<int, array{email: string, name: string}>, targetLabel: string, chain: array<int, string>}
+     * @return array{
+     *     recipients: array<int, array{email: string, name: string}>,
+     *     cc: array<int, array{email: string, name: string}>,
+     *     targetLabel: string,
+     *     chain: array<int, string>
+     * }
      */
     public function resolveRecipients(User $user, int $churchId): array
     {
-        /** @var array<string, array{email: string, name: string}> $dedupe */
-        $dedupe = [];
+        /** @var array<string, array{email: string, name: string}> $to */
+        $to = [];
+        /** @var array<string, array{email: string, name: string}> $cc */
+        $cc = [];
         $chain = [];
         $senderEmail = $user->email;
 
-        $addManagers = function (Church $church, string $label) use (&$dedupe, &$chain, $senderEmail): bool {
-            $full = Church::with('manager:id,email,name')->find($church->id);
-            $manager = $full?->manager;
+        $person = fn (User $u): array => [
+            'email' => $u->email,
+            'name' => $u->name ?: $u->email,
+        ];
 
-            if (! $manager || ! $manager->email) {
-                return false;
+        $managerOf = function (Church $church): ?User {
+            return Church::with('manager:id,email,name')->find($church->id)?->manager;
+        };
+
+        $addTo = function (User $manager, string $label) use (&$to, &$chain, $senderEmail, $person): void {
+            if (! $manager->email || $manager->email === $senderEmail) {
+                return;
             }
 
             $chain[] = $label;
-            if ($manager->email !== $senderEmail) {
-                $dedupe[$manager->email] = [
-                    'email' => $manager->email,
-                    'name' => $manager->name ?: $manager->email,
-                ];
-            }
-
-            return true;
+            $to[$manager->email] = $person($manager);
         };
 
-        $addSuperAdmins = function () use (&$dedupe, &$chain, $senderEmail): void {
-            $chain[] = 'super administrateurs';
+        $addCc = function (User $manager, string $label) use (&$cc, &$to, &$chain, $senderEmail, $person): void {
+            if (! $manager->email || $manager->email === $senderEmail || isset($to[$manager->email])) {
+                return;
+            }
+
+            $chain[] = $label.' (copie)';
+            $cc[$manager->email] = $person($manager);
+        };
+
+        $addSuperAdmins = function (string $bucket) use (&$to, &$cc, &$chain, $senderEmail, $person): void {
+            $chain[] = $bucket === 'to' ? 'super administrateurs' : 'super administrateurs (copie)';
 
             User::role(RoleName::SUPER_ADMIN->value)
                 ->where('is_active', true)
                 ->get(['id', 'email', 'name'])
-                ->each(function (User $admin) use (&$dedupe, $senderEmail): void {
-                    if ($admin->email && $admin->email !== $senderEmail) {
-                        $dedupe[$admin->email] = [
-                            'email' => $admin->email,
-                            'name' => $admin->name ?: $admin->email,
-                        ];
+                ->each(function (User $admin) use (&$to, &$cc, $bucket, $senderEmail, $person): void {
+                    if (! $admin->email || $admin->email === $senderEmail) {
+                        return;
+                    }
+
+                    if ($bucket === 'to' || ! isset($to[$admin->email])) {
+                        ${$bucket}[$admin->email] = $person($admin);
                     }
                 });
         };
@@ -262,72 +279,95 @@ class PartnershipReportService
             throw new RuntimeException('Église introuvable');
         }
 
-        // Le groupe est le sommet de la chaîne locale.
+        // Une église groupe est le sommet de la chaîne locale.
         if ($church->type === ChurchType::GROUP) {
-            $addSuperAdmins();
+            $addSuperAdmins('to');
 
             return [
-                'recipients' => array_values($dedupe),
+                'recipients' => array_values($to),
+                'cc' => [],
                 'targetLabel' => 'hiérarchie nationale (super administrateurs)',
                 'chain' => $chain,
             ];
         }
 
-        $senderManagesThisChurch = $church->manager_id === $user->id;
-        $isHigherPastor = in_array($user->roleName(), [
-            RoleName::SUPER_ADMIN->value,
-            RoleName::GROUP_PASTOR->value,
+        $pastorRoles = [
+            RoleName::LOCAL_PASTOR->value,
             RoleName::SUBGROUP_PASTOR->value,
-        ], true);
+            RoleName::GROUP_PASTOR->value,
+            RoleName::SUPER_ADMIN->value,
+        ];
 
-        if ($senderManagesThisChurch || $isHigherPastor) {
-            $parent = $church->parent_id ? Church::find($church->parent_id) : null;
-            $foundParent = null;
+        // Personnel : envoi uniquement au pasteur de sa propre église.
+        if (! in_array($user->roleName(), $pastorRoles, true)) {
+            $manager = $managerOf($church);
 
-            while ($parent) {
-                $label = $parent->type === ChurchType::SUB_GROUP
-                    ? "pasteur de sous-groupe ({$parent->name})"
-                    : "pasteur de groupe ({$parent->name})";
-
-                if ($addManagers($parent, $label)) {
-                    $foundParent = $parent;
-                    break;
-                }
-
-                $parent = $parent->parent_id ? Church::find($parent->parent_id) : null;
+            if (! $manager || ! $manager->email || $manager->email === $senderEmail) {
+                throw new RuntimeException('Aucun pasteur d’église n’est assigné à cette église.');
             }
 
-            if ($dedupe === []) {
-                $addSuperAdmins();
-            }
+            $addTo($manager, "pasteur de votre église ({$church->name})");
 
             return [
-                'recipients' => array_values($dedupe),
-                'targetLabel' => $foundParent
-                    ? ($foundParent->type === ChurchType::SUB_GROUP
-                        ? 'pasteur de votre sous-groupe'
-                        : 'pasteur de votre groupe')
-                    : 'hiérarchie nationale (super administrateurs)',
+                'recipients' => array_values($to),
+                'cc' => [],
+                'targetLabel' => 'pasteur de votre église',
                 'chain' => $chain,
             ];
         }
 
-        // STAFF (ou membre non responsable) : pasteur de sa propre église.
-        $ownFound = $addManagers($church, "pasteur de votre église ({$church->name})");
+        // Pasteur d'église ou de sous-groupe : envoi direct au pasteur de groupe.
+        $group = null;
+        $subGroups = [];
+        $cursor = $church->parent_id ? Church::find($church->parent_id) : null;
 
-        if (! $ownFound) {
-            $parent = $church->parent_id ? Church::find($church->parent_id) : null;
-            if ($parent) {
-                $addManagers($parent, "pasteur de groupe ({$parent->name})");
+        while ($cursor) {
+            if ($cursor->type === ChurchType::SUB_GROUP) {
+                $subGroups[] = $cursor;
             }
-            if ($dedupe === []) {
-                $addSuperAdmins();
+            if ($cursor->type === ChurchType::GROUP) {
+                $group = $cursor;
+                break;
+            }
+
+            $cursor = $cursor->parent_id ? Church::find($cursor->parent_id) : null;
+        }
+
+        if ($group) {
+            $groupManager = $managerOf($group);
+
+            if ($groupManager) {
+                $addTo($groupManager, "pasteur de groupe ({$group->name})");
             }
         }
 
+        // Si l'expéditeur est lui-même le pasteur de groupe, on remonte à la
+        // hiérarchie nationale plutôt que de s'envoyer le rapport.
+        if ($to === []) {
+            $addSuperAdmins('to');
+
+            return [
+                'recipients' => array_values($to),
+                'cc' => [],
+                'targetLabel' => 'hiérarchie nationale (super administrateurs)',
+                'chain' => $chain,
+            ];
+        }
+
+        // Copie hiérarchique : pasteurs de sous-groupe et super administrateurs.
+        foreach ($subGroups as $subGroup) {
+            $subManager = $managerOf($subGroup);
+
+            if ($subManager) {
+                $addCc($subManager, "pasteur de sous-groupe ({$subGroup->name})");
+            }
+        }
+        $addSuperAdmins('cc');
+
         return [
-            'recipients' => array_values($dedupe),
-            'targetLabel' => 'pasteur de votre église',
+            'recipients' => array_values($to),
+            'cc' => array_values($cc),
+            'targetLabel' => 'pasteur de votre groupe',
             'chain' => $chain,
         ];
     }

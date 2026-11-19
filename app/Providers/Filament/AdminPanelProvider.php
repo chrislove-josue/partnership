@@ -11,7 +11,6 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-use Filament\Support\Colors\Color;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -27,12 +26,24 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('dashboard')
-            ->brandName('Suivi des Partenariats')
+            ->viteTheme('resources/css/filament/admin/theme.css')
+            ->brandName('ChurchManager')
+            ->font('Geist', 'https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap')
+            ->monoFont('Geist Mono', 'https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap')
             ->login(Login::class)
             ->profile()
             ->userMenu(position: UserMenuPosition::Sidebar)
+            ->darkMode(false)
+            ->sidebarWidth('18rem')
+            ->maxContentWidth('80rem')
+            ->simplePageMaxContentWidth('28rem')
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => '#9333EA',
+                'danger' => '#E7000B',
+                'info' => '#3B82F6',
+                'success' => '#10B981',
+                'warning' => '#F59E0B',
+                'gray' => '#6B7280',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

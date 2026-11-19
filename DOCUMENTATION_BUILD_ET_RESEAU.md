@@ -253,6 +253,30 @@ Le site ne propose pas d’export brut des listes de dons ou de partenaires : le
 
 ---
 
+## 6 ter. Historique des connexions et déconnexions
+
+Chaque connexion et déconnexion est enregistrée dans la table `login_histories`, quel que soit le canal :
+
+| Canal | Enregistrement |
+| --- | --- |
+| Site web (Filament, y compris lien magique) | Événements Laravel `Login` / `Logout` captés par `App\Listeners\RecordLoginHistory` |
+| Application mobile | `AuthController::login()` / `logout()` via `LoginHistoryService` (`source = mobile`) |
+
+Chaque ligne contient l’utilisateur, l’événement, la source (site web ou application mobile), l’adresse IP, l’appareil et la date/heure.
+
+Consultation par l’utilisateur :
+
+- **Site web** : menu **Mon compte → Historique de connexion** (`/dashboard/login-history`), paginé et limité à ses propres lignes.
+- **Application mobile** : **Profil → Sécurité → Historique de connexion** (`GET /api/auth/history`), limité à ses propres lignes.
+
+Aucun historique n’est envoyé par e-mail et aucune donnée d’un autre utilisateur n’est exposée.
+
+```bash
+php artisan test --filter=LoginHistoryTest
+```
+
+---
+
 ## 7. Générer les assets (logo et icônes)
 
 Les sources sont dans `mobile/assets/` :
@@ -416,8 +440,7 @@ Recompiler puis recopier :
 cd C:\Project\partnership\mobile\android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
-copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.0.0.apk /Y
-copy .\FinanceMobile-1.0.0.apk .\FinanceMobile-1.1.0.apk /Y
+copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.2.0.apk /Y
 ```
 
 ---
@@ -439,8 +462,7 @@ npx.cmd expo prebuild --platform android
 cd android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
-copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.0.0.apk /Y
-copy .\FinanceMobile-1.0.0.apk .\FinanceMobile-1.1.0.apk /Y
+copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.2.0.apk /Y
 ```
 
 Adresse à saisir dans l’application :

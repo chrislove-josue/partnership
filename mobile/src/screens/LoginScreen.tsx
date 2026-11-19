@@ -47,7 +47,7 @@ export function LoginScreen() {
           accessibilityLabel="Logo FinanceMobile"
         />
         <Text style={styles.appName}>FinanceMobile</Text>
-        <Text style={styles.tagline}>Partenariat et dons — Christ Embassy Bénin</Text>
+        <Text style={styles.tagline}>Gestion financière — Christ Embassy Bénin</Text>
       </View>
 
       <View style={styles.form}>

@@ -151,20 +151,25 @@ Les tests tournent sur SQLite en mémoire (`phpunit.xml`), sans impact sur la ba
 
 ## Migration des données
 
-Les données de l'ancienne application Next.js (Postgres/Neon) ont été migrées vers la base
-MySQL via `php artisan legacy:import`.
+Les données de l'ancienne application Next.js (PostgreSQL) sont migrées vers la base MySQL
+via un export JSON intermédiaire.
 
 **Fonctionnement :**
 
-1. Exporter l'ancienne base en JSON (depuis `C:\Project\sponsorship-traking`) :
+1. Convertir le dump PostgreSQL (`churchmanager_backup.sql`) en JSON :
 
    ```bash
-   node export-legacy.js   # produit legacy-export.json
+   php database/convert-pg-dump.php <chemin vers churchmanager_backup.sql>
    ```
 
-2. Copier l'export dans `storage/app/legacy-export.json`, puis lancer :
+   Le script lit les instructions `INSERT` du dump et produit `storage/app/legacy-export.json`
+   (l'export précédent est conservé en `.bak`). Les identifiants Prisma sont conservés pour
+   reconstruire les relations.
+
+2. Recréer les tables, puis importer :
 
    ```bash
+   php artisan migrate:fresh --seed
    php artisan legacy:import --force
    # ou avec un chemin explicite :
    php artisan legacy:import --path=storage/app/legacy-export.json --force

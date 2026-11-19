@@ -53,7 +53,8 @@ class ErrorPagesTest extends TestCase
 
             $response->assertStatus($code)
                 ->assertSee('ChurchManager', false)
-                ->assertSee('Erreur '.substr((string) $code, 0, 1).'xx', false)
+                ->assertDontSee('Erreur 4xx', false)
+                ->assertDontSee('Erreur 5xx', false)
                 ->assertSee((string) $code, false)
                 ->assertSee($expected['title'])
                 ->assertSee($expected['message'])
@@ -84,14 +85,14 @@ class ErrorPagesTest extends TestCase
     {
         $this->get('/__test-error/418')
             ->assertStatus(418)
-            ->assertSee('Erreur 4xx', false)
+            ->assertDontSee('Erreur 4xx', false)
             ->assertSee('418', false)
             ->assertSee('Requête invalide', false)
             ->assertSee("La requête n'a pas pu être traitée.");
 
         $this->get('/__test-error/599')
             ->assertStatus(599)
-            ->assertSee('Erreur 5xx', false)
+            ->assertDontSee('Erreur 5xx', false)
             ->assertSee('599', false)
             ->assertSee('Erreur du serveur', false)
             ->assertSee('Une erreur est survenue au niveau du serveur.', false);

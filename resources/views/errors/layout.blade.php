@@ -74,22 +74,8 @@
             box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.8);
         }
 
-        .badge {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            color: #7e22ce;
-            background-color: #faf5ff;
-            border: 1px solid #e9d5ff;
-        }
-
-        html.dark .badge { color: #d8b4fe; background-color: #3b0764; border-color: #581c87; }
-
         .code {
-            margin: 1rem 0 0.25rem;
+            margin: 0 0 0.25rem;
             font-size: 5rem;
             line-height: 1;
             font-weight: 700;
@@ -183,7 +169,6 @@
                 ? $exception->getStatusCode()
                 : 500);
             $status = (int) $status;
-            $family = substr((string) $status, 0, 1).'xx';
             $isAuthError = in_array($status, [401, 403], true);
             $actionUrl = $actionUrl ?? ($isAuthError ? '/login' : '/dashboard');
             $actionLabel = $actionLabel ?? ($isAuthError ? 'Se connecter' : 'Retour au tableau de bord');
@@ -191,7 +176,6 @@
             $secondaryLabel = $isAuthError ? 'Tableau de bord' : 'Connexion';
         @endphp
 
-        <span class="badge">Erreur {{ $family }}</span>
         <p class="code">{{ $status }}</p>
         <h1 class="title">@yield('title', 'Une erreur est survenue')</h1>
         <p class="message">@yield('message', 'Une erreur inattendue est survenue. Réessayez dans quelques instants.')</p>

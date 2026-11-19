@@ -264,6 +264,41 @@ class PartnershipReportTest extends TestCase
         }
     }
 
+    public function test_page_recomputes_the_report_when_the_year_changes(): void
+    {
+        $this->seed();
+
+        $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $category = CategoryDon::firstOrFail();
+        $partner = $this->makePartner($church, 'jean@example.test');
+        $this->makeDonation($partner, $church, $category, '2025-06-10 10:00:00', 3000);
+        $this->makeDonation($partner, $church, $category, '2026-06-10 10:00:00', 7000);
+
+        $admin = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $this->actingAs($admin);
+
+        \Livewire\Livewire::test(\App\Filament\Pages\PartnershipReport::class)
+            ->set('data.type', 'year')
+            ->set('data.year', 2025)
+            ->assertSee('3 000 FCFA')
+            ->set('data.year', 2026)
+            ->assertSee('7 000 FCFA');
+    }
+
+    public function test_report_page_renders_for_a_super_admin(): void
+    {
+        $this->seed();
+
+        $admin = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get('/dashboard/partnership-report')
+            ->assertOk()
+            ->assertSee('Rapport de partenariat')
+            ->assertSee('Total des dons')
+            ->assertSee('Dons par catégorie');
+    }
+
     public function test_missing_church_raises_a_clear_error(): void
     {
         $this->expectException(RuntimeException::class);

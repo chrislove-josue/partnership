@@ -57,7 +57,7 @@ class ErrorPagesTest extends TestCase
                 ->assertSee((string) $code, false)
                 ->assertSee($expected['title'])
                 ->assertSee($expected['message'])
-                ->assertSee('Retour au tableau de bord', false)
+                ->assertSee(in_array($code, [401, 403], true) ? 'Se connecter' : 'Retour au tableau de bord', false)
                 ->assertDontSee('Whoops', false)
                 ->assertDontSee('Symfony', false)
                 ->assertDontSee('SQLSTATE', false)

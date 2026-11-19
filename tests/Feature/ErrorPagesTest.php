@@ -74,7 +74,7 @@ class ErrorPagesTest extends TestCase
                 ->assertSee('href="/login"', false);
         }
 
-        $this->get(route('test.error', ['code' => 404]))
+        $this->get('/__test-error/404')
             ->assertStatus(404)
             ->assertDontSee('Se connecter', false)
             ->assertSee('href="/dashboard"', false);
@@ -82,14 +82,14 @@ class ErrorPagesTest extends TestCase
 
     public function test_unknown_4xx_and_5xx_codes_use_the_generic_pages(): void
     {
-        $this->get(route('test.error', ['code' => 418]))
+        $this->get('/__test-error/418')
             ->assertStatus(418)
             ->assertSee('Erreur 4xx', false)
             ->assertSee('418', false)
             ->assertSee('Requête invalide', false)
             ->assertSee("La requête n'a pas pu être traitée.", false);
 
-        $this->get(route('test.error', ['code' => 599]))
+        $this->get('/__test-error/599')
             ->assertStatus(599)
             ->assertSee('Erreur 5xx', false)
             ->assertSee('599', false)
@@ -99,7 +99,7 @@ class ErrorPagesTest extends TestCase
 
     public function test_error_pages_follow_the_light_dark_system_theme(): void
     {
-        $response = $this->get(route('test.error', ['code' => 404]));
+        $response = $this->get('/__test-error/404');
 
         $response->assertStatus(404)
             ->assertSee("localStorage.getItem('theme')", false)

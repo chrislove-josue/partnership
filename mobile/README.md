@@ -1,4 +1,4 @@
-# ChurchManager Mobile
+# FinanceMobile
 
 Application Expo / React Native pour le back-office ChurchManager (Christ Embassy Bénin). Elle consomme l’API Laravel du projet (`/api`) avec les mêmes règles d’accès que Filament.
 
@@ -24,7 +24,7 @@ Le serveur Laravel doit tourner sur `http://localhost:8000` avec la base migrée
 L’APK de release se trouve ici :
 
 ```
-mobile/ChurchManager-1.0.0.apk
+mobile/FinanceMobile-1.0.0.apk
 ```
 
 Il est signé avec la clé de debug générée par Expo : il s’installe directement sur Android, mais n’est pas destiné au Play Store. L’adresse de l’API peut être modifiée **depuis l’application**, sans recompiler :

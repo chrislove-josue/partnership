@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  Linking,
   Modal,
   Pressable,
   ScrollView,
@@ -68,6 +69,9 @@ export function Screen({
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {children}
         <View style={styles.appFooter}>
+          <Pressable onPress={() => void Linking.openURL('https://wa.me/22998123353')}>
+            <Text style={styles.appFooterLink}>Pour toute assistance : +229 98 12 33 53</Text>
+          </Pressable>
           <Text style={styles.appFooterText}>Conçu et Développé par Nestor ATCHOUGO</Text>
         </View>
       </ScrollView>
@@ -436,6 +440,7 @@ const styles = StyleSheet.create({
   errorCard: { borderColor: colors.red },
   errorText: { color: colors.red, marginBottom: 12 },
   row: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end', marginTop: 12 },
-  appFooter: { marginTop: 'auto', paddingTop: 28, alignItems: 'center' },
+  appFooter: { marginTop: 'auto', paddingTop: 28, alignItems: 'center', gap: 6 },
+  appFooterLink: { fontSize: 11, color: colors.blue, textAlign: 'center', textDecorationLine: 'underline' },
   appFooterText: { fontSize: 11, color: colors.muted, textAlign: 'center' },
 });

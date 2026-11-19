@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import { ApiError } from '../api/client';
 import { colors, PrimaryButton, TextField } from '../components/ui';
@@ -44,12 +44,12 @@ export function LoginScreen() {
           <Text style={styles.logoText}>CE</Text>
         </View>
         <Text style={styles.appName}>ChurchManager</Text>
-        <Text style={styles.tagline}>Partenariat &amp; dons — Christ Embassy Bénin</Text>
+        <Text style={styles.tagline}>Gestion Financière — Christ Embassy Benin Republic</Text>
       </View>
 
       <View style={styles.form}>
         <Text style={styles.title}>Connexion</Text>
-        <Text style={styles.help}>Utilisez votre email et votre mot de passe du back-office.</Text>
+        <Text style={styles.help}>Utilisez votre email et votre mot de passe pour vous connecter.</Text>
         <TextField
           label="Adresse du serveur"
           value={serverUrl}
@@ -68,7 +68,7 @@ export function LoginScreen() {
           label="Adresse email"
           value={email}
           onChangeText={setEmail}
-          placeholder="vous@exemple.com"
+          placeholder="nestoratchougo@exemple.com"
           keyboardType="email-address"
         />
         <TextField
@@ -80,7 +80,12 @@ export function LoginScreen() {
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <PrimaryButton title="Se connecter" onPress={submit} loading={loading} disabled={!email || !password} />
-        <Text style={styles.footer}>Pour toute assistance : +229 98 12 33 53</Text>
+        <Pressable
+          style={styles.assistanceLink}
+          onPress={() => void Linking.openURL('https://wa.me/22998123353')}
+        >
+          <Text style={styles.footer}>Pour toute assistance : +229 98 12 33 53</Text>
+        </Pressable>
         <Text style={styles.credit}>Conçu et Développé par Nestor ATCHOUGO</Text>
       </View>
     </KeyboardAvoidingView>
@@ -114,6 +119,7 @@ const styles = StyleSheet.create({
   error: { color: colors.red, marginBottom: 12, fontSize: 14 },
   serverButton: { alignSelf: 'flex-start', marginBottom: 16 },
   serverButtonText: { color: colors.blue, fontWeight: '700', fontSize: 13 },
+  assistanceLink: { alignItems: 'center', paddingVertical: 6 },
   footer: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 18 },
   credit: { textAlign: 'center', color: colors.muted, fontSize: 11, marginTop: 10 },
 });

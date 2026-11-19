@@ -54,11 +54,8 @@ class ProfilePageTest extends TestCase
     public function test_profile_rejects_a_kingschat_handle_already_used(): void
     {
         $this->seed();
-        $users = User::query()->orderBy('id')->limit(2)->get();
-        $user = $users[0];
-        $other = $users[1];
-
-        $other->update(['handle_kc' => 'handle_deja_pris']);
+        $user = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
+        User::factory()->create(['handle_kc' => 'handle_deja_pris']);
 
         Livewire::actingAs($user)
             ->test(EditProfile::class)

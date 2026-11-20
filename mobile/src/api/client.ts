@@ -361,7 +361,7 @@ async function mirrorOnlineWrite(
 
   const record = responseRecord(entity, result) ?? body ?? {};
   const id = record.id ?? match[2];
-  if (id === undefined || id === null) {
+  if (typeof id !== 'string' && typeof id !== 'number') {
     return;
   }
 

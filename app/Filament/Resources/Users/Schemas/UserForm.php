@@ -61,7 +61,6 @@ class UserForm
                     ->options($roleOptions)
                     ->multiple()
                     ->required()
-                    ->relationship('roles', 'name')
                     ->rules([
                         fn (Get $get): \Closure => function (string $attribute, mixed $value, callable $fail) use ($actor, $get): void {
                             $roles = collect((array) $value)

@@ -206,7 +206,7 @@ export function PartnersScreen() {
             <TextField label="Téléphone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
             <TextField label="Identifiant KingsChat (handle KC)" value={handleKc} onChangeText={setHandleKc} />
             <TextField label="Adresse" value={address} onChangeText={setAddress} />
-            <TextField label="Date de naissance (AAAA-MM-JJ)" value={birthdate} onChangeText={setBirthdate} />
+            <DateField label="Date de naissance" value={birthdate} onChange={setBirthdate} allowEmpty />
             <SelectField label="Église" value={churchId} options={churchOptions} onChange={(value) => { setChurchId(value); setCelluleId(''); }} />
             <SelectField
               label="Cellule"

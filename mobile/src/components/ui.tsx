@@ -272,10 +272,13 @@ export function DateField({
   const month = parts[1] ?? '';
   const day = parts[2] ?? '';
 
-  const emptyOption = allowEmpty ? [{ label: '—', value: '' }] : [];
+  const emptyOption: Option[] = allowEmpty ? [{ label: '—', value: '' }] : [];
   const yearOptions = [
     ...emptyOption,
-    ...Array.from({ length: 100 }, (_, index) => String(currentYear - index)),
+    ...Array.from({ length: 100 }, (_, index) => ({
+      label: String(currentYear - index),
+      value: String(currentYear - index),
+    })),
   ];
   const monthOptions = [
     ...emptyOption,

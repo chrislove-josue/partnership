@@ -1,5 +1,6 @@
 package com.churchmanager.benin
 
+import android.content.ContentUris
 import android.content.ContentValues
 import android.net.Uri
 import android.os.Build
@@ -113,7 +114,7 @@ class FinanceMediaStoreModule(private val reactContext: ReactApplicationContext)
                 cursor?.use {
                     if (it.moveToFirst()) {
                         val id = it.getLong(it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
-                        val uri = Uri.withAppendedId(collection, id)
+                        val uri = ContentUris.withAppendedId(collection, id)
                         val bytes = reactContext.contentResolver.openInputStream(uri)?.use { input ->
                             input.readBytes()
                         }

@@ -53,6 +53,42 @@ export function ProfileScreen() {
     setLoading(false);
   }, [user]);
 
+  const loadSyncInfo = useCallback(async () => {
+    try {
+      await initDatabase();
+      const [pending, conflicts, lastSync] = await Promise.all([
+        countPendingChanges(),
+        listConflicts(),
+        getMeta('last_sync'),
+      ]);
+      setSyncInfo({ pending, conflicts: conflicts.length, lastSync: lastSync ?? '' });
+    } catch {
+      setSyncInfo({ pending: 0, conflicts: 0, lastSync: '' });
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSyncInfo();
+  }, [loadSyncInfo]);
+
+  const synchronize = async () => {
+    setSyncing(true);
+    try {
+      const summary = await syncNow();
+      await loadSyncInfo();
+      Alert.alert(
+        'Synchronisation',
+        summary.skipped
+          ? 'Connectez-vous pour synchroniser les données.'
+          : `${summary.pushed} modification(s) envoyée(s), ${summary.pulled} donnée(s) reçue(s). ${summary.conflicts} conflit(s) résolu(s) en faveur du serveur.`,
+      );
+    } catch (caught) {
+      Alert.alert('Synchronisation impossible', getErrorMessage(caught, 'Réessayez plus tard.'));
+    } finally {
+      setSyncing(false);
+    }
+  };
+
   const save = async () => {
     setSaving(true);
     setError('');

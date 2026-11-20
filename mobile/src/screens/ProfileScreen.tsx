@@ -94,9 +94,25 @@ export function ProfileScreen() {
   };
 
   const save = async () => {
-    setSaving(true);
     setError('');
     setSuccess('');
+
+    if (password || confirmation) {
+      if (!currentPassword) {
+        setError('Saisissez d’abord votre mot de passe actuel.');
+        return;
+      }
+      if (!password) {
+        setError('Saisissez le nouveau mot de passe.');
+        return;
+      }
+      if (password !== confirmation) {
+        setError('La confirmation du mot de passe ne correspond pas.');
+        return;
+      }
+    }
+
+    setSaving(true);
     try {
       const body: Record<string, unknown> = {
         name,
@@ -202,9 +218,9 @@ export function ProfileScreen() {
 
       <Card>
         <SectionTitle>Modifier le mot de passe</SectionTitle>
-        <TextField label="Nouveau mot de passe" value={password} onChangeText={setPassword} secureTextEntry />
-        <TextField label="Confirmer le mot de passe" value={confirmation} onChangeText={setConfirmation} secureTextEntry />
         <TextField label="Mot de passe actuel" value={currentPassword} onChangeText={setCurrentPassword} secureTextEntry />
+        <TextField label="Nouveau mot de passe" value={password} onChangeText={setPassword} secureTextEntry />
+        <TextField label="Confirmer le nouveau mot de passe" value={confirmation} onChangeText={setConfirmation} secureTextEntry />
         <Text style={styles.help}>Laissez ces champs vides pour conserver votre mot de passe actuel.</Text>
       </Card>
 

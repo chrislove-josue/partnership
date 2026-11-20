@@ -78,6 +78,21 @@ export function Screen({
   );
 }
 
+export function AppFooter({ compact = false }: { compact?: boolean }) {
+  return (
+    <View style={[styles.appFooter, compact && styles.appFooterCompact]}>
+      <View style={styles.appFooterSpacer} />
+      <View style={styles.appFooterMain}>
+        <Pressable onPress={() => void Linking.openURL('https://wa.me/22998123353')}>
+          <Text style={styles.appFooterLink}>Pour toute assistance : +229 01 98 12 33 53</Text>
+        </Pressable>
+        <Text style={styles.appFooterText}>Conçu et Développé par Nestor ATCHOUGO</Text>
+      </View>
+      <Text style={styles.appFooterVersion}>Version {APP_VERSION}</Text>
+    </View>
+  );
+}
+
 export function Card({ children, style }: { children: React.ReactNode; style?: object }) {
   return <View style={[styles.card, style]}>{children}</View>;
 }
@@ -447,7 +462,17 @@ const styles = StyleSheet.create({
   errorCard: { borderColor: colors.red },
   errorText: { color: colors.red, marginBottom: 12 },
   row: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end', marginTop: 12 },
-  appFooter: { marginTop: 'auto', paddingTop: 28, alignItems: 'center', gap: 6 },
+  appFooter: {
+    width: '100%',
+    marginTop: 'auto',
+    paddingTop: 28,
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+  },
+  appFooterCompact: { paddingTop: 16 },
+  appFooterSpacer: { flex: 1 },
+  appFooterMain: { flex: 2, alignItems: 'center', gap: 6 },
   appFooterLink: { fontSize: 11, color: colors.blue, textAlign: 'center', textDecorationLine: 'underline' },
   appFooterText: { fontSize: 11, color: colors.muted, textAlign: 'center' },
+  appFooterVersion: { flex: 1, fontSize: 10, color: colors.muted, textAlign: 'right' },
 });

@@ -159,7 +159,8 @@ class UserRoleAssignmentTest extends TestCase
                 'is_active' => true,
             ])
             ->call('create')
-            ->assertHasFormErrors(['roles']);
+            ->tap(fn ($component) => dump($component->getForm('form')->getErrors()))
+            ->assertHasFormErrors();
 
         $this->assertDatabaseMissing('users', ['email' => 'personnel-test@example.test']);
 

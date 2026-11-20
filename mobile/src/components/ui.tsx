@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
-  Application,
   FlatList,
   Linking,
   Modal,
@@ -15,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import appConfig from '../../app.json';
 
-export const APP_VERSION = Application.nativeApplicationVersion ?? appConfig.expo.version;
+export const APP_VERSION = appConfig.expo.version;
 
 export const colors = {
   navy: '#0F2B46',

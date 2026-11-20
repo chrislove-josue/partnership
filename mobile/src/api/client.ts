@@ -220,6 +220,242 @@ async function performRequest<T>(
   return result;
 }
 
+const SYNCABLE_LIST_PATTERN = /^\/(churches|cellules|categories|partners|donations)(?:\?|$)/;
+const SYNCABLE_WRITE_PATTERN = /^\/(churches|cellules|categories|partners|donations)(?:\/(\d+))?$/;
+
+const SINGULAR_NAMES: Record<EntityName, string> = {
+  churches: 'church',
+  cellules: 'cellule',
+  categories: 'category',
+  partners: 'partner',
+  donations: 'donation',
+};
+
+type LocalRecord = Record<string, unknown>;
+
+function applyLocalFilters(
+  entity: EntityName,
+  rows: LocalRecord[],
+  query: string,
+): LocalRecord[] {
+  const params = new URLSearchParams(query);
+  const search = params.get('search')?.trim().toLowerCase();
+
+  return rows.filter((row) => {
+    if (search && entity === 'partners') {
+      const searchable = [row.first_name, row.last_name, row.phone, row.handle_kc]
+        .map((value) => String(value ?? '').toLowerCase())
+        .join(' ');
+      if (!searchable.includes(search)) {
+        return false;
+      }
+    }
+
+    for (const key of ['church_id', 'cellule_id', 'category_id', 'partner_id']) {
+      const expected = params.get(key);
+      if (expected && String(row[key] ?? '') !== expected) {
+        return false;
+      }
+    }
+
+    const date = String(row.date ?? '').slice(0, 10);
+    const from = params.get('date_from');
+    const to = params.get('date_to');
+    if (from && date < from) {
+      return false;
+    }
+    if (to && date > to) {
+      return false;
+    }
+    return true;
+  });
+}
+
+async function tryReadLocal<T>(path: string): Promise<T | null> {
+  const match = path.match(SYNCABLE_LIST_PATTERN);
+  if (!match) {
+    return null;
+  }
+
+  if (!isDatabaseReady()) {
+    await initDatabase().catch(() => null);
+  }
+  if (!isDatabaseReady()) {
+    return null;
+  }
+
+  const entity = match[1] as EntityName;
+  const queryIndex = path.indexOf('?');
+  const query = queryIndex >= 0 ? path.slice(queryIndex + 1) : '';
+  const rows = await listEntities<LocalRecord>(entity);
+
+  return { data: applyLocalFilters(entity, rows, query) } as T;
+}
+
+function responseRecord(entity: EntityName, result: unknown): LocalRecord | null {
+  if (!result || typeof result !== 'object') {
+    return null;
+  }
+  const candidate = (result as LocalRecord)[SINGULAR_NAMES[entity]];
+  return candidate && typeof candidate === 'object' ? (candidate as LocalRecord) : null;
+}
+
+async function buildLocalRecord(
+  entity: EntityName,
+  id: string | number,
+  body: LocalRecord,
+): Promise<LocalRecord> {
+  const record: LocalRecord = {
+    ...body,
+    id,
+    updated_at: new Date().toISOString(),
+  };
+
+  if (entity === 'donations') {
+    record.amount = Number(body.amount ?? 0);
+    record.date = String(body.date ?? '');
+    const [churches, partners, categories] = await Promise.all([
+      listEntities<LocalRecord>('churches'),
+      listEntities<LocalRecord>('partners'),
+      listEntities<LocalRecord>('categories'),
+    ]);
+    record.church = churches.find((item) => String(item.id) === String(body.church_id))?.name ?? '—';
+    const partner = partners.find((item) => String(item.id) === String(body.partner_id));
+    record.partner = partner?.full_name
+      ?? (partner ? `${String(partner.first_name ?? '')} ${String(partner.last_name ?? '')}`.trim() : 'Partenaire inconnu');
+    const category = categories.find((item) => String(item.id) === String(body.category_id));
+    record.category = category?.name ?? '—';
+    record.color = category?.color ?? '#1F4E78';
+  }
+
+  if (entity === 'partners') {
+    record.full_name = `${String(body.first_name ?? '')} ${String(body.last_name ?? '')}`.trim();
+    const [churches, cellules] = await Promise.all([
+      listEntities<LocalRecord>('churches'),
+      listEntities<LocalRecord>('cellules'),
+    ]);
+    record.church = churches.find((item) => String(item.id) === String(body.church_id))?.name ?? '—';
+    record.cellule = cellules.find((item) => String(item.id) === String(body.cellule_id))?.name ?? null;
+    record.total_donations = Number(body.total_donations ?? 0);
+  }
+
+  return record;
+}
+
+async function mirrorOnlineWrite(
+  path: string,
+  method: string,
+  body: LocalRecord | undefined,
+  result: unknown,
+): Promise<void> {
+  const match = path.match(SYNCABLE_WRITE_PATTERN);
+  if (!match || !isDatabaseReady()) {
+    return;
+  }
+
+  const entity = match[1] as EntityName;
+  if (method === 'DELETE') {
+    await deleteEntity(entity, match[2] ?? '');
+    return;
+  }
+
+  const record = responseRecord(entity, result) ?? body ?? {};
+  const id = record.id ?? match[2];
+  if (id === undefined || id === null) {
+    return;
+  }
+
+  const data: LocalRecord = { ...body, ...record, id };
+  await upsertEntity(
+    entity,
+    id,
+    data,
+    typeof record.updated_at === 'string' ? record.updated_at : null,
+  );
+}
+
+async function triggerSync(): Promise<void> {
+  try {
+    const { syncNow } = await import('../db/sync');
+    await syncNow();
+  } catch {
+    // La synchronisation est best-effort : elle reprendra au prochain démarrage.
+  }
+}
+
+async function queueOfflineWrite<T>(
+  path: string,
+  method: string,
+  body: LocalRecord,
+): Promise<T> {
+  await initDatabase();
+  const match = path.match(SYNCABLE_WRITE_PATTERN);
+  if (!match) {
+    throw new ApiError(NETWORK_ERROR_MESSAGE, 0);
+  }
+
+  const entity = match[1] as EntityName;
+  const existing = match[2] ? await getEntity<LocalRecord>(entity, match[2]) : null;
+  const id = method === 'POST'
+    ? `local-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+    : match[2] ?? '';
+  const record = await buildLocalRecord(entity, id, { ...(existing ?? {}), ...body });
+
+  await upsertEntity(entity, id, record, record.updated_at as string | null, true);
+  if (method === 'DELETE') {
+    await markEntityDeleted(entity, id);
+  }
+  await enqueueChange(
+    entity,
+    method === 'POST' ? 'create' : method === 'DELETE' ? 'delete' : 'update',
+    id,
+    body,
+  );
+
+  void triggerSync();
+
+  if (method === 'DELETE') {
+    return { message: 'Suppression enregistrée hors-ligne. Elle sera synchronisée plus tard.' } as T;
+  }
+  return {
+    message: 'Modification enregistrée hors-ligne. Elle sera synchronisée automatiquement.',
+    [SINGULAR_NAMES[entity]]: record,
+  } as T;
+}
+
+/** Appel réseau avec cache local et file d'attente pour les écritures hors-ligne. */
+export async function api<T>(
+  path: string,
+  options: RequestOptions = {},
+): Promise<T> {
+  const { method = 'GET', skipOffline = false } = options;
+
+  if (!skipOffline) {
+    const local = await tryReadLocal<T>(path);
+    if (local !== null) {
+      return local;
+    }
+  }
+
+  try {
+    const result = await performRequest<T>(path, options);
+    if (!skipOffline && method !== 'GET') {
+      await mirrorOnlineWrite(path, method, options.body, result);
+    }
+    return result;
+  } catch (error) {
+    if (
+      !skipOffline
+      && method !== 'GET'
+      && isNetworkError(error)
+      && SYNCABLE_WRITE_PATTERN.test(path)
+    ) {
+      return queueOfflineWrite<T>(path, method, options.body ?? {});
+    }
+    throw error;
+  }
+}
+
 export interface UploadFile {
   uri: string;
   name: string;

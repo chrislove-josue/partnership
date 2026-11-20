@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { api, getErrorMessage } from '../api/client';
 import { formatSessionDate } from '../api/session';
 import type { User } from '../api/types';
 import { useAuth } from '../context/AuthContext';
+import { countPendingChanges, getMeta, initDatabase, listConflicts } from '../db/database';
+import { syncNow } from '../db/sync';
 import {
   Badge,
   Card,
@@ -25,6 +27,8 @@ export function ProfileScreen() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [syncInfo, setSyncInfo] = useState({ pending: 0, conflicts: 0, lastSync: '' });
+  const [syncing, setSyncing] = useState(false);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');

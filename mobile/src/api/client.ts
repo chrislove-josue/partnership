@@ -1,6 +1,4 @@
-import { File, Paths } from 'expo-file-system';
-import * as LegacyFileSystem from 'expo-file-system/legacy';
-import { downloadsFilePath, publicFilePath } from '../db/storage';
+import { saveToDocuments, saveToDownloads } from '../native/mediaStore';
 import {
   enqueueChange,
   getEntity,
@@ -560,17 +558,14 @@ export async function apiDownload(path: string, fileName: string): Promise<strin
     reader.readAsDataURL(blob);
   });
 
-  const file = new File(Paths.cache, fileName);
-  file.write(base64, { encoding: 'base64' });
+  const mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-  // Les rapports et modèles sont enregistrés dans Téléchargements et dans
-  // Documents/FinanceMobile/files, afin de rester après désinstallation.
+  // Copie de conservation, discrète pour l'utilisateur.
   try {
-    const destination = await publicFilePath(fileName);
-    await LegacyFileSystem.copyAsync({ from: file.uri, to: destination });
-    const downloads = await downloadsFilePath(destination, fileName);
-    return downloads ?? destination;
+    await saveToDocuments(base64, 'Documents/FinanceMobile/files', fileName, mimeType);
   } catch {
-    return file.uri;
+    // Le téléchargement dans Téléchargements reste prioritaire.
   }
+
+  return saveToDownloads(base64, fileName, mimeType);
 }

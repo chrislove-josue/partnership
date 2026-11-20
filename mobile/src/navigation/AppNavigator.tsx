@@ -54,7 +54,7 @@ function MainTabs() {
       <Tabs.Screen
         name="HistoriqueConnexion"
         component={LoginHistoryScreen}
-        options={{ href: null, tabBarButton: () => null }}
+        options={{ tabBarButton: () => null }}
       />
     </Tabs.Navigator>
   );

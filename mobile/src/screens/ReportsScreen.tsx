@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
-import * as Sharing from 'expo-sharing';
 import { api, apiDownload, getErrorMessage } from '../api/client';
+import { isDownloadedFile } from '../db/storage';
 import type { Church, PartnershipReport, RecipientsPreview } from '../api/types';
 import {
   Badge,
@@ -139,7 +139,12 @@ export function ReportsScreen() {
     try {
       const fileName = `rapport-${churchId}-${type}-${year}.xlsx`;
       const uri = await apiDownload(`/reports/partnership/export?${query()}`, fileName);
-      await Sharing.shareAsync(uri, { mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      Alert.alert(
+        'Rapport téléchargé',
+        isDownloadedFile(uri)
+          ? `Enregistré dans Téléchargements/${fileName}\n(copie conservée dans Documents/FinanceMobile/files).`
+          : `Le fichier est disponible ici : ${uri}`,
+      );
     } catch (caught) {
       setError(getErrorMessage(caught, 'Export impossible.'));
     } finally {

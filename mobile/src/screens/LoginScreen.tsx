@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Image, KeyboardAvoidingView, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '../context/AuthContext';
 import { getErrorMessage } from '../api/client';
-import { colors, PrimaryButton, TextField } from '../components/ui';
+import { AppFooter, colors, PrimaryButton, TextField } from '../components/ui';
 
 export function LoginScreen() {
   const { login, apiUrl, updateApiUrl } = useAuth();
@@ -94,13 +94,7 @@ export function LoginScreen() {
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <PrimaryButton title="Se connecter" onPress={submit} loading={loading} disabled={!email || !password} />
-        <Pressable
-          style={styles.assistanceLink}
-          onPress={() => void Linking.openURL('https://wa.me/22998123353')}
-        >
-          <Text style={styles.footer}>Pour toute assistance : +229 01 98 12 33 53</Text>
-        </Pressable>
-        <Text style={styles.credit}>Conçu et Développé par Nestor ATCHOUGO</Text>
+        <AppFooter compact />
       </View>
     </KeyboardAvoidingView>
   );
@@ -123,7 +117,4 @@ const styles = StyleSheet.create({
   passwordVisibilityToggle: { padding: 4 },
   serverButton: { alignSelf: 'flex-start', marginBottom: 16 },
   serverButtonText: { color: colors.blue, fontWeight: '700', fontSize: 13 },
-  assistanceLink: { alignItems: 'center', paddingVertical: 6 },
-  footer: { textAlign: 'center', color: colors.muted, fontSize: 12, marginTop: 18 },
-  credit: { textAlign: 'center', color: colors.muted, fontSize: 11, marginTop: 10 },
 });

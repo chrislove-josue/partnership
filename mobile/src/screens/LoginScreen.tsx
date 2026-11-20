@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Image, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '../context/AuthContext';
-import { getErrorMessage } from '../api/client';
+import { getApiUrl, getErrorMessage } from '../api/client';
 import { AppFooter, colors, PrimaryButton, TextField } from '../components/ui';
 
 export function LoginScreen() {
@@ -28,9 +28,16 @@ export function LoginScreen() {
     setError('');
     setLoading(true);
     try {
+      // L'adresse saisie est appliquée avant la connexion, même si l'utilisateur
+      // n'a pas touché le bouton « Utiliser cette adresse ».
+      if (serverUrl.trim() !== getApiUrl()) {
+        await updateApiUrl(serverUrl);
+      }
+      setServerSaved(true);
       await login(email.trim(), password);
     } catch (caught) {
-      setError(getErrorMessage(caught, 'Connexion impossible.'));
+      const message = getErrorMessage(caught, 'Connexion impossible.');
+      setError(`${message}\nAdresse utilisée : ${getApiUrl()}`);
     } finally {
       setLoading(false);
     }

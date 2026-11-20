@@ -3,7 +3,6 @@ import {
   addConflict,
   countPendingChanges,
   deleteEntity,
-  enqueueChange,
   getMeta,
   initDatabase,
   listOutbox,
@@ -33,22 +32,6 @@ interface DeletionEntry {
 interface DeletionsResponse {
   data: DeletionEntry[];
   server_time: string;
-}
-
-const SINGULAR_NAMES: Record<EntityName, string> = {
-  churches: 'church',
-  cellules: 'cellule',
-  categories: 'category',
-  partners: 'partner',
-  donations: 'donation',
-};
-
-function recordFromResponse(entity: EntityName, result: unknown): Record<string, unknown> | null {
-  if (!result || typeof result !== 'object') {
-    return null;
-  }
-  const candidate = (result as Record<string, unknown>)[SINGULAR_NAMES[entity]];
-  return candidate && typeof candidate === 'object' ? (candidate as Record<string, unknown>) : null;
 }
 
 async function pushOutbox(): Promise<{ pushed: number; conflicts: number }> {
@@ -114,7 +97,7 @@ async function pullChanges(since: string): Promise<number> {
     });
 
     for (const row of response.data) {
-      if (row.id === undefined || row.id === null) {
+      if (typeof row.id !== 'string' && typeof row.id !== 'number') {
         continue;
       }
       await upsertEntity(

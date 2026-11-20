@@ -9,6 +9,7 @@ use App\Models\Cellule;
 use App\Models\Church;
 use App\Models\Donation;
 use App\Models\Partner;
+use App\Observers\SyncDeletionObserver;
 use App\Services\ReportCache;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
 use Illuminate\Auth\Events\Login;
@@ -68,6 +69,7 @@ class AppServiceProvider extends ServiceProvider
             $model::created($invalidateReports);
             $model::updated($invalidateReports);
             $model::deleted($invalidateReports);
+            $model::observe(SyncDeletionObserver::class);
         }
     }
 }

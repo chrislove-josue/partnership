@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { api, ApiError } from '../api/client';
+import { api, getErrorMessage } from '../api/client';
 import type { LoginHistoryEntry } from '../api/types';
 import {
   Badge,
@@ -37,7 +37,7 @@ export function LoginHistoryScreen() {
       const response = await api<{ data: LoginHistoryEntry[] }>('/auth/history?per_page=100');
       setEntries(response.data);
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'Historique indisponible.');
+      setError(getErrorMessage(caught, 'Historique indisponible.'));
     } finally {
       setLoading(false);
     }

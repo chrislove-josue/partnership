@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { api, ApiError, invalidateCache } from '../api/client';
+import { api, getErrorMessage, invalidateCache } from '../api/client';
 import type { Cellule, Church, Partner } from '../api/types';
 import { ImportExportCard } from '../components/ImportExportCard';
 import {
@@ -67,7 +67,7 @@ export function PartnersScreen() {
       setCellules(celluleData.data);
       setChurchId((current) => current || churchData.data[0]?.id.toString() || '');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Impossible de charger les partenaires.');
+      setError(getErrorMessage(caught, 'Impossible de charger les partenaires.'));
     } finally {
       setLoading(false);
     }
@@ -126,7 +126,7 @@ export function PartnersScreen() {
       setFormOpen(false);
       await load();
     } catch (caught) {
-      setFormError(caught instanceof ApiError ? caught.message : 'Enregistrement impossible.');
+      setFormError(getErrorMessage(caught, 'Enregistrement impossible.'));
     } finally {
       setSaving(false);
     }
@@ -142,7 +142,7 @@ export function PartnersScreen() {
       setToDelete(null);
       await load();
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'Suppression impossible.');
+      setError(getErrorMessage(caught, 'Suppression impossible.'));
       setToDelete(null);
     }
   };

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { api, ApiError, invalidateCache } from '../api/client';
+import { api, getErrorMessage, invalidateCache } from '../api/client';
 import type { Category, Cellule, Church, Partner, RoleOption, User } from '../api/types';
 import {
   Badge,
@@ -80,7 +80,7 @@ export function AdminScreen() {
       setChurchId((current) => current || churchData.data[0]?.id.toString() || '');
       setAssignedChurchId((current) => current || churchData.data[0]?.id.toString() || '');
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Impossible de charger l’administration.');
+      setError(getErrorMessage(caught, 'Impossible de charger l’administration.'));
     } finally {
       setLoading(false);
     }
@@ -160,7 +160,7 @@ export function AdminScreen() {
       setFormOpen(false);
       await load();
     } catch (caught) {
-      setFormError(caught instanceof ApiError ? caught.message : 'Enregistrement impossible.');
+      setFormError(getErrorMessage(caught, 'Enregistrement impossible.'));
     } finally {
       setSaving(false);
     }
@@ -176,7 +176,7 @@ export function AdminScreen() {
       setToDelete(null);
       await load();
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'Suppression impossible.');
+      setError(getErrorMessage(caught, 'Suppression impossible.'));
       setToDelete(null);
     }
   };

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { api, ApiError } from '../api/client';
+import { api, getErrorMessage } from '../api/client';
 import { formatSessionDate } from '../api/session';
 import type { User } from '../api/types';
 import { useAuth } from '../context/AuthContext';
@@ -74,7 +74,7 @@ export function ProfileScreen() {
       setCurrentPassword('');
       setSuccess('Profil mis à jour.');
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'Mise à jour impossible.');
+      setError(getErrorMessage(caught, 'Mise à jour impossible.'));
     } finally {
       setSaving(false);
     }

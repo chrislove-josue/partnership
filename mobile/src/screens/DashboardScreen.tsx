@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { api } from '../api/client';
+import { api, getErrorMessage } from '../api/client';
 import type { AppNotification, Church, Donation, Partner } from '../api/types';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -71,7 +71,7 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
       setNotifications(notificationResponse.data);
       setUnread(notificationResponse.unread_count);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Impossible de charger le tableau de bord.');
+      setError(getErrorMessage(caught, 'Impossible de charger le tableau de bord.'));
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { api, ApiError, invalidateCache } from '../api/client';
+import { api, getErrorMessage, invalidateCache } from '../api/client';
 import type { AppNotification } from '../api/types';
 import {
   Badge,
@@ -30,7 +30,7 @@ export function NotificationsScreen() {
       setNotifications(response.data);
       setUnread(response.unread_count);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Impossible de charger les notifications.');
+      setError(getErrorMessage(caught, 'Impossible de charger les notifications.'));
     } finally {
       setLoading(false);
     }
@@ -50,7 +50,7 @@ export function NotificationsScreen() {
       invalidateCache('notifications');
       await load();
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'Mise à jour impossible.');
+      setError(getErrorMessage(caught, 'Mise à jour impossible.'));
     }
   };
 

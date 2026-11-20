@@ -1,4 +1,15 @@
 import { File, Paths } from 'expo-file-system';
+import {
+  enqueueChange,
+  getEntity,
+  initDatabase,
+  isDatabaseReady,
+  listEntities,
+  markEntityDeleted,
+  upsertEntity,
+  deleteEntity,
+  type EntityName,
+} from '../db/database';
 import { readCache, readStaleCache, writeCache } from './cache';
 
 export { clearCache, invalidateCache } from './cache';

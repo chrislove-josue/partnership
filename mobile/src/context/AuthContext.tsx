@@ -12,11 +12,12 @@ import {
 } from '../api/client';
 import { clearSession, loadSession, saveSession } from '../api/session';
 import type { SessionInfo } from '../api/session';
-import type { User } from '../api/types';
+import { isSuperAdmin, type User } from '../api/types';
 
 const TOKEN_KEY = 'churchmanager_token';
 const USER_KEY = 'churchmanager_user';
 const API_URL_KEY = 'churchmanager_api_url';
+const ADMIN_DEVICE_KEY = 'churchmanager_api_admin';
 
 interface AuthContextValue {
   user: User | null;

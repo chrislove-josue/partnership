@@ -127,6 +127,8 @@ interface RequestOptions {
   cacheTtl?: number;
   /** Ignore le cache et recharge depuis le serveur. */
   refresh?: boolean;
+  /** Utilisé par la synchronisation pour éviter de repasser par la couche hors-ligne. */
+  skipOffline?: boolean;
 }
 
 async function parseResponse(response: Response): Promise<Record<string, unknown>> {
@@ -143,7 +145,7 @@ async function parseResponse(response: Response): Promise<Record<string, unknown
   }
 }
 
-export async function api<T>(
+async function performRequest<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { apiDownload, apiUpload, ApiError, getErrorMessage, invalidateCache } from '../api/client';
 import type { ImportResult } from '../api/types';
-import { isDownloadedFile } from '../db/storage';
+import { isDownloadedFile, openStorageSettings } from '../db/storage';
 import { Card, colors, SectionTitle } from './ui';
 
 const EXCEL_MIME =
@@ -80,11 +80,26 @@ export function ImportExportCard({
     try {
       setDownloading(true);
       const uri = await apiDownload(templatePath, templateFileName);
-      const location = isDownloadedFile(uri)
-        ? `Enregistré dans Téléchargements/${templateFileName}\n(copie conservée dans Documents/FinanceMobile/files).`
-        : `Le fichier est disponible ici : ${uri}`;
 
-      Alert.alert('Modèle téléchargé', location);
+      if (isDownloadedFile(uri)) {
+        Alert.alert(
+          'Modèle téléchargé',
+          `Enregistré dans Téléchargements/${templateFileName}\n` +
+            '(copie conservée dans Documents/FinanceMobile/files).',
+        );
+        return;
+      }
+
+      Alert.alert(
+        'Autorisation requise',
+        `Le modèle n’a pas pu être enregistré dans Téléchargements. ` +
+          `Autorisez « Tous les fichiers » pour FinanceMobile, puis réessayez.\n` +
+          `Fichier temporaire : ${uri}`,
+        [
+          { text: 'Annuler' },
+          { text: 'Ouvrir les paramètres', onPress: () => void openStorageSettings() },
+        ],
+      );
     } catch (caught) {
       Alert.alert(
         'Téléchargement impossible',

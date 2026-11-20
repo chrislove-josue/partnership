@@ -221,6 +221,7 @@ export function ProfileScreen() {
 
 const styles = StyleSheet.create({
   actions: { gap: 14, marginTop: 4 },
+  syncActions: { gap: 14, marginTop: 12 },
   help: { color: colors.muted, fontSize: 12, lineHeight: 18 },
   success: { color: colors.green, fontWeight: '700', marginBottom: 12 },
 });

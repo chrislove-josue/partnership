@@ -40,6 +40,9 @@ function handleUnauthorized(sendsToken: boolean): void {
   unauthorizedHandler?.();
 }
 
+export const NETWORK_ERROR_MESSAGE =
+  'Impossible de joindre le serveur. Vérifiez votre connexion et l’adresse de l’API.';
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -49,6 +52,58 @@ export class ApiError extends Error {
     super(message);
     this.name = 'ApiError';
   }
+}
+
+function defaultMessage(status: number, fallback: string): string {
+  switch (status) {
+    case 0:
+      return NETWORK_ERROR_MESSAGE;
+    case 401:
+      return 'Votre session a expiré. Veuillez vous reconnecter.';
+    case 403:
+      return 'Vous n’avez pas l’autorisation pour effectuer cette action.';
+    case 404:
+      return 'La ressource demandée est introuvable.';
+    case 422:
+      return 'Vérifiez les informations saisies.';
+    case 500:
+      return 'Une erreur est survenue côté serveur. Veuillez réessayer.';
+    default:
+      return fallback;
+  }
+}
+
+function messageFromData(data: Record<string, unknown>, status: number, fallback: string): string {
+  const message = typeof data.message === 'string' ? data.message.trim() : '';
+
+  return message || defaultMessage(status, fallback);
+}
+
+/** Transforme toute erreur en message français affichable par l'application. */
+export function getErrorMessage(caught: unknown, fallback: string): string {
+  if (caught instanceof ApiError) {
+    const details = Object.values(caught.errors ?? {})
+      .flat()
+      .filter((detail): detail is string => typeof detail === 'string' && detail.trim() !== '');
+
+    return details[0] ?? caught.message ?? fallback;
+  }
+
+  if (caught instanceof Error && caught.message.trim() !== '') {
+    if (/network request failed|failed to fetch|networkerror|timeout/i.test(caught.message)) {
+      return NETWORK_ERROR_MESSAGE;
+    }
+
+    return caught.message;
+  }
+
+  return fallback;
+}
+
+export function isNetworkError(caught: unknown): boolean {
+  return caught instanceof ApiError
+    ? caught.status === 0
+    : caught instanceof Error && /network request failed|failed to fetch|networkerror|timeout/i.test(caught.message);
 }
 
 interface RequestOptions {
@@ -121,7 +176,7 @@ export async function api<T>(
         return stale;
       }
     }
-    throw error;
+    throw new ApiError(NETWORK_ERROR_MESSAGE, 0);
   }
 
   const data = await parseResponse(response);
@@ -138,7 +193,7 @@ export async function api<T>(
     }
     const errors = (data.errors ?? undefined) as Record<string, string[]> | undefined;
     throw new ApiError(
-      String(data.message ?? 'Une erreur est survenue. Veuillez réessayer.'),
+      messageFromData(data, response.status, 'Une erreur est survenue. Veuillez réessayer.'),
       response.status,
       errors,
     );

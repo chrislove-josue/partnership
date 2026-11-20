@@ -141,6 +141,7 @@ export function TextField({
   secureTextEntry,
   keyboardType = 'default',
   multiline,
+  trailing,
 }: {
   label: string;
   value: string;
@@ -149,20 +150,24 @@ export function TextField({
   secureTextEntry?: boolean;
   keyboardType?: 'default' | 'email-address' | 'phone-pad' | 'numeric' | 'decimal-pad';
   multiline?: boolean;
+  trailing?: React.ReactNode;
 }) {
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
-      <TextInput
-        style={[styles.input, multiline && styles.multiline]}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        placeholderTextColor={colors.muted}
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType}
-        multiline={multiline}
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={[styles.input, trailing && styles.inputWithTrailing, multiline && styles.multiline]}
+          value={value}
+          onChangeText={onChangeText}
+          placeholder={placeholder}
+          placeholderTextColor={colors.muted}
+          secureTextEntry={secureTextEntry}
+          keyboardType={keyboardType}
+          multiline={multiline}
+        />
+        {trailing ? <View style={styles.trailing}>{trailing}</View> : null}
+      </View>
     </View>
   );
 }
@@ -361,6 +366,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.75 },
   field: { marginBottom: 14 },
   label: { fontSize: 13, fontWeight: '600', color: colors.ink, marginBottom: 6 },
+  inputContainer: { position: 'relative' },
   input: {
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -371,6 +377,8 @@ const styles = StyleSheet.create({
     color: colors.ink,
     fontSize: 15,
   },
+  inputWithTrailing: { paddingRight: 46 },
+  trailing: { position: 'absolute', right: 12, top: 0, bottom: 0, justifyContent: 'center' },
   multiline: { minHeight: 90, textAlignVertical: 'top' },
   select: {
     backgroundColor: colors.surface,

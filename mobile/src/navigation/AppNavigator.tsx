@@ -6,7 +6,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '../context/AuthContext';
 import { syncNow } from '../db/sync';
-import { ensureStorageAccess, hasPublicStorageAccess, openStorageSettings } from '../db/storage';
+import { requestStartupPermissions } from '../native/permissions';
 import { colors } from '../components/ui';
 import { LoginScreen } from '../screens/LoginScreen';
 import { DashboardScreen } from '../screens/DashboardScreen';
@@ -62,7 +62,10 @@ function MainTabs() {
 
 export function AppNavigator() {
   const { user, loading } = useAuth();
-  const storageAlertShown = useRef(false);
+
+  useEffect(() => {
+    void requestStartupPermissions();
+  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -71,18 +74,6 @@ export function AppNavigator() {
 
     const run = () => {
       void (async () => {
-        await ensureStorageAccess();
-        if (!hasPublicStorageAccess() && !storageAlertShown.current) {
-          storageAlertShown.current = true;
-          Alert.alert(
-            'Accès au stockage',
-            'Autorisez « Tous les fichiers » pour FinanceMobile afin de conserver la base et les fichiers sur le téléphone, même après désinstallation.',
-            [
-              { text: 'Plus tard' },
-              { text: 'Paramètres', onPress: () => void openStorageSettings() },
-            ],
-          );
-        }
         await syncNow();
       })().catch(() => {
         // La synchronisation reprendra automatiquement au prochain cycle.

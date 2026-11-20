@@ -7,7 +7,6 @@ import type { User } from '../api/types';
 import { useAuth } from '../context/AuthContext';
 import { countPendingChanges, getMeta, initDatabase, listConflicts } from '../db/database';
 import { syncNow } from '../db/sync';
-import { ensureStorageAccess, hasPublicStorageAccess, openStorageSettings } from '../db/storage';
 import {
   Badge,
   Card,

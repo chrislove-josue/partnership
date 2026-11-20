@@ -115,15 +115,20 @@ class DataController extends Controller
         ])->all()]);
     }
 
-    public function categories(): JsonResponse
+    public function categories(Request $request): JsonResponse
     {
+        $categories = CategoryDon::query()
+            ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
+            ->orderBy('name')
+            ->get();
+
         return response()->json([
-            'data' => CategoryDon::query()->orderBy('name')->get()
-                ->map(fn (CategoryDon $category): array => [
-                    'id' => $category->id,
-                    'name' => $category->name,
-                    'color' => $category->color,
-                ])->all(),
+            'data' => $categories->map(fn (CategoryDon $category): array => [
+                'id' => $category->id,
+                'name' => $category->name,
+                'color' => $category->color,
+                'updated_at' => $category->updated_at?->toIso8601String(),
+            ])->all(),
         ]);
     }
 
@@ -138,6 +143,7 @@ class DataController extends Controller
                 'category:id,name,color',
             ])
             ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
+            ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
             ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))
             ->when($request->filled('category_id'), fn ($query) => $query->where('category_id', $request->integer('category_id')))
             ->when($request->filled('partner_id'), fn ($query) => $query->where('partner_id', $request->integer('partner_id')))
@@ -158,6 +164,7 @@ class DataController extends Controller
             'category_id' => $donation->category_id,
             'category' => $donation->category?->name,
             'color' => $donation->category?->color,
+            'updated_at' => $donation->updated_at?->toIso8601String(),
         ])->all()]);
     }
 

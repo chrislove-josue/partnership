@@ -137,6 +137,21 @@ export async function getEntity<T>(entity: EntityName, id: string | number): Pro
   return row ? (JSON.parse(row.data) as T) : null;
 }
 
+export async function isEntityPending(entity: EntityName, id: string | number): Promise<boolean> {
+  const row = await db().getFirstAsync<{ pending: number }>(
+    'SELECT pending FROM entities WHERE entity = ? AND id = ?',
+    [entity, String(id)],
+  );
+  return (row?.pending ?? 0) === 1;
+}
+
+export async function clearEntityPending(entity: EntityName, id: string | number): Promise<void> {
+  await db().runAsync(
+    'UPDATE entities SET pending = 0 WHERE entity = ? AND id = ?',
+    [entity, String(id)],
+  );
+}
+
 export async function markEntityDeleted(entity: EntityName, id: string | number): Promise<void> {
   await db().runAsync(
     'UPDATE entities SET deleted = 1, pending = 1 WHERE entity = ? AND id = ?',

@@ -11,12 +11,19 @@ export const PUBLIC_FILES_URI = `${PUBLIC_DIR_URI}files/`;
 const DATABASE_FILE = 'finance.sqlite';
 const BACKUP_URI = `${PUBLIC_DIR_URI}${DATABASE_FILE}`;
 
+let publicAccess: boolean | null = null;
+
 export function privateDatabaseUri(): string {
   return `${LegacyFileSystem.documentDirectory ?? ''}${DATABASE_FILE}`;
 }
 
 export function publicBackupUri(): string {
   return BACKUP_URI;
+}
+
+/** Indique si le dossier public est accessible (permission « Tous les fichiers »). */
+export function hasPublicStorageAccess(): boolean {
+  return publicAccess === true;
 }
 
 async function ensureDirectory(uri: string): Promise<void> {
@@ -26,14 +33,24 @@ async function ensureDirectory(uri: string): Promise<void> {
   }
 }
 
-/** Vérifie l'accès au dossier public ; l'utilisateur doit autoriser « Tous les fichiers ». */
-export async function ensureStorageAccess(): Promise<void> {
+/**
+ * Vérifie l'accès au dossier public sans jamais bloquer le démarrage de l'application.
+ * L'utilisateur doit autoriser « Tous les fichiers » dans les paramètres Android.
+ */
+export async function ensureStorageAccess(): Promise<boolean> {
   if (Platform.OS !== 'android') {
-    return;
+    publicAccess = true;
+    return true;
   }
 
-  await ensureDirectory(PUBLIC_DIR_URI);
-  await ensureDirectory(PUBLIC_FILES_URI);
+  try {
+    await ensureDirectory(PUBLIC_DIR_URI);
+    await ensureDirectory(PUBLIC_FILES_URI);
+    publicAccess = true;
+  } catch {
+    publicAccess = false;
+  }
+  return publicAccess;
 }
 
 export async function openStorageSettings(): Promise<void> {
@@ -41,36 +58,43 @@ export async function openStorageSettings(): Promise<void> {
 }
 
 export async function restoreDatabaseBackup(): Promise<void> {
-  if (Platform.OS !== 'android') {
+  if (!(await ensureStorageAccess())) {
     return;
   }
 
-  const [privateInfo, backupInfo] = await Promise.all([
-    LegacyFileSystem.getInfoAsync(privateDatabaseUri()),
-    LegacyFileSystem.getInfoAsync(BACKUP_URI),
-  ]);
+  try {
+    const [privateInfo, backupInfo] = await Promise.all([
+      LegacyFileSystem.getInfoAsync(privateDatabaseUri()),
+      LegacyFileSystem.getInfoAsync(BACKUP_URI),
+    ]);
 
-  if (!privateInfo.exists && backupInfo.exists) {
-    await LegacyFileSystem.copyAsync({ from: BACKUP_URI, to: privateDatabaseUri() });
+    if (!privateInfo.exists && backupInfo.exists) {
+      await LegacyFileSystem.copyAsync({ from: BACKUP_URI, to: privateDatabaseUri() });
+    }
+  } catch {
+    // Une sauvegarde illisible ne doit pas empêcher la création d'une base neuve.
   }
 }
 
 export async function backupDatabase(): Promise<void> {
-  if (Platform.OS !== 'android') {
+  if (!(await ensureStorageAccess())) {
     return;
   }
 
-  await ensureStorageAccess();
-  const privateInfo = await LegacyFileSystem.getInfoAsync(privateDatabaseUri());
-  if (!privateInfo.exists) {
-    return;
-  }
+  try {
+    const privateInfo = await LegacyFileSystem.getInfoAsync(privateDatabaseUri());
+    if (!privateInfo.exists) {
+      return;
+    }
 
-  const backupInfo = await LegacyFileSystem.getInfoAsync(BACKUP_URI);
-  if (backupInfo.exists) {
-    await LegacyFileSystem.deleteAsync(BACKUP_URI, { idempotent: true });
+    const backupInfo = await LegacyFileSystem.getInfoAsync(BACKUP_URI);
+    if (backupInfo.exists) {
+      await LegacyFileSystem.deleteAsync(BACKUP_URI, { idempotent: true });
+    }
+    await LegacyFileSystem.copyAsync({ from: privateDatabaseUri(), to: BACKUP_URI });
+  } catch {
+    // La base privée reste utilisable si la copie publique échoue.
   }
-  await LegacyFileSystem.copyAsync({ from: privateDatabaseUri(), to: BACKUP_URI });
 }
 
 /** Retourne l'URI publique où enregistrer un fichier exporté (XLSX, etc.). */

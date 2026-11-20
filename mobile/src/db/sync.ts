@@ -2,9 +2,11 @@ import { ApiError, api, getAuthToken, getErrorMessage } from '../api/client';
 import {
   addConflict,
   countPendingChanges,
+  clearEntityPending,
   deleteEntity,
   getMeta,
   initDatabase,
+  isEntityPending,
   listOutbox,
   recordOutboxAttempt,
   removeOutboxEntry,

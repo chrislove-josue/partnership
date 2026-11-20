@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { api, apiDownload, getErrorMessage } from '../api/client';
-import { isDownloadedFile, openStorageSettings } from '../db/storage';
 import type { Church, PartnershipReport, RecipientsPreview } from '../api/types';
 import {
   Badge,
@@ -138,27 +137,8 @@ export function ReportsScreen() {
     setError('');
     try {
       const fileName = `rapport-${churchId}-${type}-${year}.xlsx`;
-      const uri = await apiDownload(`/reports/partnership/export?${query()}`, fileName);
-
-      if (isDownloadedFile(uri)) {
-        Alert.alert(
-          'Rapport téléchargé',
-          `Enregistré dans Téléchargements/${fileName}\n` +
-            '(copie conservée dans Documents/FinanceMobile/files).',
-        );
-        return;
-      }
-
-      Alert.alert(
-        'Autorisation requise',
-        `Le rapport n’a pas pu être enregistré dans Téléchargements. ` +
-          `Autorisez « Tous les fichiers » pour FinanceMobile, puis réessayez.\n` +
-          `Fichier temporaire : ${uri}`,
-        [
-          { text: 'Annuler' },
-          { text: 'Ouvrir les paramètres', onPress: () => void openStorageSettings() },
-        ],
-      );
+      await apiDownload(`/reports/partnership/export?${query()}`, fileName);
+      Alert.alert('Rapport téléchargé', 'Le fichier est prêt.');
     } catch (caught) {
       setError(getErrorMessage(caught, 'Export impossible.'));
     } finally {

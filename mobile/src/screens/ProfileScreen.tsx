@@ -187,15 +187,28 @@ export function ProfileScreen() {
 
       <Card>
         <SectionTitle>Connexion au serveur</SectionTitle>
-        <TextField
-          label="Adresse de l'API"
-          value={serverUrl}
-          onChangeText={setServerUrl}
-          placeholder="http://192.168.1.10:8000/api"
-        />
-        <Text style={styles.help}>
-          Utilisez l’adresse de la machine qui héberge Laravel, suivie de /api. Sur un téléphone physique, remplacez localhost par l’IP de cette machine.
-        </Text>
+        {canConfigureApiUrl ? (
+          <>
+            <TextField
+              label="Adresse de l'API (super administrateur)"
+              value={serverUrl}
+              onChangeText={setServerUrl}
+              placeholder="http://192.168.1.10:8000/api"
+            />
+            <Text style={styles.help}>
+              Utilisez l’adresse de la machine qui héberge Laravel, suivie de /api.
+            </Text>
+            <SecondaryButton
+              title="Charger l’adresse configurée sur le site web"
+              onPress={() => void loadWebApiUrl()}
+              disabled={saving}
+            />
+          </>
+        ) : (
+          <Text style={styles.help}>
+            Adresse utilisée : {apiUrl}. Seul le super administrateur peut la modifier.
+          </Text>
+        )}
       </Card>
 
       <Card>

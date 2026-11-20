@@ -9,6 +9,7 @@ import {
   Card,
   colors,
   ConfirmModal,
+  DateField,
   EmptyState,
   ErrorView,
   formatDate,
@@ -195,7 +196,7 @@ export function DonationsScreen() {
         >
           <Card>
             <TextField label="Montant (FCFA)" value={amount} onChangeText={setAmount} keyboardType="numeric" placeholder="Ex. 5000" />
-            <TextField label="Date (AAAA-MM-JJ)" value={date} onChangeText={setDate} placeholder="2026-11-19" />
+            <DateField label="Date du don" value={date} onChange={setDate} />
             <SelectField
               label="Église"
               value={churchId}

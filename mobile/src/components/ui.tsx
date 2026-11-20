@@ -249,6 +249,76 @@ export function SelectField({
   );
 }
 
+const MONTH_LABELS = [
+  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
+];
+
+/** Date saisie uniquement par sélection (jour / mois / année), sans clavier. */
+export function DateField({
+  label,
+  value,
+  onChange,
+  allowEmpty = false,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  allowEmpty?: boolean;
+}) {
+  const currentYear = new Date().getFullYear();
+  const parts = value ? value.split('-') : [];
+  const year = parts[0] ?? '';
+  const month = parts[1] ?? '';
+  const day = parts[2] ?? '';
+
+  const emptyOption = allowEmpty ? [{ label: '—', value: '' }] : [];
+  const yearOptions = [
+    ...emptyOption,
+    ...Array.from({ length: 100 }, (_, index) => String(currentYear - index)),
+  ];
+  const monthOptions = [
+    ...emptyOption,
+    ...MONTH_LABELS.map((name, index) => ({
+      label: name,
+      value: String(index + 1).padStart(2, '0'),
+    })),
+  ];
+  const maxDay = year && month ? new Date(Number(year), Number(month), 0).getDate() : 31;
+  const dayOptions = [
+    ...emptyOption,
+    ...Array.from({ length: maxDay }, (_, index) => String(index + 1).padStart(2, '0')),
+  ];
+
+  const emit = (nextYear: string, nextMonth: string, nextDay: string) => {
+    if (!nextYear || !nextMonth || !nextDay) {
+      onChange('');
+      return;
+    }
+
+    const lastDay = new Date(Number(nextYear), Number(nextMonth), 0).getDate();
+    const safeDay = String(Math.min(Number(nextDay), lastDay)).padStart(2, '0');
+    onChange(`${nextYear}-${nextMonth}-${safeDay}`);
+  };
+
+  return (
+    <View style={styles.field}>
+      <Text style={styles.label}>{label}</Text>
+      <View style={styles.dateRow}>
+        <View style={styles.datePart}>
+          <SelectField label="Jour" value={day} options={dayOptions} onChange={(next) => emit(year, month, next)} placeholder="Jour" />
+        </View>
+        <View style={styles.datePart}>
+          <SelectField label="Mois" value={month} options={monthOptions} onChange={(next) => emit(year, next, day)} placeholder="Mois" />
+        </View>
+        <View style={styles.datePart}>
+          <SelectField label="Année" value={year} options={yearOptions} onChange={(next) => emit(next, month, day)} placeholder="Année" />
+        </View>
+      </View>
+    </View>
+  );
+}
+
 export function CheckboxField({
   label,
   checked,
@@ -385,6 +455,8 @@ const styles = StyleSheet.create({
   disabled: { opacity: 0.5 },
   pressed: { opacity: 0.75 },
   field: { marginBottom: 14 },
+  dateRow: { flexDirection: 'row', gap: 8 },
+  datePart: { flex: 1 },
   label: { fontSize: 13, fontWeight: '600', color: colors.ink, marginBottom: 6 },
   inputContainer: { position: 'relative' },
   input: {

@@ -159,7 +159,7 @@ class UserRoleAssignmentTest extends TestCase
                 'is_active' => true,
             ])
             ->call('create')
-            ->assertHasFormErrors(['data.roles.0']);
+            ->assertHasErrors(['data.roles.0']);
 
         $this->assertDatabaseMissing('users', ['email' => 'personnel-test@example.test']);
 
@@ -174,7 +174,7 @@ class UserRoleAssignmentTest extends TestCase
                 'is_active' => true,
             ])
             ->call('create')
-            ->assertHasNoFormErrors();
+            ->assertHasNoErrors();
 
         $this->assertDatabaseHas('users', ['email' => 'personnel-test@example.test']);
     }

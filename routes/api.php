@@ -59,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/reports/partnership/export', [ReportController::class, 'export']);
     Route::post('/reports/partnership/send', [ReportController::class, 'send']);
 
+    Route::get('/sync/deletions', [SyncController::class, 'deletions']);
+
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
 });

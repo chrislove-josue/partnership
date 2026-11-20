@@ -25,14 +25,23 @@ class DataController extends Controller
 
     public function churches(Request $request): JsonResponse
     {
+        $since = $request->string('updated_after')->toString();
+        $churches = $this->access->accessibleChurches($request->user());
+
+        if ($since !== '') {
+            $churches = $churches->filter(
+                fn (Church $church): bool => (string) $church->updated_at?->toIso8601String() > $since,
+            );
+        }
+
         return response()->json([
-            'data' => $this->access->accessibleChurches($request->user())
-                ->map(fn (Church $church): array => [
-                    'id' => $church->id,
-                    'name' => $church->name,
-                    'type' => $church->type?->value ?? (string) $church->type,
-                    'parent_id' => $church->parent_id,
-                ])->values()->all(),
+            'data' => $churches->map(fn (Church $church): array => [
+                'id' => $church->id,
+                'name' => $church->name,
+                'type' => $church->type?->value ?? (string) $church->type,
+                'parent_id' => $church->parent_id,
+                'updated_at' => $church->updated_at?->toIso8601String(),
+            ])->values()->all(),
         ]);
     }
 

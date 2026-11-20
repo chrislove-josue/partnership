@@ -9,6 +9,7 @@ export function LoginScreen() {
   const { login, apiUrl, updateApiUrl } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [serverUrl, setServerUrl] = useState(apiUrl);
   const [serverSaved, setServerSaved] = useState(false);
   const [error, setError] = useState('');
@@ -78,7 +79,18 @@ export function LoginScreen() {
           value={password}
           onChangeText={setPassword}
           placeholder="Mot de passe"
-          secureTextEntry
+          secureTextEntry={!showPassword}
+          trailing={
+            <Pressable
+              onPress={() => setShowPassword((visible) => !visible)}
+              accessibilityRole="button"
+              accessibilityLabel={showPassword ? 'Masquer le mot de passe' : 'Afficher le mot de passe'}
+              hitSlop={8}
+              style={styles.passwordVisibilityToggle}
+            >
+              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={22} color={colors.blue} />
+            </Pressable>
+          }
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <PrimaryButton title="Se connecter" onPress={submit} loading={loading} disabled={!email || !password} />

@@ -94,8 +94,8 @@ export function LoginScreen() {
         />
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <PrimaryButton title="Se connecter" onPress={submit} loading={loading} disabled={!email || !password} />
-        <AppFooter compact />
       </View>
+      <AppFooter compact />
     </KeyboardAvoidingView>
   );
 }

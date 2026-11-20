@@ -80,14 +80,21 @@ export function Screen({
 export function AppFooter({ compact = false }: { compact?: boolean }) {
   return (
     <View style={[styles.appFooter, compact && styles.appFooterCompact]}>
-      <View style={styles.appFooterSpacer} />
-      <View style={styles.appFooterMain}>
-        <Pressable onPress={() => void Linking.openURL('https://wa.me/22998123353')}>
-          <Text style={styles.appFooterLink}>Pour toute assistance : +229 01 98 12 33 53</Text>
-        </Pressable>
-        <Text style={styles.appFooterText}>Conçu et Développé par Nestor ATCHOUGO</Text>
-      </View>
-      <Text style={styles.appFooterVersion}>Version {APP_VERSION}</Text>
+      <Pressable
+        onPress={() => void Linking.openURL('https://wa.me/22998123353')}
+        accessibilityRole="link"
+        accessibilityLabel="Contacter l'assistance par WhatsApp"
+      >
+        <Text style={styles.appFooterLink} numberOfLines={1}>
+          Pour toute assistance : +229 01 98 12 33 53
+        </Text>
+      </Pressable>
+      <Text style={styles.appFooterText} numberOfLines={1}>
+        Conçu et Développé par Nestor ATCHOUGO
+      </Text>
+      <Text style={styles.appFooterVersion} numberOfLines={1}>
+        Version {APP_VERSION}
+      </Text>
     </View>
   );
 }
@@ -464,14 +471,12 @@ const styles = StyleSheet.create({
   appFooter: {
     width: '100%',
     marginTop: 'auto',
-    paddingTop: 28,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+    paddingTop: 24,
+    alignItems: 'center',
+    gap: 8,
   },
-  appFooterCompact: { paddingTop: 16 },
-  appFooterSpacer: { flex: 1 },
-  appFooterMain: { flex: 2, alignItems: 'center', gap: 6 },
-  appFooterLink: { fontSize: 11, color: colors.blue, textAlign: 'center', textDecorationLine: 'underline' },
-  appFooterText: { fontSize: 11, color: colors.muted, textAlign: 'center' },
-  appFooterVersion: { flex: 1, fontSize: 10, color: colors.muted, textAlign: 'right' },
+  appFooterCompact: { paddingTop: 18 },
+  appFooterLink: { fontSize: 13, color: colors.blue, textAlign: 'center', textDecorationLine: 'underline' },
+  appFooterText: { fontSize: 13, fontWeight: '600', color: colors.ink, textAlign: 'center' },
+  appFooterVersion: { fontSize: 12, color: colors.muted, textAlign: 'center' },
 });

@@ -148,19 +148,18 @@ class UserRoleAssignmentTest extends TestCase
         $staffId = Role::where('name', RoleName::STAFF->value)->firstOrFail()->id;
         $localPastorId = Role::where('name', RoleName::LOCAL_PASTOR->value)->firstOrFail()->id;
 
-        Livewire::actingAs($pastor)
-            ->test(CreateUser::class)
-            ->fillForm([
-                'name' => 'Personnel_test',
-                'email' => 'personnel-test@example.test',
-                'password' => 'azerty123',
-                'roles' => [$localPastorId],
-                'assigned_church_id' => $this->local->id,
-                'is_active' => true,
-            ])
-            ->call('create')
-            ->tap(fn ($component) => dump($component->getForm('form')->getErrors()))
-            ->assertHasFormErrors();
+        $page = Livewire::actingAs($pastor)->test(CreateUser::class);
+        $page->fillForm([
+            'name' => 'Personnel_test',
+            'email' => 'personnel-test@example.test',
+            'password' => 'azerty123',
+            'roles' => [$localPastorId],
+            'assigned_church_id' => $this->local->id,
+            'is_active' => true,
+        ])->call('create');
+
+        dump($page->errors());
+        $page->assertHasFormErrors();
 
         $this->assertDatabaseMissing('users', ['email' => 'personnel-test@example.test']);
 

@@ -9,6 +9,7 @@ import { Linking, Platform } from 'react-native';
  */
 export const PUBLIC_DIR_URI = 'file:///storage/emulated/0/Documents/FinanceMobile/';
 export const PUBLIC_FILES_URI = `${PUBLIC_DIR_URI}files/`;
+export const DOWNLOADS_URI = 'file:///storage/emulated/0/Download/';
 const DATABASE_FILE = 'finance.sqlite';
 const BACKUP_URI = `${PUBLIC_DIR_URI}${DATABASE_FILE}`;
 
@@ -111,4 +112,27 @@ export async function backupDatabase(): Promise<void> {
 export async function publicFilePath(fileName: string): Promise<string> {
   await ensureStorageAccess();
   return `${PUBLIC_FILES_URI}${fileName}`;
+}
+
+/** Enregistre aussi le fichier dans le dossier Téléchargements visibile par l'utilisateur. */
+export async function downloadsFilePath(
+  sourceUri: string,
+  fileName: string,
+): Promise<string | null> {
+  if (!(await ensureStorageAccess())) {
+    return null;
+  }
+
+  try {
+    await ensureDirectory(DOWNLOADS_URI);
+    const destination = `${DOWNLOADS_URI}${fileName}`;
+    await LegacyFileSystem.copyAsync({ from: sourceUri, to: destination });
+    return destination;
+  } catch {
+    return null;
+  }
+}
+
+export function isDownloadedFile(uri: string): boolean {
+  return uri.startsWith(DOWNLOADS_URI) || uri.startsWith(PUBLIC_FILES_URI);
 }

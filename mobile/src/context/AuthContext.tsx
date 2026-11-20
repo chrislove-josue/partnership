@@ -5,6 +5,7 @@ import {
   ApiError,
   clearCache,
   getApiUrl,
+  notifyServerLogout,
   setApiUrl,
   setAuthToken,
   setUnauthorizedHandler,
@@ -111,15 +112,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [forget]);
 
   const logout = useCallback(async () => {
-    try {
-      await api('/logout', { method: 'POST' });
-    } catch (error) {
-      if (!(error instanceof ApiError)) {
-        throw error;
-      }
-    } finally {
-      await forget();
-    }
+    // L'appel serveur démarre avec le jeton encore présent, mais la session
+    // locale est effacée immédiatement : l'utilisateur revient à la connexion
+    // même si le réseau est lent ou indisponible.
+    const serverLogout = notifyServerLogout();
+    await forget();
+    await serverLogout;
   }, [forget]);
 
   useEffect(() => {

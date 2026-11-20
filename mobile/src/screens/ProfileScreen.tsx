@@ -235,17 +235,8 @@ export function ProfileScreen() {
         <Text style={styles.help}>
           Dernière synchronisation : {syncInfo.lastSync ? formatSessionDate(syncInfo.lastSync) : 'jamais'}
         </Text>
-        <Text style={styles.help}>
-          Sauvegarde conservée dans Documents/FinanceMobile, même après désinstallation.
-        </Text>
-        <Text style={styles.help}>
-          Accès au stockage : {storageOk ? 'autorisé' : 'à autoriser dans les paramètres Android'}
-        </Text>
         <View style={styles.syncActions}>
           <SecondaryButton title="Synchroniser maintenant" onPress={() => void synchronize()} disabled={syncing} />
-          {storageOk ? null : (
-            <SecondaryButton title="Ouvrir les paramètres" onPress={() => void openStorageSettings()} />
-          )}
         </View>
       </Card>
 

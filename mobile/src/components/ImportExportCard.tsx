@@ -1,5 +1,4 @@
 import * as DocumentPicker from 'expo-document-picker';
-import * as Sharing from 'expo-sharing';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { apiDownload, apiUpload, ApiError, getErrorMessage, invalidateCache } from '../api/client';

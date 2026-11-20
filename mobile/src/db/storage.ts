@@ -114,7 +114,7 @@ export async function publicFilePath(fileName: string): Promise<string> {
   return `${PUBLIC_FILES_URI}${fileName}`;
 }
 
-/** Enregistre aussi le fichier dans le dossier Téléchargements visibile par l'utilisateur. */
+/** Enregistre aussi le fichier dans le dossier Téléchargements visible par l'utilisateur. */
 export async function downloadsFilePath(
   sourceUri: string,
   fileName: string,

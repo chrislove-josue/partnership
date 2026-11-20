@@ -213,7 +213,7 @@ php artisan test --filter=MobileImportApiTest
 php artisan test
 ```
 
-Dernier résultat connu : **137 tests réussis (753 assertions)**.
+Dernier résultat connu : **159 tests réussis (864 assertions)**.
 
 ### Mobile
 
@@ -535,6 +535,27 @@ cd C:\Project\partnership\mobile\android
 .\gradlew.bat assembleRelease --no-daemon
 cd ..
 copy .\android\app\build\outputs\apk\release\app-release.apk .\FinanceMobile-1.3.2.apk /Y
+```
+
+---
+
+## 10 bis. Base de données locale et synchronisation (APK 1.4.0)
+
+L’APK embarque une base SQLite (`mobile/src/db/database.ts`, `expo-sqlite`) créée au premier lancement. Elle contient les églises, cellules, catégories, partenaires et dons, ainsi qu’une file d’attente (`outbox`) des modifications effectuées hors-ligne.
+
+- **Travail hors-ligne** : les lectures `/churches`, `/cellules`, `/categories`, `/partners` et `/donations` utilisent la base locale lorsque le réseau est indisponible. Les créations, modifications et suppressions sont enregistrées dans l’outbox et rejouées automatiquement dès que le serveur répond.
+- **Synchronisation incrémentale** : au démarrage, toutes les 5 minutes et au retour de l’application au premier plan. Les endpoints `/sync/deletions` et les filtres `updated_after` (églises, cellules, catégories, partenaires, dons) ne renvoient que les changements depuis la dernière synchronisation.
+- **Conflits** : le serveur est prioritaire. Une modification locale non encore transmise n’est jamais écrasée ; si le serveur la refuse (droits, validation, donnée supprimée), l’outbox est purgée et le conflit est affiché dans **Profil → Données hors-ligne**.
+- **Persistance après désinstallation** : une copie de la base est conservée dans `Documents/FinanceMobile/finance.sqlite` et restaurée après réinstallation. Les fichiers exportés (XLSX) sont enregistrés dans `Documents/FinanceMobile/files/`. Android exige l’autorisation spéciale **« Tous les fichiers »** : l’application propose d’ouvrir les paramètres lors du premier lancement, et l’état est visible dans **Profil → Données hors-ligne**. Sans cette autorisation, l’application fonctionne avec la base privée mais ne conserve rien après désinstallation.
+- Les suppressions serveur sont tracées par `sync_deletions` (migration `2026_11_20_140000`) via `App\Observers\SyncDeletionObserver`, afin que les enregistrements supprimés disparaissent aussi du téléphone.
+
+Le bouton **Synchroniser maintenant** de l’écran Profil force une synchronisation et affiche un récapitulatif. Les tests Laravel et le typage mobile doivent être relancés après toute modification de ce mécanisme :
+
+```powershell
+cd C:\Project\partnership
+php artisan test
+cd mobile
+npm.cmd run typecheck
 ```
 
 ---

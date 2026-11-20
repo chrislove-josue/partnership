@@ -16,7 +16,6 @@ import {
   upsertEntity,
   type EntityName,
 } from './database';
-import { backupDatabase } from './storage';
 
 export interface SyncSummary {
   pushed: number;
@@ -160,7 +159,7 @@ async function runSync(): Promise<SyncSummary> {
 
   const { pushed, conflicts } = await pushOutbox();
   const pulled = await pullChanges((await getMeta('last_sync')) ?? '');
-  await backupDatabase();
+  await backupDatabaseFile();
 
   return {
     pushed,

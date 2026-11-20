@@ -256,8 +256,8 @@ Le site ne propose pas d’export brut des listes de dons ou de partenaires : le
 - Rapport d’un **membre d’une église locale** : pasteur responsable de cette locale (`pasteur de votre église`), avec copies du pasteur du sous-groupe, du pasteur du groupe et des super administrateurs.
 - Rapport du **pasteur d’une église locale sous un sous-groupe** (ex. CE PARAKOU sous CE CALAVI) : envoi au **pasteur du sous-groupe**, avec copies du pasteur du groupe et des super administrateurs.
 - Rapport du **pasteur d’une église locale rattachée directement au groupe** : pasteur du groupe, avec copies des super administrateurs.
-- Rapport d’un **membre rattaché à un sous-groupe** : envoi au **pasteur du sous-groupe**, avec copies du pasteur du groupe et des super administrateurs.
-- Rapport d’une **église sous-groupe** (pasteur ou membre rattaché) : envoi direct au **pasteur du groupe**, avec copies des autres pasteurs de sous-groupe et des super administrateurs.
+- Rapport d’un **membre rattaché à un sous-groupe** : envoi au **pasteur du groupe**, avec copies des pasteurs de sous-groupe et des super administrateurs.
+- Rapport d’une **église sous-groupe** (pasteur ou membre rattaché) : envoi direct au **pasteur du groupe**, avec copies des pasteurs de sous-groupe et des super administrateurs.
 - Rapport de l’**église groupe** : hiérarchie nationale (super administrateurs).
 - L’expéditeur est exclu des destinataires. Aucun envoi n’est effectué sans `confirm: true`.
 
@@ -306,6 +306,48 @@ Une bannière Filament (`resources/views/filament/components/cookie-consent.blad
 ```bash
 php artisan test --filter=ReportCacheTest
 php artisan test --filter=CookieConsentTest
+```
+
+---
+
+## 6 quinquies. Personnel par église (comptes STAFF)
+
+Chaque église possède un compte de personnel (`STAFF`) actif, créé et maintenu par la commande idempotente :
+
+```bash
+php artisan church:ensure-staff
+```
+
+Options utiles :
+
+```bash
+php artisan church:ensure-staff --church="CE PARAKOU"   # une seule église (id ou nom)
+php artisan church:ensure-staff --domain=exemple.org     # domaine des adresses email
+php artisan church:ensure-staff --password=...           # mot de passe initial
+```
+
+La commande ne crée que les comptes manquants, réactive les comptes désactivés et ne modifie jamais un mot de passe existant. Elle peut être relancée après l’ajout d’une église. Le domaine et le mot de passe par défaut sont configurables dans `.env` (`STAFF_EMAIL_DOMAIN`, `STAFF_DEFAULT_PASSWORD`) ; valeurs par défaut : `churchmanager.test` et `azerty123`.
+
+Les 11 comptes générés (mot de passe initial `azerty123`, à changer après première connexion) :
+
+| Église | Adresse email |
+| --- | --- |
+| CE SIKECODJI (groupe) | staff.ce-sikecodji@churchmanager.test |
+| CE CALAVI (sous-groupe) | staff.ce-calavi@churchmanager.test |
+| CE FIDJROSSE | staff.ce-fidjrosse@churchmanager.test |
+| CE PARAKOU | staff.ce-parakou@churchmanager.test |
+| CE BOHICON | staff.ce-bohicon@churchmanager.test |
+| CE HEVIE | staff.ce-hevie@churchmanager.test |
+| CE PAHOU | staff.ce-pahou@churchmanager.test |
+| CE COME 2 | staff.ce-come-2@churchmanager.test |
+| CE SEME | staff.ce-seme@churchmanager.test |
+| CE LOKOSSA | staff.ce-lokossa@churchmanager.test |
+| CE POBE | staff.ce-pobe@churchmanager.test |
+
+Un personnel peut saisir, modifier et importer les dons et partenaires de **sa propre église** uniquement. Il reçoit les notifications de dons de son église. Il peut consulter et envoyer le rapport de son église : locale → pasteur de la locale, sous-groupe → pasteur du groupe, groupe → super administrateurs (le niveau suivant toujours en copie). Il ne peut pas gérer les utilisateurs, les églises, les catégories ni lire les églises filles.
+
+```bash
+php artisan test --filter=ChurchStaffCommandTest
 ```
 
 ---

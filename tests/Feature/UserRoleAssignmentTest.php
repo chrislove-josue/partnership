@@ -162,18 +162,18 @@ class UserRoleAssignmentTest extends TestCase
 
         $this->assertDatabaseMissing('users', ['email' => 'personnel-test@example.test']);
 
-        Livewire::actingAs($pastor)
-            ->test(CreateUser::class)
-            ->fillForm([
-                'name' => 'Personnel_test',
-                'email' => 'personnel-test@example.test',
-                'password' => 'azerty123',
-                'roles' => [$staffId],
-                'assigned_church_id' => $this->local->id,
-                'is_active' => true,
-            ])
-            ->call('create')
-            ->assertHasNoFormErrors();
+        $page2 = Livewire::actingAs($pastor)->test(CreateUser::class);
+        $page2->fillForm([
+            'name' => 'Personnel_test',
+            'email' => 'personnel-test@example.test',
+            'password' => 'azerty123',
+            'roles' => [$staffId],
+            'assigned_church_id' => $this->local->id,
+            'is_active' => true,
+        ])->call('create');
+
+        dump($page2->errors());
+        $page2->assertHasNoErrors();
 
         $this->assertDatabaseHas('users', ['email' => 'personnel-test@example.test']);
     }

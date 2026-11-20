@@ -38,6 +38,8 @@ trait ValidatesUserAssignment
 
         $churchId = (int) ($data['assigned_church_id'] ?? $fallbackChurchId ?? 0);
 
+        dump(['roles_raw' => $data['roles'] ?? null, 'roles' => $roles, 'churchId' => $churchId, 'actor' => $actor->roleName()]);
+
         if (! app(ChurchAccessService::class)->canAssignRoles($actor, $roles, $churchId)) {
             throw ValidationException::withMessages([
                 'roles' => 'Vous ne pouvez pas attribuer ce rôle dans cette église.',

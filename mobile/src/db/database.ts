@@ -1,5 +1,5 @@
 import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
-import { ensureStorageAccess, restoreDatabaseBackup } from './storage';
+import { backupDatabase, ensureStorageAccess, restoreDatabaseBackup } from './storage';
 
 export type EntityName = 'churches' | 'cellules' | 'categories' | 'partners' | 'donations';
 export type SyncOperation = 'create' | 'update' | 'delete';

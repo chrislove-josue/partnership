@@ -1,4 +1,5 @@
 import * as LegacyFileSystem from 'expo-file-system/legacy';
+import { defaultDatabaseDirectory } from 'expo-sqlite';
 import { Linking, Platform } from 'react-native';
 
 /**
@@ -13,8 +14,14 @@ const BACKUP_URI = `${PUBLIC_DIR_URI}${DATABASE_FILE}`;
 
 let publicAccess: boolean | null = null;
 
+/** expo-sqlite place ses bases dans `files/SQLite` (defaultDatabaseDirectory). */
 export function privateDatabaseUri(): string {
-  return `${LegacyFileSystem.documentDirectory ?? ''}${DATABASE_FILE}`;
+  const fallback = `${LegacyFileSystem.documentDirectory ?? ''}SQLite`.replace(/^file:\/\//, '');
+  const raw = String(defaultDatabaseDirectory ?? fallback).replace(/\/+$/, '');
+  const base = raw.startsWith('file://')
+    ? raw
+    : `file://${raw.startsWith('/') ? '' : '/'}${raw}`;
+  return `${base}/${DATABASE_FILE}`;
 }
 
 export function publicBackupUri(): string {
@@ -69,7 +76,10 @@ export async function restoreDatabaseBackup(): Promise<void> {
     ]);
 
     if (!privateInfo.exists && backupInfo.exists) {
-      await LegacyFileSystem.copyAsync({ from: BACKUP_URI, to: privateDatabaseUri() });
+      const target = privateDatabaseUri();
+      const targetDir = target.slice(0, target.lastIndexOf('/'));
+      await LegacyFileSystem.makeDirectoryAsync(targetDir, { intermediates: true });
+      await LegacyFileSystem.copyAsync({ from: BACKUP_URI, to: target });
     }
   } catch {
     // Une sauvegarde illisible ne doit pas empêcher la création d'une base neuve.

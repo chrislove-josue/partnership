@@ -1,10 +1,13 @@
-import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import React, { useEffect } from 'react';
+import { ActivityIndicator, Alert, AppState, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '../context/AuthContext';
+import { getErrorMessage } from '../api/client';
+import { syncNow } from '../db/sync';
+import { openStorageSettings } from '../db/storage';
 import { colors } from '../components/ui';
 import { LoginScreen } from '../screens/LoginScreen';
 import { DashboardScreen } from '../screens/DashboardScreen';
@@ -55,6 +58,41 @@ function MainTabs() {
 
 export function AppNavigator() {
   const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!user) {
+      return;
+    }
+
+    const run = () => {
+      void syncNow().catch((error: unknown) => {
+        const message = getErrorMessage(error, 'Synchronisation impossible.');
+        if (/permission|fichier|stockage|storage|accès|mkdir|EACCES/i.test(message)) {
+          Alert.alert(
+            'Accès au stockage',
+            'Autorisez « Tous les fichiers » pour FinanceMobile afin de conserver les données sur le téléphone.',
+            [
+              { text: 'Plus tard' },
+              { text: 'Paramètres', onPress: () => void openStorageSettings() },
+            ],
+          );
+        }
+      });
+    };
+
+    run();
+    const timer = setInterval(run, 5 * 60 * 1000);
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active') {
+        run();
+      }
+    });
+
+    return () => {
+      clearInterval(timer);
+      subscription.remove();
+    };
+  }, [user]);
 
   if (loading) {
     return (

@@ -86,7 +86,7 @@ export function getErrorMessage(caught: unknown, fallback: string): string {
       .flat()
       .filter((detail): detail is string => typeof detail === 'string' && detail.trim() !== '');
 
-    return details[0] ?? caught.message ?? fallback;
+    return details[0] ?? (caught.message || fallback);
   }
 
   if (caught instanceof Error && caught.message.trim() !== '') {

@@ -19,6 +19,11 @@ export interface User {
   is_active?: boolean;
 }
 
+/** Vrai pour un super administrateur, y compris quand le rôle est cumulé. */
+export function isSuperAdmin(user: User | null | undefined): boolean {
+  return user?.role === 'SUPER_ADMIN' || (user?.roles ?? []).includes('SUPER_ADMIN');
+}
+
 export interface RoleOption {
   id: number;
   name: string;

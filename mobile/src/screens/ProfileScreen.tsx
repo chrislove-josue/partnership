@@ -172,6 +172,23 @@ export function ProfileScreen() {
       </Card>
 
       <Card>
+        <SectionTitle>Données hors-ligne</SectionTitle>
+        <Text style={styles.help}>
+          Modifications en attente : {syncInfo.pending}
+        </Text>
+        <Text style={styles.help}>
+          Conflits résolus en faveur du serveur : {syncInfo.conflicts}
+        </Text>
+        <Text style={styles.help}>
+          Dernière synchronisation : {syncInfo.lastSync ? formatSessionDate(syncInfo.lastSync) : 'jamais'}
+        </Text>
+        <Text style={styles.help}>
+          Sauvegarde conservée dans Documents/FinanceMobile, même après désinstallation.
+        </Text>
+        <SecondaryButton title="Synchroniser maintenant" onPress={() => void synchronize()} disabled={syncing} />
+      </Card>
+
+      <Card>
         <SectionTitle>Modifier le mot de passe</SectionTitle>
         <TextField label="Nouveau mot de passe" value={password} onChangeText={setPassword} secureTextEntry />
         <TextField label="Confirmer le mot de passe" value={confirmation} onChangeText={setConfirmation} secureTextEntry />

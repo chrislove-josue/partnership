@@ -12,7 +12,9 @@
     "android": {
       "package": "com.churchmanager.benin",
       "permissions": [
-        "INTERNET"
+        "INTERNET",
+        "WRITE_EXTERNAL_STORAGE",
+        "MANAGE_EXTERNAL_STORAGE"
       ],
       "usesCleartextTraffic": true,
       "adaptiveIcon": {

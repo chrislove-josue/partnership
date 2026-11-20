@@ -148,32 +148,33 @@ class UserRoleAssignmentTest extends TestCase
         $staffId = Role::where('name', RoleName::STAFF->value)->firstOrFail()->id;
         $localPastorId = Role::where('name', RoleName::LOCAL_PASTOR->value)->firstOrFail()->id;
 
-        $page = Livewire::actingAs($pastor)->test(CreateUser::class);
-        $page->fillForm([
-            'name' => 'Personnel_test',
-            'email' => 'personnel-test@example.test',
-            'password' => 'azerty123',
-            'roles' => [$localPastorId],
-            'assigned_church_id' => $this->local->id,
-            'is_active' => true,
-        ])->call('create');
-
-        $page->assertHasErrors(['roles']);
+        Livewire::actingAs($pastor)
+            ->test(CreateUser::class)
+            ->fillForm([
+                'name' => 'Personnel_test',
+                'email' => 'personnel-test@example.test',
+                'password' => 'azerty123',
+                'roles' => [$localPastorId],
+                'assigned_church_id' => $this->local->id,
+                'is_active' => true,
+            ])
+            ->call('create')
+            ->assertHasFormErrors(['roles']);
 
         $this->assertDatabaseMissing('users', ['email' => 'personnel-test@example.test']);
 
-        $page2 = Livewire::actingAs($pastor)->test(CreateUser::class);
-        $page2->fillForm([
-            'name' => 'Personnel_test',
-            'email' => 'personnel-test@example.test',
-            'password' => 'azerty123',
-            'roles' => [$staffId],
-            'assigned_church_id' => $this->local->id,
-            'is_active' => true,
-        ])->call('create');
-
-        dump($page2->errors());
-        $page2->assertHasNoErrors();
+        Livewire::actingAs($pastor)
+            ->test(CreateUser::class)
+            ->fillForm([
+                'name' => 'Personnel_test',
+                'email' => 'personnel-test@example.test',
+                'password' => 'azerty123',
+                'roles' => [$staffId],
+                'assigned_church_id' => $this->local->id,
+                'is_active' => true,
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
 
         $this->assertDatabaseHas('users', ['email' => 'personnel-test@example.test']);
     }

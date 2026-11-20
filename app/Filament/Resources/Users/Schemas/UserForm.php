@@ -4,11 +4,13 @@ namespace App\Filament\Resources\Users\Schemas;
 
 use App\Enums\RoleName;
 use App\Models\Church;
+use App\Models\Role;
 use App\Services\ChurchAccessService;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
@@ -59,7 +61,26 @@ class UserForm
                     ->options($roleOptions)
                     ->multiple()
                     ->required()
-                    ->relationship('roles', 'name'),
+                    ->relationship('roles', 'name')
+                    ->rules([
+                        fn (Get $get): \Closure => function (string $attribute, mixed $value, callable $fail) use ($actor): void {
+                            $roles = collect((array) $value)
+                                ->map(fn (mixed $role): ?string => is_numeric($role)
+                                    ? Role::find($role)?->name
+                                    : (is_string($role) && $role !== '' ? $role : null))
+                                ->filter()
+                                ->values()
+                                ->all();
+
+                            if (! $actor || ! app(ChurchAccessService::class)->canAssignRoles(
+                                $actor,
+                                $roles,
+                                (int) $get('assigned_church_id'),
+                            )) {
+                                $fail('Vous ne pouvez pas attribuer ce rôle dans cette église.');
+                            }
+                        },
+                    ]),
                 Select::make('assigned_church_id')
                     ->label('Église assignée')
                     ->options($churchOptions)

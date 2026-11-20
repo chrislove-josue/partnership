@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 20, fontWeight: '700', color: colors.navy, marginBottom: 4 },
   help: { fontSize: 13, color: colors.muted, marginBottom: 18 },
   error: { color: colors.red, marginBottom: 12, fontSize: 14 },
+  passwordVisibilityToggle: { padding: 4 },
   serverButton: { alignSelf: 'flex-start', marginBottom: 16 },
   serverButtonText: { color: colors.blue, fontWeight: '700', fontSize: 13 },
   assistanceLink: { alignItems: 'center', paddingVertical: 6 },

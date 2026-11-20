@@ -256,9 +256,11 @@ Le site ne propose pas d’export brut des listes de dons ou de partenaires : le
 - Rapport d’un **membre d’une église locale** : pasteur responsable de cette locale (`pasteur de votre église`), avec copies du pasteur du sous-groupe, du pasteur du groupe et des super administrateurs.
 - Rapport du **pasteur d’une église locale sous un sous-groupe** (ex. CE PARAKOU sous CE CALAVI) : envoi au **pasteur du sous-groupe**, avec copies du pasteur du groupe et des super administrateurs.
 - Rapport du **pasteur d’une église locale rattachée directement au groupe** : pasteur du groupe, avec copies des super administrateurs.
-- Rapport d’un **membre rattaché à un sous-groupe** : envoi au **pasteur du groupe**, avec copies des pasteurs de sous-groupe et des super administrateurs.
-- Rapport d’une **église sous-groupe** (pasteur ou membre rattaché) : envoi direct au **pasteur du groupe**, avec copies des pasteurs de sous-groupe et des super administrateurs.
-- Rapport de l’**église groupe** : hiérarchie nationale (super administrateurs).
+- Rapport du **personnel d’une église locale** : pasteur de cette locale, avec copies du pasteur du sous-groupe, du pasteur du groupe et des super administrateurs.
+- Rapport du **personnel d’un sous-groupe** : pasteur du sous-groupe, avec copies du pasteur du groupe et des super administrateurs.
+- Rapport du **personnel de l’église groupe** : pasteur du groupe, avec copies des super administrateurs.
+- Rapport du **pasteur d’un sous-groupe** : pasteur du groupe, avec copies des pasteurs de sous-groupe et des super administrateurs.
+- Rapport du **pasteur de l’église groupe** : hiérarchie nationale (super administrateurs).
 - L’expéditeur est exclu des destinataires. Aucun envoi n’est effectué sans `confirm: true`.
 
 ---
@@ -344,7 +346,7 @@ Les 11 comptes générés (mot de passe initial `azerty123`, à changer après p
 | CE LOKOSSA | staff.ce-lokossa@churchmanager.test |
 | CE POBE | staff.ce-pobe@churchmanager.test |
 
-Un personnel peut saisir, modifier et importer les dons et partenaires de **sa propre église** uniquement. Il reçoit les notifications de dons de son église. Il peut consulter et envoyer le rapport de son église : locale → pasteur de la locale, sous-groupe → pasteur du groupe, groupe → super administrateurs (le niveau suivant toujours en copie). Il ne peut pas gérer les utilisateurs, les églises, les catégories ni lire les églises filles.
+Un personnel peut saisir, modifier et importer les dons et partenaires de **sa propre église** uniquement. Il reçoit les notifications de dons de son église. Il peut consulter et envoyer le rapport de son église au **pasteur de cette même église** (locale, sous-groupe ou groupe), avec le niveau suivant en copie. Il ne peut pas gérer les utilisateurs, les églises, les catégories ni lire les églises filles.
 
 ```bash
 php artisan test --filter=ChurchStaffCommandTest

@@ -125,6 +125,27 @@ class ChurchAccessService
         ], true);
     }
 
+    /**
+     * Vérifie l'attribution complète : chaque rôle doit être gérable par
+     * l'acteur et l'église cible doit entrer dans son périmètre.
+     *
+     * @param  array<int, string>  $roles
+     */
+    public function canAssignRoles(User $actor, array $roles, int $targetChurchId): bool
+    {
+        if ($roles === []) {
+            return false;
+        }
+
+        foreach ($roles as $role) {
+            if (! $this->canManageUser($actor, $role)) {
+                return false;
+            }
+        }
+
+        return $this->canModifyChurchData($actor, $targetChurchId);
+    }
+
     // ─────────────────────────────────────────────────────────────────────
     // GESTION DES ÉGLISES
     // ─────────────────────────────────────────────────────────────────────

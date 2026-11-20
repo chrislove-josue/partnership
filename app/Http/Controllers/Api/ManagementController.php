@@ -241,10 +241,8 @@ class ManagementController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        foreach ($data['roles'] as $role) {
-            if (! $this->access->canManageUser($request->user(), $role)) {
-                abort(403, 'Vous ne pouvez pas attribuer ce rôle.');
-            }
+        if (! $this->access->canAssignRoles($request->user(), $data['roles'], $data['assigned_church_id'])) {
+            abort(403, 'Vous ne pouvez pas attribuer ce rôle dans cette église.');
         }
 
         $user = User::query()->create([
@@ -284,12 +282,12 @@ class ManagementController extends Controller
             'is_active' => ['boolean'],
         ]);
 
-        if (isset($data['roles'])) {
-            foreach ($data['roles'] as $role) {
-                if (! $this->access->canManageUser($request->user(), $role)) {
-                    abort(403, 'Vous ne pouvez pas attribuer ce rôle.');
-                }
-            }
+        if (isset($data['roles']) && ! $this->access->canAssignRoles(
+            $request->user(),
+            $data['roles'],
+            $data['assigned_church_id'] ?? $target->assigned_church_id,
+        )) {
+            abort(403, 'Vous ne pouvez pas attribuer ce rôle dans cette église.');
         }
 
         if (array_key_exists('password', $data)) {

@@ -36,6 +36,22 @@ interface DeletionsResponse {
   server_time: string;
 }
 
+const SINGULAR_NAMES: Record<EntityName, string> = {
+  churches: 'church',
+  cellules: 'cellule',
+  categories: 'category',
+  partners: 'partner',
+  donations: 'donation',
+};
+
+function recordFromResponse(entity: EntityName, result: unknown): Record<string, unknown> | null {
+  if (!result || typeof result !== 'object') {
+    return null;
+  }
+  const candidate = (result as Record<string, unknown>)[SINGULAR_NAMES[entity]];
+  return candidate && typeof candidate === 'object' ? (candidate as Record<string, unknown>) : null;
+}
+
 async function pushOutbox(): Promise<{ pushed: number; conflicts: number }> {
   let pushed = 0;
   let conflicts = 0;
@@ -47,12 +63,26 @@ async function pushOutbox(): Promise<{ pushed: number; conflicts: number }> {
       : `/${entry.entity}/${entry.entity_id}`;
 
     try {
+      let result: unknown;
       if (entry.operation === 'create') {
-        await api(path, { method: 'POST', body: payload, skipOffline: true });
+        result = await api(path, { method: 'POST', body: payload, skipOffline: true });
       } else if (entry.operation === 'update') {
-        await api(path, { method: 'PATCH', body: payload, skipOffline: true });
+        result = await api(path, { method: 'PATCH', body: payload, skipOffline: true });
       } else {
-        await api(path, { method: 'DELETE', skipOffline: true });
+        result = await api(path, { method: 'DELETE', skipOffline: true });
+      }
+
+      const created = recordFromResponse(entry.entity, result);
+      if (
+        entry.entity_id.startsWith('local-')
+        && created
+        && (typeof created.id === 'string' || typeof created.id === 'number')
+      ) {
+        // Remplace l'identifiant temporaire par celui du serveur pour éviter un doublon.
+        await deleteEntity(entry.entity, entry.entity_id);
+        await upsertEntity(entry.entity, created.id, created);
+      } else {
+        await clearEntityPending(entry.entity, entry.entity_id);
       }
 
       await removeOutboxEntry(entry.id);
@@ -100,6 +130,10 @@ async function pullChanges(since: string): Promise<number> {
 
     for (const row of response.data) {
       if (typeof row.id !== 'string' && typeof row.id !== 'number') {
+        continue;
+      }
+      // Une modification locale non encore transmise ne doit pas être écrasée.
+      if (await isEntityPending(entity, row.id)) {
         continue;
       }
       await upsertEntity(

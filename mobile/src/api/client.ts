@@ -226,21 +226,26 @@ export async function apiUpload<T>(
   } as unknown as Blob);
 
   const sendsToken = authToken !== null;
-  const response = await fetch(`${apiUrl}${path}`, {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      ...(sendsToken ? { Authorization: `Bearer ${authToken}` } : {}),
-    },
-    body: form,
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${apiUrl}${path}`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        ...(sendsToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      },
+      body: form,
+    });
+  } catch {
+    throw new ApiError(NETWORK_ERROR_MESSAGE, 0);
+  }
 
   const data = await parseResponse(response);
   if (!response.ok) {
     handleUnauthorized(sendsToken && response.status === 401);
     const errors = (data.errors ?? undefined) as Record<string, string[]> | undefined;
     throw new ApiError(
-      String(data.message ?? "L'envoi du fichier a échoué."),
+      messageFromData(data, response.status, "L'envoi du fichier a échoué."),
       response.status,
       errors,
     );
@@ -251,12 +256,17 @@ export async function apiUpload<T>(
 
 export async function apiDownload(path: string, fileName: string): Promise<string> {
   const sendsToken = authToken !== null;
-  const response = await fetch(`${apiUrl}${path}`, {
-    headers: {
-      Accept: 'application/json, application/octet-stream',
-      ...(sendsToken ? { Authorization: `Bearer ${authToken}` } : {}),
-    },
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${apiUrl}${path}`, {
+      headers: {
+        Accept: 'application/json, application/octet-stream',
+        ...(sendsToken ? { Authorization: `Bearer ${authToken}` } : {}),
+      },
+    });
+  } catch {
+    throw new ApiError(NETWORK_ERROR_MESSAGE, 0);
+  }
 
   if (!response.ok) {
     handleUnauthorized(sendsToken && response.status === 401);

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   ActivityIndicator,
+  Application,
   FlatList,
   Linking,
   Modal,
@@ -12,6 +13,9 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import appConfig from '../../app.json';
+
+export const APP_VERSION = Application.nativeApplicationVersion ?? appConfig.expo.version;
 
 export const colors = {
   navy: '#0F2B46',
@@ -68,12 +72,7 @@ export function Screen({
       </View>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {children}
-        <View style={styles.appFooter}>
-          <Pressable onPress={() => void Linking.openURL('https://wa.me/22998123353')}>
-            <Text style={styles.appFooterLink}>Pour toute assistance : +229 01 98 12 33 53</Text>
-          </Pressable>
-          <Text style={styles.appFooterText}>Conçu et Développé par Nestor ATCHOUGO</Text>
-        </View>
+        <AppFooter />
       </ScrollView>
     </SafeAreaView>
   );

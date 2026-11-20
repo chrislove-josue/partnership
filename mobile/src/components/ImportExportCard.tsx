@@ -2,7 +2,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { apiDownload, apiUpload, ApiError, invalidateCache } from '../api/client';
+import { apiDownload, apiUpload, ApiError, getErrorMessage, invalidateCache } from '../api/client';
 import type { ImportResult } from '../api/types';
 import { Card, colors, SectionTitle } from './ui';
 
@@ -69,7 +69,7 @@ export function ImportExportCard({
         : '';
       Alert.alert(
         'Import impossible',
-        details || (caught instanceof Error ? caught.message : "L'import a échoué."),
+        details || getErrorMessage(caught, "L'import a échoué."),
       );
     } finally {
       setUploading(false);
@@ -95,7 +95,7 @@ export function ImportExportCard({
     } catch (caught) {
       Alert.alert(
         'Téléchargement impossible',
-        caught instanceof Error ? caught.message : "Le modèle n'a pas pu être téléchargé.",
+        getErrorMessage(caught, "Le modèle n'a pas pu être téléchargé."),
       );
     } finally {
       setDownloading(false);

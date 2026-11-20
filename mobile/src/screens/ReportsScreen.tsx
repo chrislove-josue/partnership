@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import * as Sharing from 'expo-sharing';
-import { api, apiDownload, ApiError } from '../api/client';
+import { api, apiDownload, getErrorMessage } from '../api/client';
 import type { Church, PartnershipReport, RecipientsPreview } from '../api/types';
 import {
   Badge,
@@ -47,7 +47,7 @@ export function ReportsScreen() {
         setChurches(response.data);
         setChurchId((current) => current || response.data[0]?.id.toString() || '');
       } catch (caught) {
-        setError(caught instanceof Error ? caught.message : 'Impossible de charger les églises.');
+        setError(getErrorMessage(caught, 'Impossible de charger les églises.'));
       } finally {
         setLoadingChurches(false);
       }
@@ -79,7 +79,7 @@ export function ReportsScreen() {
     try {
       setReport(await api<PartnershipReport>(`/reports/partnership?${query()}`));
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'Génération impossible.');
+      setError(getErrorMessage(caught, 'Génération impossible.'));
     } finally {
       setLoading(false);
     }
@@ -97,7 +97,7 @@ export function ReportsScreen() {
       setSelectedCc(result.cc.map((recipient) => recipient.email));
       setConfirming(true);
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'Aperçu des destinataires impossible.');
+      setError(getErrorMessage(caught, 'Aperçu des destinataires impossible.'));
     } finally {
       setLoading(false);
     }
@@ -124,7 +124,7 @@ export function ReportsScreen() {
       setConfirming(false);
       Alert.alert('Rapport envoyé', `${result.to.length} destinataire(s), ${result.cc.length} en copie.`);
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'Envoi impossible.');
+      setError(getErrorMessage(caught, 'Envoi impossible.'));
     } finally {
       setLoading(false);
     }
@@ -141,7 +141,7 @@ export function ReportsScreen() {
       const uri = await apiDownload(`/reports/partnership/export?${query()}`, fileName);
       await Sharing.shareAsync(uri, { mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Export impossible.');
+      setError(getErrorMessage(caught, 'Export impossible.'));
     } finally {
       setLoading(false);
     }

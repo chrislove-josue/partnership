@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Image, KeyboardAvoidingView, Linking, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '../context/AuthContext';
-import { ApiError } from '../api/client';
+import { getErrorMessage } from '../api/client';
 import { colors, PrimaryButton, TextField } from '../components/ui';
 
 export function LoginScreen() {
@@ -30,7 +30,7 @@ export function LoginScreen() {
     try {
       await login(email.trim(), password);
     } catch (caught) {
-      setError(caught instanceof ApiError ? caught.message : 'Connexion impossible.');
+      setError(getErrorMessage(caught, 'Connexion impossible.'));
     } finally {
       setLoading(false);
     }

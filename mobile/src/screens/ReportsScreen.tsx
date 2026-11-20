@@ -287,7 +287,7 @@ export function ReportsScreen() {
 }
 
 const styles = StyleSheet.create({
-  buttonRow: { flexDirection: 'row', gap: 10, marginTop: 6 },
+  buttonRow: { flexDirection: 'row', gap: 14, marginTop: 6 },
   total: { fontSize: 26, fontWeight: '800', color: colors.blue, marginTop: 12 },
   meta: { fontSize: 13, color: colors.muted, marginTop: 5 },
   listRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: colors.border },

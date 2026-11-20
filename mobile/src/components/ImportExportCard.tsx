@@ -140,7 +140,7 @@ export function ImportExportCard({
 
 const styles = StyleSheet.create({
   help: { fontSize: 13, color: colors.muted, lineHeight: 19, marginBottom: 14 },
-  actions: { flexDirection: 'row', gap: 10 },
+  actions: { flexDirection: 'row', gap: 14 },
   action: { flex: 1 },
   button: {
     minHeight: 46,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { api, getErrorMessage } from '../api/client';
 import { formatSessionDate } from '../api/session';
@@ -142,13 +142,16 @@ export function ProfileScreen() {
       {error ? <ErrorView message={error} /> : null}
       {success ? <Text style={styles.success}>{success}</Text> : null}
 
-      <PrimaryButton title="Sauvegarder les modifications" onPress={() => void save()} loading={saving} disabled={!name || !email} />
-      <PrimaryButton title="Déconnexion" onPress={disconnect} />
+      <View style={styles.actions}>
+        <PrimaryButton title="Sauvegarder les modifications" onPress={() => void save()} loading={saving} disabled={!name || !email} />
+        <PrimaryButton title="Déconnexion" onPress={disconnect} />
+      </View>
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
+  actions: { gap: 14, marginTop: 4 },
   help: { color: colors.muted, fontSize: 12, lineHeight: 18 },
   success: { color: colors.green, fontWeight: '700', marginBottom: 12 },
 });

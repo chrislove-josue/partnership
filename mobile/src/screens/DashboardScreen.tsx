@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   churchValue: { fontSize: 20, fontWeight: '800', color: colors.blue },
   churchLabel: { fontSize: 11, color: colors.muted, marginTop: 3, textAlign: 'center' },
   churchNote: { fontSize: 11, color: colors.muted, marginTop: 6, lineHeight: 16 },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 14 },
   action: {
     width: '47%',
     backgroundColor: colors.surface,

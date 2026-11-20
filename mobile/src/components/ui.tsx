@@ -467,7 +467,7 @@ const styles = StyleSheet.create({
   loadingText: { color: colors.muted },
   errorCard: { borderColor: colors.red },
   errorText: { color: colors.red, marginBottom: 12 },
-  row: { flexDirection: 'row', gap: 10, justifyContent: 'flex-end', marginTop: 12 },
+  row: { flexDirection: 'row', gap: 16, justifyContent: 'flex-end', marginTop: 16 },
   appFooter: {
     width: '100%',
     marginTop: 'auto',

@@ -143,7 +143,13 @@ export function ProfileScreen() {
   const disconnect = () => {
     Alert.alert('Déconnexion', 'Voulez-vous vraiment quitter l’application ?', [
       { text: 'Annuler', style: 'cancel' },
-      { text: 'Déconnexion', style: 'destructive', onPress: () => void logout() },
+      {
+        text: 'Déconnexion',
+        style: 'destructive',
+        onPress: () => {
+          void logout().catch(() => undefined);
+        },
+      },
     ]);
   };
 

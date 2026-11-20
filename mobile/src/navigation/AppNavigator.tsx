@@ -107,7 +107,7 @@ export function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer key={user ? 'application' : 'connexion'}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
           <>

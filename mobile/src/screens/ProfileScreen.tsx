@@ -28,7 +28,6 @@ export function ProfileScreen() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [syncInfo, setSyncInfo] = useState({ pending: 0, conflicts: 0, lastSync: '' });
-  const [storageOk, setStorageOk] = useState(true);
   const [syncing, setSyncing] = useState(false);
 
   const [name, setName] = useState('');
@@ -57,8 +56,6 @@ export function ProfileScreen() {
   const loadSyncInfo = useCallback(async () => {
     try {
       await initDatabase();
-      await ensureStorageAccess();
-      setStorageOk(hasPublicStorageAccess());
       const [pending, conflicts, lastSync] = await Promise.all([
         countPendingChanges(),
         listConflicts(),

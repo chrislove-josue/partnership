@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ManagementController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SyncController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/reports/partnership/recipients', [ReportController::class, 'recipients']);
     Route::get('/reports/partnership/export', [ReportController::class, 'export']);
     Route::post('/reports/partnership/send', [ReportController::class, 'send']);
+
+    Route::get('/settings/api-url', [SettingsController::class, 'apiUrl']);
 
     Route::get('/sync/deletions', [SyncController::class, 'deletions']);
 

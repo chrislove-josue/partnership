@@ -59,7 +59,7 @@ export function LoginScreen() {
 
       <View style={styles.form}>
         <Text style={styles.title}>Connexion</Text>
-        <Text style={styles.help}>Utilisez votre email et votre mot de passe pour acceder à votre espace client de gestion.</Text>
+        <Text style={styles.help}>Utilisez votre email et votre mot de passe pour acceder à votre espace de gestion.</Text>
         <TextField
           label="Adresse du serveur"
           value={serverUrl}

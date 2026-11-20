@@ -40,6 +40,31 @@ export function getAuthToken(): string | null {
   return authToken;
 }
 
+/** Déconnexion côté serveur, sans jamais bloquer la déconnexion locale. */
+export async function notifyServerLogout(): Promise<void> {
+  const token = authToken;
+  if (!token) {
+    return;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 3000);
+  try {
+    await fetch(`${getApiUrl()}/logout`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      signal: controller.signal,
+    });
+  } catch {
+    // La session locale est supprimée même si le serveur est injoignable.
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** Appelé lorsqu'une requête authentifiée reçoit un 401 (session expirée). */
 export function setUnauthorizedHandler(handler: (() => void) | null): void {
   unauthorizedHandler = handler;

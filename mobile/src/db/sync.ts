@@ -2,6 +2,7 @@ import { ApiError, api, getAuthToken, getErrorMessage } from '../api/client';
 import {
   addConflict,
   countPendingChanges,
+  backupDatabaseFile,
   clearEntityPending,
   deleteEntity,
   getMeta,

@@ -102,6 +102,23 @@ export function isDatabaseReady(): boolean {
   return database !== null;
 }
 
+/** Copie la base dans le dossier public après l'avoir fermée proprement. */
+export async function backupDatabaseFile(): Promise<void> {
+  if (!database) {
+    return;
+  }
+
+  const current = database;
+  database = null;
+  try {
+    await current.closeAsync();
+    await backupDatabase();
+  } finally {
+    database = await openDatabaseAsync(DATABASE_NAME);
+    await database.execAsync(SCHEMA);
+  }
+}
+
 export async function upsertEntity(
   entity: EntityName,
   id: string | number,

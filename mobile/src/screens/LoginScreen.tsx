@@ -6,7 +6,7 @@ import { getApiUrl, getErrorMessage } from '../api/client';
 import { AppFooter, colors, PrimaryButton, TextField } from '../components/ui';
 
 export function LoginScreen() {
-  const { login, apiUrl, updateApiUrl } = useAuth();
+  const { login, apiUrl, canConfigureApiUrl, updateApiUrl } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -20,6 +20,9 @@ export function LoginScreen() {
   }, [apiUrl]);
 
   const applyServer = async () => {
+    if (!canConfigureApiUrl) {
+      return;
+    }
     await updateApiUrl(serverUrl);
     setServerSaved(true);
   };
@@ -30,10 +33,10 @@ export function LoginScreen() {
     try {
       // L'adresse saisie est appliquée avant la connexion, même si l'utilisateur
       // n'a pas touché le bouton « Utiliser cette adresse ».
-      if (serverUrl.trim() !== getApiUrl()) {
+      if (canConfigureApiUrl && serverUrl.trim() !== getApiUrl()) {
         await updateApiUrl(serverUrl);
+        setServerSaved(true);
       }
-      setServerSaved(true);
       await login(email.trim(), password);
     } catch (caught) {
       const message = getErrorMessage(caught, 'Connexion impossible.');
@@ -60,20 +63,32 @@ export function LoginScreen() {
       <View style={styles.form}>
         <Text style={styles.title}>Connexion</Text>
         <Text style={styles.help}>Utilisez votre email et votre mot de passe pour acceder à votre espace de gestion.</Text>
-        <TextField
-          label="Adresse du serveur"
-          value={serverUrl}
-          onChangeText={(value) => {
-            setServerUrl(value);
-            setServerSaved(false);
-          }}
-          placeholder="http://192.168.1.10:8000/api"
-        />
-        <Pressable style={styles.serverButton} onPress={() => void applyServer()}>
-          <Text style={styles.serverButtonText}>
-            {serverSaved ? 'Adresse enregistrée ✓' : 'Utiliser cette adresse'}
-          </Text>
-        </Pressable>
+        {canConfigureApiUrl ? (
+          <>
+            <TextField
+              label="Adresse du serveur (super administrateur)"
+              value={serverUrl}
+              onChangeText={(value) => {
+                setServerUrl(value);
+                setServerSaved(false);
+              }}
+              placeholder="http://192.168.1.10:8000/api"
+            />
+            <Pressable style={styles.serverButton} onPress={() => void applyServer()}>
+              <Text style={styles.serverButtonText}>
+                {serverSaved ? 'Adresse enregistrée ✓' : 'Utiliser cette adresse'}
+              </Text>
+            </Pressable>
+          </>
+        ) : (
+          <View style={styles.serverReadonly}>
+            <Text style={styles.serverReadonlyLabel}>Adresse du serveur</Text>
+            <Text style={styles.serverReadonlyValue}>{apiUrl}</Text>
+            <Text style={styles.serverReadonlyHelp}>
+              Seul le super administrateur peut modifier cette adresse.
+            </Text>
+          </View>
+        )}
         <TextField
           label="Adresse email"
           value={email}
@@ -124,4 +139,13 @@ const styles = StyleSheet.create({
   passwordVisibilityToggle: { padding: 4 },
   serverButton: { alignSelf: 'flex-start', marginBottom: 16 },
   serverButtonText: { color: colors.blue, fontWeight: '700', fontSize: 13 },
+  serverReadonly: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 18,
+  },
+  serverReadonlyLabel: { fontSize: 12, color: colors.muted, marginBottom: 4 },
+  serverReadonlyValue: { fontSize: 13, color: colors.ink, fontWeight: '600' },
+  serverReadonlyHelp: { fontSize: 11, color: colors.muted, marginTop: 6 },
 });

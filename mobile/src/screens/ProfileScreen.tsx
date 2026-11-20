@@ -22,7 +22,7 @@ import {
 } from '../components/ui';
 
 export function ProfileScreen() {
-  const { user, session, refreshUser, logout, apiUrl, updateApiUrl } = useAuth();
+  const { user, session, refreshUser, logout, apiUrl, canConfigureApiUrl, updateApiUrl } = useAuth();
   const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -127,7 +127,9 @@ export function ProfileScreen() {
       }
 
       await api<{ user: User }>('/profile', { method: 'PATCH', body });
-      await updateApiUrl(serverUrl);
+      if (canConfigureApiUrl && serverUrl !== apiUrl) {
+        await updateApiUrl(serverUrl);
+      }
       await refreshUser();
       setPassword('');
       setConfirmation('');
@@ -135,6 +137,22 @@ export function ProfileScreen() {
       setSuccess('Profil mis à jour.');
     } catch (caught) {
       setError(getErrorMessage(caught, 'Mise à jour impossible.'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const loadWebApiUrl = async () => {
+    setSaving(true);
+    setError('');
+    setSuccess('');
+    try {
+      const response = await api<{ api_url: string }>('/settings/api-url');
+      await updateApiUrl(response.api_url);
+      setServerUrl(response.api_url);
+      setSuccess('Adresse du site web appliquée.');
+    } catch (caught) {
+      setError(getErrorMessage(caught, 'Adresse du site web indisponible.'));
     } finally {
       setSaving(false);
     }

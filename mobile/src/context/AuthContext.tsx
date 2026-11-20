@@ -145,8 +145,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       authenticated: false,
     });
 
+    const allowed = isSuperAdmin(response.user);
     await SecureStore.setItemAsync(TOKEN_KEY, response.token);
     await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
+    await SecureStore.setItemAsync(ADMIN_DEVICE_KEY, allowed ? '1' : '0');
+    setCanConfigureApiUrl(allowed);
     const now = new Date().toISOString();
     const opened: SessionInfo = { connectedAt: now, lastSyncAt: now };
     await saveSession(opened);
@@ -159,6 +162,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await api<{ user: User }>('/me');
       setUser(response.user);
+      const allowed = isSuperAdmin(response.user);
+      await SecureStore.setItemAsync(ADMIN_DEVICE_KEY, allowed ? '1' : '0');
+      setCanConfigureApiUrl(allowed);
       await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
       const synced: SessionInfo = {
         connectedAt: session?.connectedAt ?? new Date().toISOString(),
@@ -174,8 +180,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [logout, session]);
 
   const value = useMemo(
-    () => ({ user, session, loading, apiUrl, updateApiUrl, login, logout, refreshUser }),
-    [user, session, loading, apiUrl, updateApiUrl, login, logout, refreshUser],
+    () => ({ user, session, loading, apiUrl, canConfigureApiUrl, updateApiUrl, login, logout, refreshUser }),
+    [user, session, loading, apiUrl, canConfigureApiUrl, updateApiUrl, login, logout, refreshUser],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

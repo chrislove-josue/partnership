@@ -430,13 +430,6 @@ export async function api<T>(
 ): Promise<T> {
   const { method = 'GET', skipOffline = false } = options;
 
-  if (!skipOffline) {
-    const local = await tryReadLocal<T>(path);
-    if (local !== null) {
-      return local;
-    }
-  }
-
   try {
     const result = await performRequest<T>(path, options);
     if (!skipOffline && method !== 'GET') {
@@ -444,13 +437,20 @@ export async function api<T>(
     }
     return result;
   } catch (error) {
-    if (
-      !skipOffline
-      && method !== 'GET'
-      && isNetworkError(error)
-      && SYNCABLE_WRITE_PATTERN.test(path)
-    ) {
-      return queueOfflineWrite<T>(path, method, options.body ?? {});
+    if (skipOffline) {
+      throw error;
+    }
+
+    if (isNetworkError(error)) {
+      if (method !== 'GET' && SYNCABLE_WRITE_PATTERN.test(path)) {
+        return queueOfflineWrite<T>(path, method, options.body ?? {});
+      }
+      if (method === 'GET') {
+        const local = await tryReadLocal<T>(path);
+        if (local !== null) {
+          return local;
+        }
+      }
     }
     throw error;
   }

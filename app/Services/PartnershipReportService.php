@@ -375,24 +375,11 @@ class PartnershipReportService
 
         $isStaff = ! in_array($user->roleName(), $pastorRoles, true);
 
-        // Une église groupe est le sommet de la chaîne : son personnel envoie
-        // son rapport directement à la hiérarchie nationale, comme son pasteur.
-        if ($church->type === ChurchType::GROUP) {
-            $addSuperAdmins('to');
-
-            return [
-                'recipients' => array_values($to),
-                'cc' => [],
-                'targetLabel' => 'hiérarchie nationale (super administrateurs)',
-                'chain' => $chain,
-            ];
-        }
-
         $parent = $church->parent_id ? Church::find($church->parent_id) : null;
-        $group = null;
+        $group = $church->type === ChurchType::GROUP ? $church : null;
         $cursor = $parent;
 
-        while ($cursor) {
+        while (! $group && $cursor) {
             if ($cursor->type === ChurchType::GROUP) {
                 $group = $cursor;
                 break;
@@ -401,24 +388,33 @@ class PartnershipReportService
             $cursor = $cursor->parent_id ? Church::find($cursor->parent_id) : null;
         }
 
-        // Personnel d'une église locale : envoi au pasteur de cette église,
-        // avec le niveau suivant (sous-groupe puis groupe) en copie.
-        if ($isStaff && $church->type === ChurchType::LOCAL) {
-            foreach ($pastorsFor($church, RoleName::LOCAL_PASTOR->value) as $pastor) {
-                $addTo($pastor, "pasteur de votre église ({$church->name})");
+        // Le personnel envoie toujours son rapport au pasteur de SA église,
+        // quel que soit le niveau : locale, sous-groupe ou groupe. Le niveau
+        // supérieur et les super administrateurs sont en copie.
+        if ($isStaff) {
+            $staffTargets = [
+                ChurchType::LOCAL->value => [RoleName::LOCAL_PASTOR, 'pasteur de votre église'],
+                ChurchType::SUB_GROUP->value => [RoleName::SUBGROUP_PASTOR, 'pasteur de votre sous-groupe'],
+                ChurchType::GROUP->value => [RoleName::GROUP_PASTOR, 'pasteur de votre groupe'],
+            ];
+
+            [$role, $targetLabel] = $staffTargets[$church->type->value];
+
+            foreach ($pastorsFor($church, $role->value) as $pastor) {
+                $addTo($pastor, "{$targetLabel} ({$church->name})");
             }
 
             if ($to === []) {
-                throw new RuntimeException('Aucun pasteur local actif n’est assigné à cette église.');
+                throw new RuntimeException('Aucun pasteur actif n’est assigné à cette église.');
             }
 
-            if ($parent?->type === ChurchType::SUB_GROUP) {
+            if ($church->type === ChurchType::LOCAL && $parent?->type === ChurchType::SUB_GROUP) {
                 foreach ($pastorsFor($parent, RoleName::SUBGROUP_PASTOR->value) as $pastor) {
                     $addCc($pastor, "pasteur de sous-groupe ({$parent->name})");
                 }
             }
 
-            if ($group) {
+            if ($church->type !== ChurchType::GROUP && $group) {
                 foreach ($pastorsFor($group, RoleName::GROUP_PASTOR->value) as $pastor) {
                     $addCc($pastor, "pasteur de groupe ({$group->name})");
                 }
@@ -428,7 +424,19 @@ class PartnershipReportService
             return [
                 'recipients' => array_values($to),
                 'cc' => array_values($cc),
-                'targetLabel' => 'pasteur de votre église',
+                'targetLabel' => $targetLabel,
+                'chain' => $chain,
+            ];
+        }
+
+        // Une église groupe est le sommet de la chaîne locale pour un pasteur.
+        if ($church->type === ChurchType::GROUP) {
+            $addSuperAdmins('to');
+
+            return [
+                'recipients' => array_values($to),
+                'cc' => [],
+                'targetLabel' => 'hiérarchie nationale (super administrateurs)',
                 'chain' => $chain,
             ];
         }

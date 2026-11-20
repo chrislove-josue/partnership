@@ -157,7 +157,7 @@ export function TextField({
       <Text style={styles.label}>{label}</Text>
       <View style={styles.inputContainer}>
         <TextInput
-          style={[styles.input, trailing && styles.inputWithTrailing, multiline && styles.multiline]}
+          style={[styles.input, trailing ? styles.inputWithTrailing : null, multiline && styles.multiline]}
           value={value}
           onChangeText={onChangeText}
           placeholder={placeholder}

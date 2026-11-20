@@ -222,13 +222,12 @@ class PartnershipReportService
     /**
      * Résolution de la chaîne hiérarchique des destinataires.
      *
-     * Règle de remontée d'un niveau, le niveau suivant étant toujours en copie :
-     * personnel d'une locale → pasteur de cette locale ; pasteur d'une locale →
-     * pasteur de son sous-groupe ; pasteur d'un sous-groupe → pasteur du groupe.
-     * Une locale rattachée directement au groupe remonte au pasteur du groupe.
-     * Les super administrateurs sont en copie de chaque niveau, et destinataires
-     * pour une église groupe (pasteur ou personnel) ou un SUPER_ADMIN. L'adresse
-     * de l'expéditeur est toujours exclue.
+     * Le personnel envoie son rapport au pasteur de SA église, quel que soit son
+     * niveau (locale, sous-groupe ou groupe), avec le niveau supérieur en copie.
+     * Les pasteurs remontent d'un niveau : locale → sous-groupe → groupe, avec le
+     * niveau suivant en copie. Les super administrateurs sont en copie de chaque
+     * niveau, et destinataires pour une église groupe (pasteur) ou un SUPER_ADMIN.
+     * L'adresse de l'expéditeur est toujours exclue.
      *
      * @return array{
      *     recipients: array<int, array{email: string, name: string}>,

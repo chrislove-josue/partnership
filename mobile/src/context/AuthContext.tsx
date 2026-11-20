@@ -24,6 +24,7 @@ interface AuthContextValue {
   session: SessionInfo | null;
   loading: boolean;
   apiUrl: string;
+  canConfigureApiUrl: boolean;
   updateApiUrl: (url: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -37,13 +38,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [apiUrl, setApiUrlState] = useState(getApiUrl());
+  const [canConfigureApiUrl, setCanConfigureApiUrl] = useState(false);
 
   const updateApiUrl = useCallback(async (url: string) => {
+    if (!canConfigureApiUrl) {
+      throw new Error('Seul le super administrateur peut modifier l’adresse de l’API.');
+    }
+
     const normalized = url.trim().replace(/\/+$/, '');
     await SecureStore.setItemAsync(API_URL_KEY, normalized);
     setApiUrl(normalized);
     setApiUrlState(normalized);
-  }, []);
+  }, [canConfigureApiUrl]);
 
   const forget = useCallback(async () => {
     clearCache();
@@ -65,6 +71,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setApiUrl(storedUrl);
           setApiUrlState(storedUrl);
         }
+
+        const adminDevice = await SecureStore.getItemAsync(ADMIN_DEVICE_KEY);
+        setCanConfigureApiUrl(adminDevice === '1');
 
         const token = await SecureStore.getItemAsync(TOKEN_KEY);
         if (!token) {

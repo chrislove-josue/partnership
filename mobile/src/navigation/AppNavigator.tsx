@@ -57,6 +57,7 @@ function MainTabs() {
 
 export function AppNavigator() {
   const { user, loading } = useAuth();
+  const storageAlertShown = useRef(false);
 
   useEffect(() => {
     if (!user) {
@@ -64,18 +65,22 @@ export function AppNavigator() {
     }
 
     const run = () => {
-      void syncNow().catch((error: unknown) => {
-        const message = getErrorMessage(error, 'Synchronisation impossible.');
-        if (/permission|fichier|stockage|storage|accès|mkdir|EACCES/i.test(message)) {
+      void (async () => {
+        await ensureStorageAccess();
+        if (!hasPublicStorageAccess() && !storageAlertShown.current) {
+          storageAlertShown.current = true;
           Alert.alert(
             'Accès au stockage',
-            'Autorisez « Tous les fichiers » pour FinanceMobile afin de conserver les données sur le téléphone.',
+            'Autorisez « Tous les fichiers » pour FinanceMobile afin de conserver la base et les fichiers sur le téléphone, même après désinstallation.',
             [
               { text: 'Plus tard' },
               { text: 'Paramètres', onPress: () => void openStorageSettings() },
             ],
           );
         }
+        await syncNow();
+      })().catch(() => {
+        // La synchronisation reprendra automatiquement au prochain cycle.
       });
     };
 

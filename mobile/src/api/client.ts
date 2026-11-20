@@ -1,4 +1,6 @@
 import { File, Paths } from 'expo-file-system';
+import * as LegacyFileSystem from 'expo-file-system/legacy';
+import { publicFilePath } from '../db/storage';
 import {
   enqueueChange,
   getEntity,
@@ -536,5 +538,13 @@ export async function apiDownload(path: string, fileName: string): Promise<strin
   const file = new File(Paths.cache, fileName);
   file.write(base64, { encoding: 'base64' });
 
-  return file.uri;
+  // Les rapports exportés restent dans Documents/FinanceMobile/files,
+  // y compris après désinstallation de l'application.
+  try {
+    const destination = await publicFilePath(fileName);
+    await LegacyFileSystem.copyAsync({ from: file.uri, to: destination });
+    return destination;
+  } catch {
+    return file.uri;
+  }
 }

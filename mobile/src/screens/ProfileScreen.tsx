@@ -7,6 +7,7 @@ import type { User } from '../api/types';
 import { useAuth } from '../context/AuthContext';
 import { countPendingChanges, getMeta, initDatabase, listConflicts } from '../db/database';
 import { syncNow } from '../db/sync';
+import { ensureStorageAccess, hasPublicStorageAccess, openStorageSettings } from '../db/storage';
 import {
   Badge,
   Card,
@@ -28,6 +29,7 @@ export function ProfileScreen() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [syncInfo, setSyncInfo] = useState({ pending: 0, conflicts: 0, lastSync: '' });
+  const [storageOk, setStorageOk] = useState(true);
   const [syncing, setSyncing] = useState(false);
 
   const [name, setName] = useState('');
@@ -56,6 +58,8 @@ export function ProfileScreen() {
   const loadSyncInfo = useCallback(async () => {
     try {
       await initDatabase();
+      await ensureStorageAccess();
+      setStorageOk(hasPublicStorageAccess());
       const [pending, conflicts, lastSync] = await Promise.all([
         countPendingChanges(),
         listConflicts(),
@@ -185,7 +189,15 @@ export function ProfileScreen() {
         <Text style={styles.help}>
           Sauvegarde conservée dans Documents/FinanceMobile, même après désinstallation.
         </Text>
-        <SecondaryButton title="Synchroniser maintenant" onPress={() => void synchronize()} disabled={syncing} />
+        <Text style={styles.help}>
+          Accès au stockage : {storageOk ? 'autorisé' : 'à autoriser dans les paramètres Android'}
+        </Text>
+        <View style={styles.syncActions}>
+          <SecondaryButton title="Synchroniser maintenant" onPress={() => void synchronize()} disabled={syncing} />
+          {storageOk ? null : (
+            <SecondaryButton title="Ouvrir les paramètres" onPress={() => void openStorageSettings()} />
+          )}
+        </View>
       </Card>
 
       <Card>

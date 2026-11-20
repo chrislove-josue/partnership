@@ -227,8 +227,8 @@ class PartnershipReportService
      * pasteur de son sous-groupe ; pasteur d'un sous-groupe → pasteur du groupe.
      * Une locale rattachée directement au groupe remonte au pasteur du groupe.
      * Les super administrateurs sont en copie de chaque niveau, et destinataires
-     * pour une église groupe ou un SUPER_ADMIN. L'adresse de l'expéditeur est
-     * toujours exclue.
+     * pour une église groupe (pasteur ou personnel) ou un SUPER_ADMIN. L'adresse
+     * de l'expéditeur est toujours exclue.
      *
      * @return array{
      *     recipients: array<int, array{email: string, name: string}>,
@@ -375,13 +375,8 @@ class PartnershipReportService
 
         $isStaff = ! in_array($user->roleName(), $pastorRoles, true);
 
-        // Personnel rattaché directement au groupe : aucun niveau local à
-        // solliciter, la hiérarchie nationale est le seul interlocuteur.
-        if ($isStaff && $church->type === ChurchType::GROUP) {
-            throw new RuntimeException('Un personnel doit être rattaché à une église locale.');
-        }
-
-        // Une église groupe est le sommet de la chaîne locale pour un pasteur.
+        // Une église groupe est le sommet de la chaîne : son personnel envoie
+        // son rapport directement à la hiérarchie nationale, comme son pasteur.
         if ($church->type === ChurchType::GROUP) {
             $addSuperAdmins('to');
 

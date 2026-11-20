@@ -290,7 +290,10 @@ export function DateField({
   const maxDay = year && month ? new Date(Number(year), Number(month), 0).getDate() : 31;
   const dayOptions = [
     ...emptyOption,
-    ...Array.from({ length: maxDay }, (_, index) => String(index + 1).padStart(2, '0')),
+    ...Array.from({ length: maxDay }, (_, index) => {
+      const value = String(index + 1).padStart(2, '0');
+      return { label: value, value };
+    }),
   ];
 
   const emit = (nextYear: string, nextMonth: string, nextDay: string) => {

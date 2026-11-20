@@ -348,8 +348,22 @@ Les 11 comptes générés (mot de passe initial `azerty123`, à changer après p
 
 Un personnel peut saisir, modifier et importer les dons et partenaires de **sa propre église** uniquement. Il reçoit les notifications de dons de son église. Il peut consulter et envoyer le rapport de son église au **pasteur de cette même église** (locale, sous-groupe ou groupe), avec le niveau suivant en copie. Il ne peut pas gérer les utilisateurs, les églises, les catégories ni lire les églises filles.
 
+### Attribution des rôles depuis l’écran « Créer un utilisateur »
+
+Le champ **Rôles** est filtré selon le niveau du créateur, et chaque attribution est revérifiée côté serveur (formulaire Filament et API) :
+
+| Créateur | Rôles attribuables |
+| --- | --- |
+| Pasteur local | Personnel (`STAFF`) |
+| Pasteur de sous-groupe | Pasteur local, Personnel |
+| Pasteur de groupe | Pasteur de sous-groupe, Pasteur local, Personnel |
+| Super administrateur | Tous les rôles |
+
+L’église assignée doit toujours appartenir au périmètre du créateur. Tenter d’envoyer un rôle ou une église non autorisés est refusé avec un message en français.
+
 ```bash
 php artisan test --filter=ChurchStaffCommandTest
+php artisan test --filter=UserRoleAssignmentTest
 ```
 
 ---

@@ -154,7 +154,7 @@ class UserRoleAssignmentTest extends TestCase
                 'name' => 'Personnel_test',
                 'email' => 'personnel-test@example.test',
                 'password' => 'azerty123',
-                'roles' => [$localPastorId],
+                'roles' => [RoleName::LOCAL_PASTOR->value],
                 'assigned_church_id' => $this->local->id,
                 'is_active' => true,
             ])
@@ -169,7 +169,7 @@ class UserRoleAssignmentTest extends TestCase
                 'name' => 'Personnel_test',
                 'email' => 'personnel-test@example.test',
                 'password' => 'azerty123',
-                'roles' => [$staffId],
+                'roles' => [RoleName::STAFF->value],
                 'assigned_church_id' => $this->local->id,
                 'is_active' => true,
             ])

@@ -53,6 +53,7 @@ class DataController extends Controller
             ->with(['church:id,name', 'cellule:id,name'])
             ->withTotalDonations()
             ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
+            ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
             ->when($request->string('search')->toString(), function ($query, string $search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('first_name', 'like', "%{$search}%")
@@ -82,6 +83,7 @@ class DataController extends Controller
             'cellule_id' => $partner->cellule_id,
             'cellule' => $partner->cellule?->name,
             'total_donations' => (float) ($partner->total_donations ?? 0),
+            'updated_at' => $partner->updated_at?->toIso8601String(),
         ])->all()]);
     }
 
@@ -93,6 +95,7 @@ class DataController extends Controller
             ->with(['church:id,name', 'leader:id,first_name,last_name'])
             ->withTotalDonations()
             ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
+            ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
             ->when($request->string('search')->toString(), function ($query, string $search): void {
                 $query->where('name', 'like', "%{$search}%");
             })
@@ -108,6 +111,7 @@ class DataController extends Controller
             'leader_id' => $cellule->leader_id,
             'leader' => $cellule->leader?->full_name,
             'total_donations' => (float) ($cellule->total_donations ?? 0),
+            'updated_at' => $cellule->updated_at?->toIso8601String(),
         ])->all()]);
     }
 

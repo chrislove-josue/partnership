@@ -272,11 +272,13 @@ if (!SOURCE_ONLY) {
     skip('APK : manifeste (mode complet)', 'aucun APK présent');
     skip('APK : signature de release (mode complet)', 'aucun APK présent');
   } else {
-    if (toolExists('aapt')) {
+    const aapt = resolveTool('aapt');
+    if (aapt) {
       check('APK : manifeste (mode complet)', () => {
-        const output = execFileSync('aapt', ['dump', 'xmltree', apk, 'AndroidManifest.xml'], {
+        const output = execFileSync(aapt, ['dump', 'xmltree', apk, 'AndroidManifest.xml'], {
           encoding: 'utf8',
           stdio: ['ignore', 'pipe', 'ignore'],
+          shell: process.platform === 'win32',
         });
         assert.ok(!/usesCleartextTraffic/i.test(output), 'l\'APK demande du trafic en clair');
         assert.ok(!/MANAGE_EXTERNAL_STORAGE|POST_NOTIFICATIONS|SYSTEM_ALERT_WINDOW/.test(output), 'permissions excessives dans l\'APK');
@@ -285,13 +287,15 @@ if (!SOURCE_ONLY) {
       skip('APK : manifeste (mode complet)', 'aapt absent : contrôle ignoré');
     }
 
-    if (toolExists('apksigner')) {
+    const apksigner = resolveTool('apksigner');
+    if (apksigner) {
       check('APK : signature de release (mode complet)', () => {
         let signature = '';
         try {
-          signature = execFileSync('apksigner', ['verify', '--print-certs', apk], {
+          signature = execFileSync(apksigner, ['verify', '--print-certs', apk], {
             encoding: 'utf8',
             stdio: ['ignore', 'pipe', 'ignore'],
+            shell: process.platform === 'win32',
           });
         } catch (error) {
           signature = `${error.stdout ?? ''}\n${error.stderr ?? ''}`;

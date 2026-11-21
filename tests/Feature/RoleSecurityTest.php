@@ -69,12 +69,12 @@ class RoleSecurityTest extends TestCase
     public function test_super_admin_keeps_role_management(): void
     {
         $admin = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
-        $staffRole = Role::where('name', RoleName::STAFF->value)->firstOrFail();
+        $customRole = Role::create(['name' => 'ROLE PERSONNALISE', 'guard_name' => 'web', 'is_system' => false]);
         $superAdminRole = Role::where('name', RoleName::SUPER_ADMIN->value)->firstOrFail();
 
         $this->assertTrue(Gate::forUser($admin)->allows('create', Role::class));
         $this->assertTrue(Gate::forUser($admin)->allows('update', $superAdminRole));
-        $this->assertTrue(Gate::forUser($admin)->allows('delete', $staffRole));
+        $this->assertTrue(Gate::forUser($admin)->allows('delete', $customRole));
         $this->assertTrue(Gate::forUser($admin)->denies('delete', $superAdminRole));
     }
 }

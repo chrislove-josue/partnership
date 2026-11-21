@@ -78,7 +78,8 @@ class ChurchesTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->before(fn (DeleteBulkAction $action) => ChurchDeleteGuard::beforeBulkDelete($action)),
                 ]),
             ]);
     }

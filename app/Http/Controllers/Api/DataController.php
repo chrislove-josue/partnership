@@ -192,6 +192,8 @@ class DataController extends Controller
     {
         Gate::authorize('viewAny', Donation::class);
 
+        [$isSync, $afterId, $limit] = $this->syncOptions($request);
+
         $query = Donation::query()
             ->with([
                 'partner:id,first_name,last_name,email,phone,handle_kc',
@@ -200,16 +202,22 @@ class DataController extends Controller
             ])
             ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
             ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
+            ->when($afterId > 0, fn ($query) => $query->where('id', '>', $afterId))
             ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))
             ->when($request->filled('category_id'), fn ($query) => $query->where('category_id', $request->integer('category_id')))
             ->when($request->filled('partner_id'), fn ($query) => $query->where('partner_id', $request->integer('partner_id')))
             ->when($request->filled('date_from'), fn ($query) => $query->whereDate('date', '>=', $request->string('date_from')->toString()))
-            ->when($request->filled('date_to'), fn ($query) => $query->whereDate('date', '<=', $request->string('date_to')->toString()))
-            ->latest('date')
-            ->latest('id')
-            ->limit(300);
+            ->when($request->filled('date_to'), fn ($query) => $query->whereDate('date', '<=', $request->string('date_to')->toString()));
 
-        return response()->json(['data' => $query->get()->map(fn (Donation $donation): array => [
+        if ($isSync) {
+            $query->orderBy('id');
+        } else {
+            $query->latest('date')->latest('id');
+        }
+        $rows = $query->limit($isSync ? $limit : 300)->get();
+        $hasMore = $isSync && $rows->count() === $limit;
+
+        return response()->json(['data' => $rows->map(fn (Donation $donation): array => [
             'id' => $donation->id,
             'amount' => (float) $donation->amount,
             'date' => $donation->date?->toIso8601String(),
@@ -221,7 +229,7 @@ class DataController extends Controller
             'category' => $donation->category?->name,
             'color' => $donation->category?->color,
             'updated_at' => $donation->updated_at?->toIso8601String(),
-        ])->all()]);
+        ])->all(), 'has_more' => $hasMore]);
     }
 
     public function updateDonation(Request $request, Donation $donation): JsonResponse

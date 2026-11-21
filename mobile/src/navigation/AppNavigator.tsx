@@ -61,7 +61,7 @@ function MainTabs() {
 }
 
 export function AppNavigator() {
-  const { user, loading } = useAuth();
+  const { user, loading, markSynced } = useAuth();
 
   useEffect(() => {
     void requestStartupPermissions();
@@ -74,7 +74,10 @@ export function AppNavigator() {
 
     const run = () => {
       void (async () => {
-        await syncNow();
+        const summary = await syncNow();
+        if (!summary.skipped) {
+          await markSynced();
+        }
       })().catch(() => {
         // La synchronisation reprendra automatiquement au prochain cycle.
       });
@@ -92,7 +95,7 @@ export function AppNavigator() {
       clearInterval(timer);
       subscription.remove();
     };
-  }, [user]);
+  }, [user, markSynced]);
 
   if (loading) {
     return (

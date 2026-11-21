@@ -25,6 +25,7 @@ export interface SyncSummary {
 }
 
 interface DeletionEntry {
+  id: number;
   entity: string;
   entity_id: string;
   deleted_at: string;
@@ -32,8 +33,17 @@ interface DeletionEntry {
 
 interface DeletionsResponse {
   data: DeletionEntry[];
+  has_more: boolean;
   server_time: string;
 }
+
+interface EntityPage {
+  data: Record<string, unknown>[];
+  has_more?: boolean;
+}
+
+const PAGE_SIZE = 500;
+const CONFLICT_STATUSES = [403, 404, 409, 422];
 
 const SINGULAR_NAMES: Record<EntityName, string> = {
   churches: 'church',
@@ -51,12 +61,23 @@ function recordFromResponse(entity: EntityName, result: unknown): Record<string,
   return candidate && typeof candidate === 'object' ? (candidate as Record<string, unknown>) : null;
 }
 
+function numericId(value: unknown): number | null {
+  const id = Number(value);
+  return value !== undefined && value !== null && Number.isFinite(id) ? id : null;
+}
+
 async function pushOutbox(): Promise<{ pushed: number; conflicts: number }> {
   let pushed = 0;
   let conflicts = 0;
 
   for (const entry of await listOutbox()) {
-    const payload = entry.payload ? (JSON.parse(entry.payload) as Record<string, unknown>) : {};
+    let payload: Record<string, unknown> = {};
+    try {
+      payload = entry.payload ? (JSON.parse(entry.payload) as Record<string, unknown>) : {};
+    } catch {
+      // Une entrée corrompue ne doit pas bloquer toutes les autres.
+      payload = {};
+    }
     const path = entry.entity_id.startsWith('local-')
       ? `/${entry.entity}`
       : `/${entry.entity}/${entry.entity_id}`;
@@ -80,6 +101,9 @@ async function pushOutbox(): Promise<{ pushed: number; conflicts: number }> {
         // Remplace l'identifiant temporaire par celui du serveur pour éviter un doublon.
         await deleteEntity(entry.entity, entry.entity_id);
         await upsertEntity(entry.entity, created.id, created);
+      } else if (entry.operation === 'delete') {
+        // La suppression est confirmée : on retire définitivement la copie locale.
+        await deleteEntity(entry.entity, entry.entity_id);
       } else {
         await clearEntityPending(entry.entity, entry.entity_id);
       }
@@ -91,12 +115,15 @@ async function pushOutbox(): Promise<{ pushed: number; conflicts: number }> {
         throw error;
       }
 
-      if (error instanceof ApiError && [403, 404, 422].includes(error.status)) {
+      if (error instanceof ApiError && CONFLICT_STATUSES.includes(error.status)) {
+        // Le serveur reste la source de vérité : la copie locale est retirée et
+        // sera restaurée par le prochain rapatriement.
         await addConflict(
           entry.entity,
           entry.entity_id,
           getErrorMessage(error, 'La modification locale a été ignorée.'),
         );
+        await deleteEntity(entry.entity, entry.entity_id);
         await removeOutboxEntry(entry.id);
         conflicts += 1;
         continue;
@@ -110,42 +137,92 @@ async function pushOutbox(): Promise<{ pushed: number; conflicts: number }> {
   return { pushed, conflicts };
 }
 
-async function pullChanges(since: string): Promise<number> {
-  const query = since ? `?since=${encodeURIComponent(since)}` : '';
-  const deletions = await api<DeletionsResponse>(`/sync/deletions${query}`, { skipOffline: true });
+async function pullDeletions(since: string): Promise<string> {
+  let afterId = 0;
+  let serverTime = new Date().toISOString();
 
-  for (const deletion of deletions.data) {
-    if ((SYNCABLE_ENTITIES as string[]).includes(deletion.entity)) {
-      await deleteEntity(deletion.entity as EntityName, deletion.entity_id);
+  do {
+    const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
+    if (since) {
+      params.set('since', since);
     }
-  }
+    if (afterId > 0) {
+      params.set('after_id', String(afterId));
+    }
 
+    const response = await api<DeletionsResponse>(`/sync/deletions?${params}`, { skipOffline: true });
+    serverTime = response.server_time || serverTime;
+
+    let lastId = 0;
+    for (const deletion of response.data) {
+      if ((SYNCABLE_ENTITIES as string[]).includes(deletion.entity)) {
+        await deleteEntity(deletion.entity as EntityName, deletion.entity_id);
+      }
+      const id = numericId(deletion.id);
+      if (id !== null) {
+        lastId = Math.max(lastId, id);
+      }
+    }
+
+    afterId = response.has_more && lastId > 0 ? lastId : 0;
+  } while (afterId > 0);
+
+  return serverTime;
+}
+
+async function pullEntity(entity: EntityName, since: string): Promise<number> {
+  let afterId = 0;
   let pulled = 0;
-  for (const entity of SYNCABLE_ENTITIES) {
-    const suffix = since ? `?updated_after=${encodeURIComponent(since)}` : '';
-    const response = await api<{ data: Record<string, unknown>[] }>(`/${entity}${suffix}`, {
-      skipOffline: true,
-    });
+
+  do {
+    const params = new URLSearchParams({ sync: '1', limit: String(PAGE_SIZE) });
+    if (since) {
+      params.set('updated_after', since);
+    }
+    if (afterId > 0) {
+      params.set('after_id', String(afterId));
+    }
+
+    const response = await api<EntityPage>(`/${entity}?${params}`, { skipOffline: true });
+    let lastId = 0;
 
     for (const row of response.data) {
-      if (typeof row.id !== 'string' && typeof row.id !== 'number') {
+      const id = numericId(row.id);
+      if (id === null) {
         continue;
       }
+      lastId = Math.max(lastId, id);
+
       // Une modification locale non encore transmise ne doit pas être écrasée.
-      if (await isEntityPending(entity, row.id)) {
+      if (await isEntityPending(entity, id)) {
         continue;
       }
       await upsertEntity(
         entity,
-        row.id,
+        id,
         row,
         typeof row.updated_at === 'string' ? row.updated_at : null,
       );
       pulled += 1;
     }
+
+    afterId = response.has_more && lastId > 0 ? lastId : 0;
+  } while (afterId > 0);
+
+  return pulled;
+}
+
+async function pullChanges(since: string): Promise<number> {
+  // Les suppressions sont traitées en premier : une entité supprimée côté serveur
+  // ne doit pas être réintroduite par la liste des modifications.
+  const serverTime = await pullDeletions(since);
+
+  let pulled = 0;
+  for (const entity of SYNCABLE_ENTITIES) {
+    pulled += await pullEntity(entity, since);
   }
 
-  await setMeta('last_sync', deletions.server_time);
+  await setMeta('last_sync', serverTime);
   return pulled;
 }
 

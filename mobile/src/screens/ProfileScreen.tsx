@@ -21,7 +21,7 @@ import {
 } from '../components/ui';
 
 export function ProfileScreen() {
-  const { user, session, refreshUser, logout, apiUrl, canConfigureApiUrl, updateApiUrl } = useAuth();
+  const { user, session, refreshUser, logout, apiUrl, canConfigureApiUrl, updateApiUrl, markSynced } = useAuth();
   const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -76,6 +76,9 @@ export function ProfileScreen() {
     setSyncing(true);
     try {
       const summary = await syncNow();
+      if (!summary.skipped) {
+        await markSynced();
+      }
       await loadSyncInfo();
       Alert.alert(
         'Synchronisation',

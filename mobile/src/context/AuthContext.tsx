@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
 import {
   api,
@@ -31,6 +31,8 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  /** Enregistre l'heure d'une synchronisation réellement effectuée. */
+  markSynced: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -45,6 +47,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [apiUrl, setApiUrlState] = useState(getApiUrl());
   const [canConfigureApiUrl, setCanConfigureApiUrl] = useState(false);
+  const sessionRef = useRef<SessionInfo | null>(null);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
 
   const updateApiUrl = useCallback(async (url: string) => {
     if (!canConfigureApiUrl) {
@@ -71,6 +78,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setSession(null);
     setCanConfigureApiUrl(false);
+    sessionRef.current = null;
+  }, []);
+
+  const markSynced = useCallback(async () => {
+    const now = new Date().toISOString();
+    const next: SessionInfo = {
+      connectedAt: sessionRef.current?.connectedAt ?? now,
+      lastSyncAt: now,
+    };
+    await saveSession(next);
+    sessionRef.current = next;
+    setSession(next);
   }, []);
 
   useEffect(() => {
@@ -122,12 +141,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(response.user);
         setCanConfigureApiUrl(isSuperAdmin(response.user));
         await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
-        const synced: SessionInfo = {
+        const current: SessionInfo = {
           connectedAt: storedSession?.connectedAt ?? new Date().toISOString(),
-          lastSyncAt: new Date().toISOString(),
+          // La date de synchronisation n'est mise à jour que par une sync réussie.
+          lastSyncAt: storedSession?.lastSyncAt ?? '',
         };
-        await saveSession(synced);
-        setSession(synced);
+        await saveSession(current);
+        setSession(current);
       } catch (error) {
         // Hors-ligne, on conserve le jeton et l'utilisateur mémorisés : le cache
         // local reste consultable. Seul un 401 signifie une session terminée.
@@ -179,7 +199,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
     setCanConfigureApiUrl(allowed);
     const now = new Date().toISOString();
-    const opened: SessionInfo = { connectedAt: now, lastSyncAt: now };
+    const opened: SessionInfo = { connectedAt: now, lastSyncAt: '' };
     await saveSession(opened);
     setAuthToken(response.token);
     setUser(response.user);
@@ -192,12 +212,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(response.user);
       setCanConfigureApiUrl(isSuperAdmin(response.user));
       await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
-      const synced: SessionInfo = {
+      const refreshed: SessionInfo = {
         connectedAt: session?.connectedAt ?? new Date().toISOString(),
-        lastSyncAt: new Date().toISOString(),
+        lastSyncAt: session?.lastSyncAt ?? '',
       };
-      await saveSession(synced);
-      setSession(synced);
+      await saveSession(refreshed);
+      setSession(refreshed);
     } catch (error) {
       if (error instanceof ApiError && error.status === 401) {
         await logout();
@@ -206,8 +226,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [logout, session]);
 
   const value = useMemo(
-    () => ({ user, session, loading, apiUrl, canConfigureApiUrl, updateApiUrl, login, logout, refreshUser }),
-    [user, session, loading, apiUrl, canConfigureApiUrl, updateApiUrl, login, logout, refreshUser],
+    () => ({
+      user,
+      session,
+      loading,
+      apiUrl,
+      canConfigureApiUrl,
+      updateApiUrl,
+      login,
+      logout,
+      refreshUser,
+      markSynced,
+    }),
+    [user, session, loading, apiUrl, canConfigureApiUrl, updateApiUrl, login, logout, refreshUser, markSynced],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

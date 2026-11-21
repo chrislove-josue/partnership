@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { api, apiDownload, getErrorMessage } from '../api/client';
+import { FilterCard } from '../components/FilterCard';
+import { filterBy } from '../utils/search';
 import type { Church, PartnershipReport, RecipientsPreview } from '../api/types';
 import {
   Badge,
@@ -33,6 +35,8 @@ export function ReportsScreen() {
   const [quarter, setQuarter] = useState(String(Math.floor(new Date().getMonth() / 3) + 1));
   const [year, setYear] = useState(String(new Date().getFullYear()));
   const [report, setReport] = useState<PartnershipReport | null>(null);
+  const [reportSearch, setReportSearch] = useState('');
+  const [reportSection, setReportSection] = useState('');
   const [preview, setPreview] = useState<RecipientsPreview | null>(null);
   const [selectedCc, setSelectedCc] = useState<string[]>([]);
   const [confirming, setConfirming] = useState(false);

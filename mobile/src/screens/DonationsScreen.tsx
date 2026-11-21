@@ -18,6 +18,7 @@ import {
   LoadingView,
   PrimaryButton,
   Screen,
+  SecondaryButton,
   SectionTitle,
   SelectField,
   TextField,
@@ -30,8 +31,12 @@ export function DonationsScreen() {
   const [churches, setChurches] = useState<Church[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [search, setSearch] = useState('');
   const [churchFilter, setChurchFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [partnerFilter, setPartnerFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
@@ -47,8 +52,16 @@ export function DonationsScreen() {
     setLoading(true);
     setError('');
     try {
+      const query = new URLSearchParams();
+      if (churchFilter) query.set('church_id', churchFilter);
+      if (categoryFilter) query.set('category_id', categoryFilter);
+      if (partnerFilter) query.set('partner_id', partnerFilter);
+      if (dateFrom) query.set('date_from', dateFrom);
+      if (dateTo) query.set('date_to', dateTo);
+      const donationPath = `/donations${query.toString() ? `?${query}` : ''}`;
+
       const [donationData, churchData, partnerData, categoryData] = await Promise.all([
-        api<{ data: Donation[] }>('/donations', { cacheKey: 'donations' }),
+        api<{ data: Donation[] }>(donationPath, { cacheKey: `donations:${query}` }),
         api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
         api<{ data: Partner[] }>('/partners', { cacheKey: 'partners' }),
         api<{ data: Category[] }>('/categories', { cacheKey: 'categories' }),
@@ -64,34 +77,50 @@ export function DonationsScreen() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [churchFilter, categoryFilter, partnerFilter, dateFrom, dateTo]);
 
   useEffect(() => {
-    void load();
+    const timer = setTimeout(() => void load(), 250);
+    return () => clearTimeout(timer);
   }, [load]);
+
+  const resetFilters = () => {
+    setSearch('');
+    setChurchFilter('');
+    setCategoryFilter('');
+    setPartnerFilter('');
+    setDateFrom('');
+    setDateTo('');
+  };
 
   useFocusEffect(useCallback(() => {
     void load();
   }, [load]));
 
   const churchOptions = churches.map((church) => ({ label: church.name, value: String(church.id) }));
-  const filteredPartners = partners.filter((partner) => !churchId || partner.church_id === Number(churchId));
-  const partnerOptions = filteredPartners.map((partner) => ({
+  const partnerOptions = partners.map((partner) => ({
     label: partner.full_name ?? `${partner.first_name} ${partner.last_name}`,
     value: String(partner.id),
   }));
+  const formPartnerOptions = partners
+    .filter((partner) => !churchId || partner.church_id === Number(churchId))
+    .map((partner) => ({
+      label: partner.full_name ?? `${partner.first_name} ${partner.last_name}`,
+      value: String(partner.id),
+    }));
   const categoryOptions = categories.map((category) => ({ label: category.name, value: String(category.id) }));
-  const visibleDonations = donations.filter((donation) => {
-    if (churchFilter && donation.church_id !== Number(churchFilter)) {
-      return false;
-    }
-    return !categoryFilter || donation.category_id === Number(categoryFilter);
-  });
+  const visibleDonations = filterBy(donations, search, [
+    (donation) => donation.partner,
+    (donation) => donation.church,
+    (donation) => donation.category,
+    (donation) => donation.amount,
+    (donation) => donation.date,
+  ]);
 
   const openForm = () => {
     setFormError('');
     setAmount('');
-    setPartnerId(filteredPartners[0] ? String(filteredPartners[0].id) : '');
+    setPartnerId(formPartnerOptions[0]?.value ?? '');
     setFormOpen(true);
   };
 

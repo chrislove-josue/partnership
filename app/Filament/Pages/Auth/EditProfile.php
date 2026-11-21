@@ -29,9 +29,9 @@ class EditProfile extends BaseEditProfile
                 ->label('Identifiant KingsChat (handle KC)')
                 ->unique(ignoreRecord: true)
                 ->maxLength(255),
+            $this->getCurrentPasswordFormComponent(),
             $this->getPasswordFormComponent(),
             $this->getPasswordConfirmationFormComponent(),
-            $this->getCurrentPasswordFormComponent(),
         ]);
     }
 }

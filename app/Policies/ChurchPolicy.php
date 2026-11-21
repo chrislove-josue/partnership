@@ -13,7 +13,11 @@ class ChurchPolicy
 
     public function viewAny(User $user): bool
     {
-        return $this->access->canManageChurches($user);
+        return $this->access->canManageChurches($user)
+            || in_array($user->roleName(), [
+                RoleName::GROUP_PASTOR->value,
+                RoleName::SUBGROUP_PASTOR->value,
+            ], true);
     }
 
     public function view(User $user, Church $church): bool

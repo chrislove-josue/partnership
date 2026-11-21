@@ -10,7 +10,6 @@ use App\Services\PartnershipReportService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Utilities\Get;
@@ -49,7 +48,6 @@ class PartnershipReport extends Page
             'month' => now()->month,
             'quarter' => now()->quarter,
             'year' => now()->year,
-            'report_search' => '',
             'report_section' => '',
         ]);
     }
@@ -105,11 +103,6 @@ class PartnershipReport extends Page
                     ->required()
                     ->live(),
 
-                TextInput::make('report_search')
-                    ->label('Rechercher dans le rapport')
-                    ->placeholder('Partenaire, catégorie, montant, date')
-                    ->live(debounce: 300),
-
                 Select::make('report_section')
                     ->label('Section')
                     ->options([
@@ -161,8 +154,8 @@ class PartnershipReport extends Page
     }
 
     /**
-     * Filtre uniquement l'affichage : l'export et l'envoi utilisent le rapport
-     * complet, comme dans l'application mobile.
+     * Ajoute la section sélectionnée pour l'affichage. L'export et l'envoi
+     * utilisent le rapport complet.
      *
      * @param  array<string, mixed>  $report
      * @return array<string, mixed>
@@ -170,70 +163,8 @@ class PartnershipReport extends Page
     private function filterReportForDisplay(array $report): array
     {
         $report['report_section'] = (string) ($this->data['report_section'] ?? '');
-        $search = mb_strtolower(trim((string) ($this->data['report_search'] ?? '')));
-
-        if ($search === '') {
-            return $report;
-        }
-
-        $report['categories'] = array_values(array_filter(
-            $report['categories'],
-            fn (array $category): bool => $this->matchesReportSearch($search, [
-                $category['name'] ?? null,
-                $category['count'] ?? null,
-                $category['amount'] ?? null,
-            ]),
-        ));
-
-        $report['partners'] = array_values(array_filter(
-            $report['partners'],
-            fn (array $partner): bool => $this->matchesReportSearch($search, [
-                $partner['name'] ?? null,
-                $partner['cellule'] ?? null,
-                $partner['email'] ?? null,
-                $partner['phone'] ?? null,
-                $partner['count'] ?? null,
-                $partner['amount'] ?? null,
-            ]),
-        ));
-
-        $report['partnersWithoutDonation'] = array_values(array_filter(
-            $report['partnersWithoutDonation'],
-            fn (array $partner): bool => $this->matchesReportSearch($search, [
-                $partner['name'] ?? null,
-                $partner['cellule'] ?? null,
-                $partner['email'] ?? null,
-                $partner['phone'] ?? null,
-            ]),
-        ));
-
-        $report['donations'] = array_values(array_filter(
-            $report['donations'],
-            fn (array $donation): bool => $this->matchesReportSearch($search, [
-                $donation['partner'] ?? null,
-                $donation['category'] ?? null,
-                $donation['amount'] ?? null,
-                $donation['date'] ?? null,
-            ]),
-        ));
 
         return $report;
-    }
-
-    /** @param array<int, mixed> $values */
-    private function matchesReportSearch(string $search, array $values): bool
-    {
-        foreach ($values as $value) {
-            if ($value === null || $value === '') {
-                continue;
-            }
-
-            if (str_contains(mb_strtolower((string) $value), $search)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     protected function getHeaderActions(): array
@@ -242,10 +173,8 @@ class PartnershipReport extends Page
             Action::make('resetReportFilters')
                 ->label('Réinitialiser les filtres')
                 ->color('gray')
-                ->visible(fn (): bool => filled($this->data['report_search'] ?? null)
-                    || filled($this->data['report_section'] ?? null))
+                ->visible(fn (): bool => filled($this->data['report_section'] ?? null))
                 ->action(function (): void {
-                    $this->data['report_search'] = '';
                     $this->data['report_section'] = '';
                     $this->form->fill($this->data);
                 }),

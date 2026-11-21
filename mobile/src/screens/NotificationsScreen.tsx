@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage, invalidateCache } from '../api/client';
+import { FilterCard } from '../components/FilterCard';
+import { filterBy } from '../utils/search';
 import type { AppNotification } from '../api/types';
 import {
   Badge,
@@ -12,6 +14,7 @@ import {
   formatDate,
   LoadingView,
   Screen,
+  SelectField,
 } from '../components/ui';
 
 export function NotificationsScreen() {
@@ -19,6 +22,8 @@ export function NotificationsScreen() {
   const [error, setError] = useState('');
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unread, setUnread] = useState(0);
+  const [search, setSearch] = useState('');
+  const [readFilter, setReadFilter] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);

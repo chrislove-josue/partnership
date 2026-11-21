@@ -38,6 +38,7 @@ export interface Church {
   parent?: string | null;
   manager_id?: number | null;
   total_donations?: number;
+  is_active?: boolean;
 }
 
 export interface Partner {

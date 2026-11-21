@@ -15,12 +15,14 @@ class Church extends Model
         'type',
         'parent_id',
         'manager_id',
+        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
             'type' => ChurchType::class,
+            'is_active' => 'boolean',
         ];
     }
 

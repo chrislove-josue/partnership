@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { api, getErrorMessage, invalidateCache } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { filterBy } from '../utils/search';
 import type { Category, Cellule, Church, Partner, RoleOption, User } from '../api/types';
 import {
@@ -33,6 +34,7 @@ const sections: Array<{ key: Section; label: string }> = [
 ];
 
 const PASTOR_ROLES = ['GROUP_PASTOR', 'SUBGROUP_PASTOR', 'LOCAL_PASTOR'];
+const CHURCH_STATUS_MANAGERS = ['GROUP_PASTOR', 'SUBGROUP_PASTOR'];
 
 function hasRole(user: User, role: string): boolean {
   return user.role === role || (user.roles ?? []).includes(role);
@@ -43,6 +45,7 @@ function isPastor(user: User): boolean {
 }
 
 export function AdminScreen() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [section, setSection] = useState<Section>('churches');
@@ -60,6 +63,9 @@ export function AdminScreen() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Editable | null>(null);
   const [toDelete, setToDelete] = useState<Editable | null>(null);
+  const [toToggleStatus, setToToggleStatus] = useState<Church | null>(null);
+  const [toggling, setToggling] = useState(false);
+  const [toggleError, setToggleError] = useState('');
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -114,6 +120,34 @@ export function AdminScreen() {
     label: partner.full_name ?? `${partner.first_name} ${partner.last_name}`,
     value: String(partner.id),
   }));
+
+  const canDeleteChurches = user ? hasRole(user, 'SUPER_ADMIN') : false;
+  const canManageChurchStatus = user
+    ? Boolean(user.assigned_church_id)
+      && CHURCH_STATUS_MANAGERS.some((role) => hasRole(user, role))
+    : false;
+  const churchesById = new Map(churches.map((church) => [church.id, church]));
+
+  /** Vrai si l'église cible est l'église assignée ou l'une de ses descendantes. */
+  const isAssignedOrDescendant = (church: Church): boolean => {
+    if (!user?.assigned_church_id) {
+      return false;
+    }
+
+    let current: Church | undefined = church;
+    const visited = new Set<number>();
+    while (current && !visited.has(current.id)) {
+      if (current.id === user.assigned_church_id) {
+        return true;
+      }
+      visited.add(current.id);
+      current = current.parent_id ? churchesById.get(current.parent_id) : undefined;
+    }
+    return false;
+  };
+
+  const canToggleChurch = (church: Church): boolean =>
+    canManageChurchStatus && isAssignedOrDescendant(church);
 
   const filteredChurches = filterBy(churches, search, [
     (church) => church.name,
@@ -242,6 +276,36 @@ export function AdminScreen() {
     }
   };
 
+  const toggleChurchStatus = async () => {
+    if (!toToggleStatus || toggling) {
+      return;
+    }
+
+    const churchId = toToggleStatus.id;
+    const action = toToggleStatus.is_active === false ? 'activate' : 'deactivate';
+    const fallback = action === 'activate'
+      ? 'Impossible de réactiver l’église.'
+      : 'Impossible de désactiver l’église.';
+
+    setToggling(true);
+    setToggleError('');
+    try {
+      const response = await api<{ data: Church }>(`/churches/${churchId}/${action}`, {
+        method: 'POST',
+      });
+      setChurches((current) => current.map((church) =>
+        church.id === response.data.id ? response.data : church,
+      ));
+      invalidateCache();
+      setToToggleStatus(null);
+      await load();
+    } catch (caught) {
+      setToggleError(getErrorMessage(caught, fallback));
+    } finally {
+      setToggling(false);
+    }
+  };
+
   const toggleRole = (role: string, checked: boolean) => {
     setUserRoles((current) => checked ? [...current, role] : current.filter((item) => item !== role));
   };
@@ -324,12 +388,27 @@ export function AdminScreen() {
           <Card key={church.id}>
             <View style={styles.row}>
               <Text style={styles.itemTitle}>{church.name}</Text>
-              <Badge text={String(church.type)} />
+              <View style={styles.badges}>
+                <Badge text={String(church.type)} />
+                {church.is_active === false ? <Badge text="Inactive" color={colors.red} /> : null}
+              </View>
             </View>
             <Text style={styles.meta}>Total dons : {formatMoney(church.total_donations ?? 0)}</Text>
             <View style={styles.actions}>
               <Pressable onPress={() => openForm(church)}><Text style={styles.edit}>Modifier</Text></Pressable>
-              <Pressable onPress={() => setToDelete(church)}><Text style={styles.delete}>Supprimer</Text></Pressable>
+              {canDeleteChurches ? (
+                <Pressable onPress={() => setToDelete(church)}><Text style={styles.delete}>Supprimer</Text></Pressable>
+              ) : null}
+              {canToggleChurch(church) ? (
+                <Pressable onPress={() => {
+                  setToggleError('');
+                  setToToggleStatus(church);
+                }}>
+                  <Text style={church.is_active === false ? styles.activate : styles.delete}>
+                    {church.is_active === false ? 'Réactiver' : 'Désactiver'}
+                  </Text>
+                </Pressable>
+              ) : null}
             </View>
           </Card>
         ))
@@ -498,6 +577,22 @@ export function AdminScreen() {
         onCancel={() => setToDelete(null)}
         onConfirm={() => void remove()}
       />
+
+      <ConfirmModal
+        visible={toToggleStatus !== null}
+        title={toToggleStatus?.is_active === false ? 'Réactiver l’église' : 'Désactiver l’église'}
+        message={toToggleStatus?.is_active === false
+          ? `L’église « ${toToggleStatus.name} » sera réactivée.`
+          : `L’église « ${toToggleStatus?.name ?? ''} » sera désactivée. Seule cette église est concernée.`}
+        confirmLabel={toToggleStatus?.is_active === false ? 'Réactiver' : 'Désactiver'}
+        onCancel={() => {
+          setToToggleStatus(null);
+          setToggleError('');
+        }}
+        onConfirm={() => void toggleChurchStatus()}
+      >
+        {toggleError ? <Text style={styles.error}>{toggleError}</Text> : null}
+      </ConfirmModal>
     </Screen>
   );
 }
@@ -509,11 +604,13 @@ const styles = StyleSheet.create({
   tabText: { color: colors.blue, fontWeight: '600' },
   tabTextActive: { color: '#FFFFFF', fontWeight: '700' },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
+  badges: { flexDirection: 'row', alignItems: 'center', gap: 6, flexShrink: 0 },
   itemTitle: { fontSize: 16, fontWeight: '700', color: colors.ink, flex: 1 },
   meta: { fontSize: 13, color: colors.muted, marginTop: 5 },
   actions: { flexDirection: 'row', gap: 18, marginTop: 12 },
   edit: { color: colors.blue, fontWeight: '700', fontSize: 13 },
   delete: { color: colors.red, fontWeight: '700', fontSize: 13 },
+  activate: { color: colors.green, fontWeight: '700', fontSize: 13 },
   color: { width: 14, height: 14, borderRadius: 7 },
   error: { color: colors.red, marginBottom: 12 },
 });

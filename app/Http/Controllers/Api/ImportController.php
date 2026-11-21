@@ -26,11 +26,15 @@ class ImportController extends Controller
 
     public function importDonations(Request $request): JsonResponse
     {
+        Gate::authorize('create', Donation::class);
+
         return $this->import($request, $this->donationImporter, 'Import des dons terminé');
     }
 
     public function importPartners(Request $request): JsonResponse
     {
+        Gate::authorize('create', Partner::class);
+
         return $this->import($request, $this->partnerImporter, 'Import des partenaires terminé');
     }
 

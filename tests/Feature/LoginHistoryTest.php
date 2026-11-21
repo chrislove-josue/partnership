@@ -138,4 +138,30 @@ class LoginHistoryTest extends TestCase
             ->assertSee('10.0.0.1')
             ->assertDontSee('10.0.0.2');
     }
+
+    public function test_filament_history_pagination_is_translated_in_french(): void
+    {
+        $this->seed();
+
+        $user = $this->user();
+
+        for ($i = 0; $i < 21; $i++) {
+            $user->loginHistories()->create([
+                'event' => LoginHistory::EVENT_LOGIN,
+                'source' => LoginHistory::SOURCE_WEB,
+                'created_at' => now()->subMinutes($i),
+            ]);
+        }
+
+        $this->actingAs($user)
+            ->get('/dashboard/login-history')
+            ->assertOk()
+            ->assertSee('Affichage de')
+            ->assertSee('résultats')
+            ->assertSee('Précédent')
+            ->assertSee('Suivant')
+            ->assertDontSee('pagination.previous')
+            ->assertDontSee('pagination.next')
+            ->assertDontSee('Showing');
+    }
 }

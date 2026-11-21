@@ -2,7 +2,7 @@
   "expo": {
     "name": "FinanceMobile",
     "slug": "finance-mobile",
-    "version": "1.5.1",
+    "version": "1.5.2",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "icon": "./assets/icon.png",

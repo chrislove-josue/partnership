@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\RoleName;
+use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Roles\RoleResource;
 use App\Models\Church;
 use App\Models\Role;
@@ -10,6 +11,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class RoleSecurityTest extends TestCase
@@ -64,6 +66,24 @@ class RoleSecurityTest extends TestCase
         $this->assertTrue(Gate::forUser($pastor)->denies('create', Role::class));
         $this->assertTrue(Gate::forUser($pastor)->denies('update', $staffRole));
         $this->assertTrue(Gate::forUser($pastor)->denies('delete', $staffRole));
+    }
+
+    public function test_group_pastor_form_cannot_change_sensitive_role_fields(): void
+    {
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $pastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group, 'pasteur-form-role@example.test');
+        $role = Role::where('name', RoleName::STAFF->value)->firstOrFail();
+
+        Livewire::actingAs($pastor)
+            ->test(EditRole::class, ['record' => $role->id])
+            ->fillForm([
+                'name' => 'ROLE ESCALADE',
+                'is_system' => true,
+            ])
+            ->assertFormSet([
+                'name' => $role->name,
+                'is_system' => $role->is_system,
+            ]);
     }
 
     public function test_super_admin_keeps_role_management(): void

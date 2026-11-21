@@ -146,7 +146,7 @@ export async function isEntityPending(entity: EntityName, id: string | number): 
 
 export async function clearEntityPending(entity: EntityName, id: string | number): Promise<void> {
   await db().runAsync(
-    'UPDATE entities SET pending = 0 WHERE entity = ? AND id = ?',
+    'UPDATE entities SET pending = 0, deleted = 0 WHERE entity = ? AND id = ?',
     [entity, String(id)],
   );
 }

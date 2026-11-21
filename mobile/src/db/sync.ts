@@ -116,14 +116,20 @@ async function pushOutbox(): Promise<{ pushed: number; conflicts: number }> {
       }
 
       if (error instanceof ApiError && CONFLICT_STATUSES.includes(error.status)) {
-        // Le serveur reste la source de vérité : la copie locale est retirée et
-        // sera restaurée par le prochain rapatriement.
+        // La modification est refusée : on conserve la fiche pour ne pas perdre
+        // les données déjà présentes, mais on lève son drapeau « en attente ».
+        // Une création temporaire est en revanche supprimée : elle n'existe pas
+        // côté serveur et serait un doublon.
         await addConflict(
           entry.entity,
           entry.entity_id,
           getErrorMessage(error, 'La modification locale a été ignorée.'),
         );
-        await deleteEntity(entry.entity, entry.entity_id);
+        if (entry.operation === 'create') {
+          await deleteEntity(entry.entity, entry.entity_id);
+        } else {
+          await clearEntityPending(entry.entity, entry.entity_id);
+        }
         await removeOutboxEntry(entry.id);
         conflicts += 1;
         continue;

@@ -18,13 +18,8 @@ class NotificationPolicy
 
     public function view(User $user, Notification $notification): bool
     {
-        if ($notification->user_id === $user->id) {
-            return true;
-        }
-
-        $churchId = $notification->user?->assigned_church_id;
-
-        return $churchId !== null && $this->access->canAccessChurchData($user, $churchId);
+        // Une notification est personnelle, même pour un pasteur ou un admin.
+        return $notification->user_id === $user->id;
     }
 
     public function create(User $user): bool

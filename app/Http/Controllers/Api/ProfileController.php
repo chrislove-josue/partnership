@@ -34,12 +34,18 @@ class ProfileController extends Controller
             'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
         ]);
 
-        if (! empty($data['password'])) {
-            if (empty($data['current_password']) || ! Hash::check($data['current_password'], $user->password)) {
-                throw ValidationException::withMessages([
-                    'current_password' => ['Le mot de passe actuel est incorrect.'],
-                ]);
-            }
+        $emailChanged = mb_strtolower(trim($data['email'])) !== mb_strtolower((string) $user->email);
+        $passwordChanged = ! empty($data['password']);
+
+        if (($emailChanged || $passwordChanged)
+            && (empty($data['current_password']) || ! Hash::check($data['current_password'], $user->password))) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Le mot de passe actuel est incorrect.'],
+            ]);
+        }
+
+        if ($emailChanged) {
+            $user->email_verified_at = null;
         }
 
         $user->fill([

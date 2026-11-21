@@ -35,6 +35,15 @@ class NotificationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    /** Les notifications sont personnelles : aucun autre compte ne peut les consulter. */
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        return $user ? $query->where('user_id', $user->id) : $query;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return NotificationForm::configure($schema);

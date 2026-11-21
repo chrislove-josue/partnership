@@ -5,12 +5,9 @@ namespace App\Policies;
 use App\Enums\PermissionName;
 use App\Models\Notification;
 use App\Models\User;
-use App\Services\ChurchAccessService;
 
 class NotificationPolicy
 {
-    public function __construct(private readonly ChurchAccessService $access) {}
-
     public function viewAny(User $user): bool
     {
         return $user->hasPermission(PermissionName::READ_OWN_CHURCH_DATA);

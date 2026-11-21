@@ -91,7 +91,6 @@ export function LoginHistoryScreen() {
             { label: 'Tous les événements', value: '' },
             { label: 'Connexions', value: 'login' },
             { label: 'Déconnexions', value: 'logout' },
-            { label: 'Échecs', value: 'failed' },
           ]}
           onChange={setEventFilter}
         />

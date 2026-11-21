@@ -27,6 +27,7 @@ class UsersTable
                 TextColumn::make('roles.name')
                     ->label('Rôle')
                     ->badge()
+                    ->searchable()
                     ->formatStateUsing(fn (string $state) => RoleName::tryFrom($state)?->label() ?? $state),
                 TextColumn::make('assignedChurch.name')
                     ->label('Église assignée')
@@ -34,6 +35,11 @@ class UsersTable
                 TextColumn::make('phone')
                     ->label('Téléphone')
                     ->searchable()
+                    ->toggleable(),
+                TextColumn::make('handle_kc')
+                    ->label('KingChat')
+                    ->searchable()
+                    ->placeholder('—')
                     ->toggleable(),
                 IconColumn::make('is_active')
                     ->label('Actif')

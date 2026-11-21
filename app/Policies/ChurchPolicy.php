@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\ChurchType;
+use App\Enums\RoleName;
 use App\Models\Church;
 use App\Models\User;
 use App\Services\ChurchAccessService;

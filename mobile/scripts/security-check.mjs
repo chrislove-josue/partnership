@@ -284,6 +284,7 @@ if (!SOURCE_ONLY) {
         } catch (error) {
           signature = `${error.stdout ?? ''}\n${error.stderr ?? ''}`;
         }
+        assert.ok(signature.trim() !== '', 'signature de l\'APK illisible');
         assert.ok(!/CN=Android Debug/i.test(signature), 'l\'APK est signé avec le certificat de debug');
       });
     } else {

@@ -61,7 +61,7 @@ class PartnershipReportExporter
         $sheet->getColumnDimension('A')->setWidth(34);
         $sheet->getColumnDimension('B')->setWidth(50);
 
-        $sheet->setCellValue('A1', 'Rapport de partenariat — '.$report['church']['name']);
+        $sheet->setCellValue('A1', self::safeText('Rapport de partenariat — '.$report['church']['name']));
         $sheet->mergeCells('A1:B1');
         $sheet->getRowDimension(1)->setRowHeight(34);
         $sheet->getStyle('A1')->applyFromArray([
@@ -87,8 +87,8 @@ class PartnershipReportExporter
 
         foreach ($rows as $i => [$label, $value]) {
             $row = $i + 3;
-            $sheet->setCellValue("A{$row}", $label);
-            $sheet->setCellValue("B{$row}", $value);
+            $sheet->setCellValue("A{$row}", self::safeText($label));
+            $sheet->setCellValue("B{$row}", self::safeText($value));
             $sheet->getStyle("A{$row}:B{$row}")->applyFromArray([
                 'font' => ['name' => self::FONT],
                 'borders' => $this->borders(),
@@ -121,7 +121,7 @@ class PartnershipReportExporter
 
         $row = 2;
         foreach ($report['categories'] as $i => $category) {
-            $sheet->setCellValue("A{$row}", $category['name']);
+            $sheet->setCellValue("A{$row}", self::safeText($category['name']));
             $sheet->setCellValue("B{$row}", $category['count']);
             $sheet->setCellValue("C{$row}", $category['amount']);
             $sheet->getStyle("C{$row}")->getNumberFormat()->setFormatCode(self::CURRENCY_FORMAT);

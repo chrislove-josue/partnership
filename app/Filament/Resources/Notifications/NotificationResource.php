@@ -35,11 +35,6 @@ class NotificationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
-    public static function churchScopeColumn(): string
-    {
-        return 'user.assigned_church_id';
-    }
-
     public static function form(Schema $schema): Schema
     {
         return NotificationForm::configure($schema);

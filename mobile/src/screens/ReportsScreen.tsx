@@ -137,7 +137,8 @@ export function ReportsScreen() {
     setLoading(true);
     setError('');
     try {
-      const fileName = `rapport-${churchId}-${type}-${year}.xlsx`;
+      const period = currentPeriod();
+      const fileName = `rapport-${churchId}-${period.type}-${period.year}-${period.month}.xlsx`;
       await apiDownload(`/reports/partnership/export?${query()}`, fileName);
       Alert.alert('Rapport téléchargé', 'Le fichier est prêt.');
     } catch (caught) {
@@ -175,33 +176,6 @@ export function ReportsScreen() {
       <Card>
         {loadingChurches ? <LoadingView /> : null}
         <SelectField label="Église" value={churchId} options={churchOptions} onChange={setChurchId} searchable />
-        <SelectField
-          label="Période"
-          value={type}
-          options={[
-            { label: 'Par mois', value: 'month' },
-            { label: 'Par trimestre', value: 'quarter' },
-            { label: 'Par année', value: 'year' },
-          ]}
-          onChange={setType}
-        />
-        {type === 'month' ? (
-          <SelectField
-            label="Mois"
-            value={month}
-            options={months.map((label, index) => ({ label, value: String(index + 1) }))}
-            onChange={setMonth}
-          />
-        ) : null}
-        {type === 'quarter' ? (
-          <SelectField
-            label="Trimestre"
-            value={quarter}
-            options={[1, 2, 3, 4].map((value) => ({ label: `T${value}`, value: String(value) }))}
-            onChange={setQuarter}
-          />
-        ) : null}
-        <SelectField label="Année" value={year} options={yearOptions} onChange={setYear} />
         <View style={styles.buttonRow}>
           <PrimaryButton title="Générer" onPress={() => void generate()} disabled={!churchId || loading} />
           <PrimaryButton title="Exporter" onPress={() => void exportReport()} disabled={!churchId || loading} />

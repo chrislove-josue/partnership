@@ -265,6 +265,7 @@ export function AdminScreen() {
       </ScrollView>
 
       <Card>
+        <SectionTitle>Recherche et filtres</SectionTitle>
         <TextField label="Rechercher" value={search} onChangeText={setSearch} placeholder="Nom, email, téléphone, église" />
         {section === 'churches' ? (
           <SelectField
@@ -312,6 +313,7 @@ export function AdminScreen() {
             />
           </>
         ) : null}
+        <SecondaryButton title="Réinitialiser les filtres" onPress={resetFilters} />
       </Card>
 
       {loading ? <LoadingView /> : null}

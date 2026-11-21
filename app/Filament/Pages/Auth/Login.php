@@ -26,13 +26,19 @@ class Login extends BaseLogin
 
     public ?string $loginError = null;
 
+    public const GENERIC_ERROR = 'Email ou mot de passe incorrect.';
+
     public const LOGIN_MESSAGES = [
         'missing_fields' => "Veuillez renseigner l'email et le mot de passe.",
-        'user_not_found' => "Aucun compte n'existe avec cette adresse email.",
-        'no_password' => "Ce compte n'a pas de mot de passe. Utilisez un autre moyen de connexion.",
-        'account_disabled' => 'Ce compte est désactivé. Contactez l\'administrateur.',
-        'wrong_password' => 'Mot de passe incorrect.',
+        'user_not_found' => self::GENERIC_ERROR,
+        'no_password' => self::GENERIC_ERROR,
+        'account_disabled' => self::GENERIC_ERROR,
+        'wrong_password' => self::GENERIC_ERROR,
+        'rate_limited' => 'Trop de tentatives de connexion. Veuillez réessayer plus tard.',
     ];
+
+    /** Hash fictif pour ne pas révéler l'existence d'un compte par le temps de réponse. */
+    private const DUMMY_PASSWORD_HASH = '$2y$10$E/hDNQjXn6KcE985RembzeIJE02zO.rmkn40zTElBPXqleVCozHe6';
 
     public function getTitle(): string
     {

@@ -39,7 +39,7 @@ class RolesTable
                     ->label('Rôle système')
                     ->trueLabel('Système')
                     ->falseLabel('Personnalisé')
-                    ->nullableLabel('Tous'),
+                    ->placeholder('Tous'),
             ])
             ->recordActions([
                 EditAction::make(),

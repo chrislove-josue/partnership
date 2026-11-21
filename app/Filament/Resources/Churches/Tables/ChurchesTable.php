@@ -69,7 +69,7 @@ class ChurchesTable
                     ->label('Statut')
                     ->trueLabel('Actives')
                     ->falseLabel('Inactives')
-                    ->nullableLabel('Toutes'),
+                    ->placeholder('Toutes'),
             ])
             ->recordActions([
                 EditAction::make(),

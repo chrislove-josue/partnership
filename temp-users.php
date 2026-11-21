@@ -12,6 +12,6 @@ $rows = App\Models\User::query()->with('roles')->get()->map(function ($user) {
         'roles' => $user->getRoleNames()->values()->all(),
         'azerty123' => Illuminate\Support\Facades\Hash::check('azerty123', $user->password),
     ];
-})->limit(40)->all();
+})->take(40)->all();
 
 dump($rows);

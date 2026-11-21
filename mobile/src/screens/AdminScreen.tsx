@@ -15,6 +15,7 @@ import {
   LoadingView,
   PrimaryButton,
   Screen,
+  SecondaryButton,
   SectionTitle,
   SelectField,
   TextField,
@@ -145,6 +146,14 @@ export function AdminScreen() {
   const filteredPastors = filteredUsers.filter(isPastor);
   const userSection = section === 'users' || section === 'pasteurs';
 
+  const resetFilters = () => {
+    setSearch('');
+    setChurchTypeFilter('');
+    setCelluleChurchFilter('');
+    setUserRoleFilter('');
+    setUserActiveFilter('');
+  };
+
   const openForm = (record?: Editable) => {
     setFormError('');
     setEditing(record ?? null);
@@ -160,7 +169,9 @@ export function AdminScreen() {
     setPhone(record && 'phone' in record ? record.phone ?? '' : '');
     setHandleKc(record && 'handle_kc' in record ? record.handle_kc ?? '' : '');
     setPassword('');
-    setUserRoles(record && 'roles' in record ? record.roles ?? [] : []);
+    setUserRoles(record && 'roles' in record
+      ? record.roles ?? []
+      : section === 'pasteurs' ? ['LOCAL_PASTOR'] : []);
     setAssignedChurchId(record && 'assigned_church_id' in record && record.assigned_church_id
       ? String(record.assigned_church_id)
       : assignedChurchId);
@@ -238,7 +249,7 @@ export function AdminScreen() {
   return (
     <Screen
       title="Administration"
-      subtitle="Églises, cellules, catégories et comptes"
+      subtitle="Églises, cellules, catégories, comptes et pasteurs"
       actions={<PrimaryButton title="Ajouter" onPress={() => openForm()} />}
     >
       <ScrollView horizontal style={styles.tabs}>

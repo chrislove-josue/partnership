@@ -11,7 +11,9 @@ return new class extends Migration
         Schema::table('sync_deletions', function (Blueprint $table): void {
             // Les suppressions globales (catégories) restent visibles par tous ;
             // les autres ne sont renvoyées qu'au personnel de l'église concernée.
-            $table->foreignId('church_id')->nullable()->after('entity_id')->constrained('churches')->cascadeOnDelete();
+            // Pas de clé étrangère : une église supprimée doit rester identifiable
+            // dans l'historique de synchronisation.
+            $table->unsignedBigInteger('church_id')->nullable()->after('entity_id');
             $table->index(['church_id', 'deleted_at']);
         });
     }
@@ -20,7 +22,7 @@ return new class extends Migration
     {
         Schema::table('sync_deletions', function (Blueprint $table): void {
             $table->dropIndex(['church_id', 'deleted_at']);
-            $table->dropConstrainedForeignId('church_id');
+            $table->dropColumn('church_id');
         });
     }
 };

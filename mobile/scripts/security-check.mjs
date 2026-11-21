@@ -242,11 +242,23 @@ check('F10 : validation des montants, églises et tailles de fichiers', () => {
 
 function toolExists(command) {
   try {
-    execFileSync(command, ['version'], { stdio: 'ignore' });
+    execFileSync(command, ['version'], {
+      stdio: 'ignore',
+      shell: process.platform === 'win32',
+    });
     return true;
   } catch (error) {
     return error?.code !== 'ENOENT';
   }
+}
+
+/** Windows ne résout pas toujours les scripts .bat via execFile sans shell. */
+function resolveTool(command) {
+  const candidates = process.platform === 'win32'
+    ? [command, `${command}.exe`, `${command}.bat`, `${command}.cmd`]
+    : [command];
+
+  return candidates.find((candidate) => toolExists(candidate)) ?? null;
 }
 
 if (!SOURCE_ONLY) {

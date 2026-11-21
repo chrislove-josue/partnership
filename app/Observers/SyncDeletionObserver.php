@@ -40,7 +40,9 @@ class SyncDeletionObserver
     private function churchIdFor(Model $model): ?int
     {
         if ($model instanceof Church) {
-            return $model->id;
+            // Le périmètre est calculé après la suppression : on rattache la
+            // suppression à l'église parente encore visible pour le pasteur.
+            return $model->parent_id ?? $model->id;
         }
 
         if ($model instanceof Cellule) {

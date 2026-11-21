@@ -40,6 +40,7 @@ class PartnersTable
                     ->toggleable(),
                 TextColumn::make('cellule.name')
                     ->label('Cellule')
+                    ->searchable()
                     ->placeholder('—')
                     ->toggleable(),
                 TextColumn::make('total_donations')

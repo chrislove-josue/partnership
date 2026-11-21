@@ -10,6 +10,7 @@ use App\Services\PartnershipReportService;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Utilities\Get;
@@ -48,6 +49,8 @@ class PartnershipReport extends Page
             'month' => now()->month,
             'quarter' => now()->quarter,
             'year' => now()->year,
+            'report_search' => '',
+            'report_section' => '',
         ]);
     }
 
@@ -101,6 +104,22 @@ class PartnershipReport extends Page
                         ->all())
                     ->required()
                     ->live(),
+
+                TextInput::make('report_search')
+                    ->label('Rechercher dans le rapport')
+                    ->placeholder('Partenaire, catégorie, montant, date')
+                    ->live(debounce: 300),
+
+                Select::make('report_section')
+                    ->label('Section')
+                    ->options([
+                        '' => 'Toutes les sections',
+                        'categories' => 'Par catégorie',
+                        'partners' => 'Partenaires',
+                        'without' => 'Sans don',
+                        'donations' => 'Détail des dons',
+                    ])
+                    ->live(),
             ])
             ->columns(5)
             ->statePath('data')
@@ -133,7 +152,9 @@ class PartnershipReport extends Page
 
             [$type, $year, $index] = $this->periodFromState($state);
 
-            return app(PartnershipReportService::class)->buildReport($churchId, $type, $year, $index);
+            $report = app(PartnershipReportService::class)->buildReport($churchId, $type, $year, $index);
+
+            return $this->filterReportForDisplay($report);
         } catch (Throwable $exception) {
             return ['error' => $exception->getMessage()];
         }

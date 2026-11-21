@@ -1,4 +1,6 @@
 <x-filament-panels::page>
+    {{ $this->form }}
+
     @php
         $entries = $this->getEntries();
     @endphp

@@ -3,6 +3,8 @@
 namespace App\Filament\Resources\Notifications\Tables;
 
 use App\Enums\NotificationType;
+use App\Models\Notification as AppNotification;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -58,6 +60,12 @@ class NotificationsTable
                     ]),
             ])
             ->recordActions([
+                Action::make('markAsRead')
+                    ->label('Marquer comme lue')
+                    ->icon('heroicon-o-check')
+                    ->color('success')
+                    ->visible(fn (AppNotification $record): bool => ! $record->is_read)
+                    ->action(fn (AppNotification $record): bool => $record->update(['is_read' => true])),
                 EditAction::make(),
             ])
             ->toolbarActions([

@@ -78,6 +78,40 @@ class ManagementController extends Controller
         return response()->json(['message' => 'Église supprimée.']);
     }
 
+    public function deactivateChurch(Church $church): JsonResponse
+    {
+        Gate::authorize('toggleActive', $church);
+
+        if (! $church->is_active) {
+            return response()->json(['message' => 'Cette église est déjà désactivée.'], 409);
+        }
+
+        $church->update(['is_active' => false]);
+
+        return response()->json([
+            'message' => 'Église désactivée.',
+            'church' => $this->churchPayload($church),
+            'data' => $this->churchPayload($church),
+        ]);
+    }
+
+    public function activateChurch(Church $church): JsonResponse
+    {
+        Gate::authorize('toggleActive', $church);
+
+        if ($church->is_active) {
+            return response()->json(['message' => 'Cette église est déjà active.'], 409);
+        }
+
+        $church->update(['is_active' => true]);
+
+        return response()->json([
+            'message' => 'Église réactivée.',
+            'church' => $this->churchPayload($church),
+            'data' => $this->churchPayload($church),
+        ]);
+    }
+
     // ── Cellules ────────────────────────────────────────────────────────
 
     public function storeCellule(Request $request): JsonResponse

@@ -23,6 +23,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::get('/churches', [DataController::class, 'churches']);
     Route::post('/churches', [ManagementController::class, 'storeChurch']);
     Route::patch('/churches/{church}', [ManagementController::class, 'updateChurch']);
+    Route::post('/churches/{church}/deactivate', [ManagementController::class, 'deactivateChurch']);
+    Route::post('/churches/{church}/activate', [ManagementController::class, 'activateChurch']);
     Route::delete('/churches/{church}', [ManagementController::class, 'destroyChurch']);
 
     Route::get('/cellules', [DataController::class, 'cellules']);

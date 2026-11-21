@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Churches\Pages;
 
+use App\Filament\Resources\Churches\Actions\ChurchStatusActions;
 use App\Filament\Resources\Churches\ChurchResource;
 use App\Filament\Resources\Concerns\RedirectsToListAfterSave;
 use Filament\Actions\DeleteAction;
@@ -16,6 +17,8 @@ class EditChurch extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ChurchStatusActions::deactivate(),
+            ChurchStatusActions::activate(),
             DeleteAction::make(),
         ];
     }

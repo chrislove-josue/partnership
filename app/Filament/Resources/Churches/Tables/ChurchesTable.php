@@ -3,9 +3,11 @@
 namespace App\Filament\Resources\Churches\Tables;
 
 use App\Enums\ChurchType;
+use App\Filament\Resources\Churches\Actions\ChurchStatusActions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -38,6 +40,9 @@ class ChurchesTable
                     ->label('Responsable')
                     ->searchable()
                     ->placeholder('—'),
+                IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean(),
                 TextColumn::make('agents_count')
                     ->label('Utilisateurs')
                     ->counts('agents')
@@ -61,6 +66,8 @@ class ChurchesTable
             ])
             ->recordActions([
                 EditAction::make(),
+                ChurchStatusActions::deactivate(),
+                ChurchStatusActions::activate(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

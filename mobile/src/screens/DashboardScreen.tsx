@@ -253,9 +253,9 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
 
           <SectionTitle>Principales catégories</SectionTitle>
           <Card style={styles.listCard}>
-            {summary.categories.length === 0 ? (
-              <Text style={styles.empty}>Aucune catégorie pour le moment.</Text>
-            ) : summary.categories.map((category, index) => (
+            {visibleCategories.length === 0 ? (
+              <Text style={styles.empty}>Aucune catégorie trouvée.</Text>
+            ) : visibleCategories.map((category, index) => (
               <View key={category.name} style={[styles.categoryRow, index > 0 && styles.listRowBorder]}>
                 <View style={styles.categoryHead}>
                   <Text style={styles.categoryName} numberOfLines={1}>{category.name}</Text>
@@ -265,7 +265,7 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
                   <View
                     style={[
                       styles.barFill,
-                      { backgroundColor: category.color || colors.blue, width: `${Math.max(6, (category.amount / maxCategoryAmount) * 100)}%` },
+                      { backgroundColor: category.color || colors.blue, width: `${Math.max(6, (category.amount / visibleMaxCategoryAmount) * 100)}%` },
                     ]}
                   />
                 </View>
@@ -276,9 +276,9 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
 
           <SectionTitle>Dernières notifications</SectionTitle>
           <Card style={styles.listCard}>
-            {summary.recentNotifications.length === 0 ? (
-              <Text style={styles.empty}>Aucune notification.</Text>
-            ) : summary.recentNotifications.map((notification, index) => (
+            {visibleNotifications.length === 0 ? (
+              <Text style={styles.empty}>Aucune notification trouvée.</Text>
+            ) : visibleNotifications.map((notification, index) => (
               <Pressable
                 key={notification.id}
                 style={[styles.listRow, index > 0 && styles.listRowBorder]}

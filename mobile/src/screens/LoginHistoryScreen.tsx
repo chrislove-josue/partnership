@@ -2,6 +2,9 @@ import React, { useCallback, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage } from '../api/client';
+import { FilterCard } from '../components/FilterCard';
+import { SecondaryButton } from '../components/ui';
+import { filterBy } from '../utils/search';
 import type { LoginHistoryEntry } from '../api/types';
 import {
   Badge,
@@ -12,6 +15,7 @@ import {
   LoadingView,
   Screen,
   SecondaryButton,
+  SelectField,
 } from '../components/ui';
 
 function formatDateTime(value: string): string {
@@ -29,6 +33,9 @@ export function LoginHistoryScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [entries, setEntries] = useState<LoginHistoryEntry[]>([]);
+  const [search, setSearch] = useState('');
+  const [eventFilter, setEventFilter] = useState('');
+  const [sourceFilter, setSourceFilter] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -47,20 +54,69 @@ export function LoginHistoryScreen() {
     void load();
   }, [load]));
 
+  const visibleEntries = filterBy(entries, search, [
+    (entry) => entry.event_label,
+    (entry) => entry.event,
+    (entry) => entry.source_label,
+    (entry) => entry.source,
+    (entry) => entry.ip_address,
+    (entry) => entry.user_agent,
+    (entry) => entry.happened_at,
+  ])
+    .filter((entry) => !eventFilter || entry.event === eventFilter)
+    .filter((entry) => !sourceFilter || entry.source === sourceFilter);
+
+  const resetFilters = () => {
+    setSearch('');
+    setEventFilter('');
+    setSourceFilter('');
+  };
+
   return (
     <Screen
       title="Historique de connexion"
-      subtitle={`${entries.length} événement(s)`}
+      subtitle={`${visibleEntries.length} événement(s)`}
     >
-      <SecondaryButton title="Actualiser" onPress={() => void load()} />
+      <FilterCard
+        query={search}
+        onQueryChange={setSearch}
+        placeholder="Événement, source, adresse IP, appareil"
+        onReset={resetFilters}
+        active={Boolean(search || eventFilter || sourceFilter)}
+      >
+        <SelectField
+          label="Événement"
+          value={eventFilter}
+          options={[
+            { label: 'Tous les événements', value: '' },
+            { label: 'Connexions', value: 'login' },
+            { label: 'Déconnexions', value: 'logout' },
+            { label: 'Échecs', value: 'failed' },
+          ]}
+          onChange={setEventFilter}
+        />
+        <SelectField
+          label="Source"
+          value={sourceFilter}
+          options={[
+            { label: 'Toutes les sources', value: '' },
+            { label: 'Web', value: 'web' },
+            { label: 'Appli mobile', value: 'mobile' },
+          ]}
+          onChange={setSourceFilter}
+        />
+      </FilterCard>
+      <View style={styles.refresh}>
+        <SecondaryButton title="Actualiser" onPress={() => void load()} />
+      </View>
 
       {loading ? <LoadingView /> : null}
       {!loading && error ? <ErrorView message={error} onRetry={() => void load()} /> : null}
-      {!loading && !error && entries.length === 0 ? (
-        <EmptyState message="Aucune connexion enregistrée." />
+      {!loading && !error && visibleEntries.length === 0 ? (
+        <EmptyState message="Aucun événement trouvé." />
       ) : null}
 
-      {!loading && !error ? entries.map((entry) => (
+      {!loading && !error ? visibleEntries.map((entry) => (
         <Card key={entry.id}>
           <View style={styles.row}>
             <Badge
@@ -83,4 +139,5 @@ const styles = StyleSheet.create({
   source: { fontSize: 13, color: colors.muted, flexShrink: 1, textAlign: 'right' },
   date: { fontSize: 15, fontWeight: '700', color: colors.ink, marginTop: 10 },
   meta: { fontSize: 12, color: colors.muted, marginTop: 5 },
+  refresh: { marginBottom: 12 },
 });

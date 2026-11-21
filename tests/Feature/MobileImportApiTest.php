@@ -8,14 +8,13 @@ use App\Models\Donation;
 use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Tests\Feature\Concerns\UploadsXlsx;
 use Tests\TestCase;
 
 class MobileImportApiTest extends TestCase
 {
     use RefreshDatabase;
+    use UploadsXlsx;
 
     private function superAdmin(): User
     {

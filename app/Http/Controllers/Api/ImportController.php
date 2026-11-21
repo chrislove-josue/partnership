@@ -74,7 +74,7 @@ class ImportController extends Controller
             $rows = $this->reader->read($data['file']);
         } catch (Throwable $exception) {
             return response()->json([
-                'message' => 'Lecture du fichier impossible : '.$exception->getMessage(),
+                'message' => 'Lecture du fichier impossible. Vérifiez le format du fichier.',
             ], 422);
         }
 

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import appConfig from '../../app.json';
+import { filterBy } from '../utils/search';
 
 export const APP_VERSION = appConfig.expo.version;
 
@@ -203,20 +204,32 @@ export function SelectField({
   options,
   onChange,
   placeholder = 'Sélectionner',
+  searchable = false,
 }: {
   label: string;
   value: string;
   options: Option[];
   onChange: (value: string) => void;
   placeholder?: string;
+  searchable?: boolean;
 }) {
   const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
   const selected = options.find((option) => option.value === value);
+  const visibleOptions = searchable
+    ? filterBy(options, query, [(option) => option.label])
+    : options;
 
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
-      <Pressable style={styles.select} onPress={() => setOpen(true)}>
+      <Pressable
+        style={styles.select}
+        onPress={() => {
+          setQuery('');
+          setOpen(true);
+        }}
+      >
         <Text style={selected ? styles.selectValue : styles.selectPlaceholder}>
           {selected?.label ?? placeholder}
         </Text>
@@ -226,9 +239,20 @@ export function SelectField({
         <Pressable style={styles.modalBackdrop} onPress={() => setOpen(false)}>
           <View style={styles.selectModal}>
             <Text style={styles.modalTitle}>{label}</Text>
+            {searchable ? (
+              <TextInput
+                style={styles.selectSearch}
+                value={query}
+                onChangeText={setQuery}
+                placeholder="Rechercher"
+                placeholderTextColor={colors.muted}
+                autoFocus
+              />
+            ) : null}
             <FlatList
-              data={options}
+              data={visibleOptions}
               keyExtractor={(item) => item.value}
+              ListEmptyComponent={<Text style={styles.selectEmpty}>Aucun résultat.</Text>}
               renderItem={({ item }) => (
                 <Pressable
                   style={({ pressed }) => [styles.option, pressed && styles.pressed, item.value === value && styles.optionSelected]}
@@ -491,6 +515,17 @@ const styles = StyleSheet.create({
   },
   selectValue: { color: colors.ink, fontSize: 15 },
   selectPlaceholder: { color: colors.muted, fontSize: 15 },
+  selectSearch: {
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: colors.ink,
+    marginBottom: 10,
+  },
+  selectEmpty: { color: colors.muted, textAlign: 'center', paddingVertical: 20 },
   chevron: { color: colors.blue, fontSize: 16 },
   modalBackdrop: {
     flex: 1,

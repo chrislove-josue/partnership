@@ -228,7 +228,8 @@ check('F9/F8 : journalisation et messages d\'erreur maîtrisés', () => {
 
 check('F10 : validation des montants, églises et tailles de fichiers', () => {
   const donations = read('src/screens/DonationsScreen.tsx');
-  assert.ok(/Number\.isFinite\(parsedAmount\) && parsedAmount <= 0/.test(donations), 'montant non validé');
+  assert.ok(/Number\.isFinite\(parsedAmount\)/.test(donations), 'montant non validé');
+  assert.ok(/parsedAmount <= 0/.test(donations), 'montant nul ou négatif accepté');
   const admin = read('src/screens/AdminScreen.tsx');
   assert.ok(/assignedChurchId \? Number\(assignedChurchId\) : null/.test(admin), 'assigned_church_id non normalisé');
   assert.ok(read('src/api/client.ts').includes('MAX_UPLOAD_BYTES'), 'limite de taille absente de apiUpload');

@@ -40,7 +40,7 @@ class DonationImportService extends BaseImportService
                     throw new RuntimeException('Champ obligatoire manquant (churchName)');
                 }
 
-                $church = $this->resolveChurch($churchName);
+                $church = $this->resolveChurch($churchName, $actor);
                 $this->assertCanModify($actor, $church);
 
                 $amount = $this->helpers->parseAmount($row['donationamount'] ?? null);
@@ -61,7 +61,11 @@ class DonationImportService extends BaseImportService
 
                 $phone = $this->helpers->normalizePhone($row['phone'] ?? null);
                 $handleKC = $this->helpers->normalizeHandleKC($this->text($row, 'handlekc'));
-                $partner = $this->findPartner($row, $phone, $handleKC);
+                $partner = $this->findPartner($actor, $row, $phone, $handleKC);
+
+                if ($partner) {
+                    $this->assertCanModifyPartner($actor, $partner);
+                }
 
                 if (! $partner) {
                     $firstName = $this->text($row, 'firstname');

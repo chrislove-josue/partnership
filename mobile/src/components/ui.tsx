@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -291,10 +291,42 @@ export function DateField({
   allowEmpty?: boolean;
 }) {
   const currentYear = new Date().getFullYear();
-  const parts = value ? value.split('-') : [];
-  const year = parts[0] ?? '';
-  const month = parts[1] ?? '';
-  const day = parts[2] ?? '';
+
+  const parse = (input: string) => {
+    const parts = input ? input.split('-') : [];
+    return {
+      year: parts[0] ?? '',
+      month: parts[1] ?? '',
+      day: parts[2] ?? '',
+    };
+  };
+
+  // La date peut être saisie dans n'importe quel ordre : on conserve la
+  // sélection en cours même quand les trois parties ne sont pas encore choisies.
+  const [draft, setDraft] = useState(() => parse(value));
+
+  useEffect(() => {
+    setDraft((current) => {
+      const composed = current.year && current.month && current.day
+        ? `${current.year}-${current.month}-${current.day}`
+        : '';
+      return composed === value ? current : parse(value);
+    });
+  }, [value]);
+
+  const emit = (next: { year: string; month: string; day: string }) => {
+    let day = next.day;
+    let result = '';
+
+    if (next.year && next.month && day) {
+      const lastDay = new Date(Number(next.year), Number(next.month), 0).getDate();
+      day = String(Math.min(Number(day), lastDay)).padStart(2, '0');
+      result = `${next.year}-${next.month}-${day}`;
+    }
+
+    setDraft({ year: next.year, month: next.month, day });
+    onChange(result);
+  };
 
   const emptyOption: Option[] = allowEmpty ? [{ label: '—', value: '' }] : [];
   const yearOptions = [
@@ -311,38 +343,47 @@ export function DateField({
       value: String(index + 1).padStart(2, '0'),
     })),
   ];
-  const maxDay = year && month ? new Date(Number(year), Number(month), 0).getDate() : 31;
+  const maxDay = draft.year && draft.month
+    ? new Date(Number(draft.year), Number(draft.month), 0).getDate()
+    : 31;
   const dayOptions = [
     ...emptyOption,
     ...Array.from({ length: maxDay }, (_, index) => {
-      const value = String(index + 1).padStart(2, '0');
-      return { label: value, value };
+      const option = String(index + 1).padStart(2, '0');
+      return { label: option, value: option };
     }),
   ];
-
-  const emit = (nextYear: string, nextMonth: string, nextDay: string) => {
-    if (!nextYear || !nextMonth || !nextDay) {
-      onChange('');
-      return;
-    }
-
-    const lastDay = new Date(Number(nextYear), Number(nextMonth), 0).getDate();
-    const safeDay = String(Math.min(Number(nextDay), lastDay)).padStart(2, '0');
-    onChange(`${nextYear}-${nextMonth}-${safeDay}`);
-  };
 
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
       <View style={styles.dateRow}>
         <View style={styles.datePart}>
-          <SelectField label="Jour" value={day} options={dayOptions} onChange={(next) => emit(year, month, next)} placeholder="Jour" />
+          <SelectField
+            label="Jour"
+            value={draft.day}
+            options={dayOptions}
+            onChange={(next) => emit({ ...draft, day: next })}
+            placeholder="Jour"
+          />
         </View>
         <View style={styles.datePart}>
-          <SelectField label="Mois" value={month} options={monthOptions} onChange={(next) => emit(year, next, day)} placeholder="Mois" />
+          <SelectField
+            label="Mois"
+            value={draft.month}
+            options={monthOptions}
+            onChange={(next) => emit({ ...draft, month: next })}
+            placeholder="Mois"
+          />
         </View>
         <View style={styles.datePart}>
-          <SelectField label="Année" value={year} options={yearOptions} onChange={(next) => emit(next, month, day)} placeholder="Année" />
+          <SelectField
+            label="Année"
+            value={draft.year}
+            options={yearOptions}
+            onChange={(next) => emit({ ...draft, year: next })}
+            placeholder="Année"
+          />
         </View>
       </View>
     </View>

@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use App\Auth\LogoutResponse;
-use App\Listeners\RecordLoginHistory;
 use App\Models\CategoryDon;
 use App\Models\Cellule;
 use App\Models\Church;
@@ -12,11 +11,8 @@ use App\Models\Partner;
 use App\Observers\SyncDeletionObserver;
 use App\Services\ReportCache;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
-use Illuminate\Auth\Events\Login;
-use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\ServiceProvider;
@@ -63,8 +59,6 @@ class AppServiceProvider extends ServiceProvider
             'components.select.actions.remove_option.label' => 'Retirer :label',
             'components.select.search_label' => 'Rechercher',
         ], 'fr', 'filament-forms');
-
-        Event::listen([Login::class, Logout::class], RecordLoginHistory::class);
 
         // Limiteurs partagés : API, connexion par email/IP et liens magiques.
         RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(120)

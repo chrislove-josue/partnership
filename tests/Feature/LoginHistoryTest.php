@@ -38,6 +38,7 @@ class LoginHistoryTest extends TestCase
             'event' => LoginHistory::EVENT_LOGIN,
             'source' => LoginHistory::SOURCE_WEB,
         ]);
+        $this->assertDatabaseCount('login_histories', 1);
     }
 
     public function test_web_logout_is_recorded(): void

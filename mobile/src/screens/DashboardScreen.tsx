@@ -198,6 +198,14 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
 
       {!loading && !error ? (
         <>
+          <FilterCard
+            query={search}
+            onQueryChange={setSearch}
+            placeholder="Don, catégorie, notification"
+            onReset={() => setSearch('')}
+            active={Boolean(search)}
+          />
+
           <SectionTitle>Aperçu</SectionTitle>
           <View style={styles.grid}>
             {stats.map((stat) => (
@@ -224,9 +232,9 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
 
           <SectionTitle>Derniers dons</SectionTitle>
           <Card style={styles.listCard}>
-            {summary.recentDonations.length === 0 ? (
-              <Text style={styles.empty}>Aucun don enregistré.</Text>
-            ) : summary.recentDonations.map((donation, index) => (
+            {visibleDonations.length === 0 ? (
+              <Text style={styles.empty}>Aucun don trouvé.</Text>
+            ) : visibleDonations.map((donation, index) => (
               <Pressable
                 key={donation.id}
                 style={[styles.listRow, index > 0 && styles.listRowBorder]}

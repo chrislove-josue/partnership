@@ -121,26 +121,35 @@ class DataController extends Controller
             'cellule' => $partner->cellule?->name,
             'total_donations' => (float) ($partner->total_donations ?? 0),
             'updated_at' => $partner->updated_at?->toIso8601String(),
-        ])->all()]);
+        ])->all(), 'has_more' => $hasMore]);
     }
 
     public function cellules(Request $request): JsonResponse
     {
         Gate::authorize('viewAny', Cellule::class);
 
+        [$isSync, $afterId, $limit] = $this->syncOptions($request);
+
         $query = Cellule::query()
             ->with(['church:id,name', 'leader:id,first_name,last_name'])
             ->withTotalDonations()
             ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
             ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
+            ->when($afterId > 0, fn ($query) => $query->where('id', '>', $afterId))
             ->when($request->string('search')->toString(), function ($query, string $search): void {
                 $query->where('name', 'like', "%{$search}%");
             })
-            ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))
-            ->orderBy('name')
-            ->limit(300);
+            ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')));
 
-        return response()->json(['data' => $query->get()->map(fn (Cellule $cellule): array => [
+        if ($isSync) {
+            $query->orderBy('id');
+        } else {
+            $query->orderBy('name');
+        }
+        $rows = $query->limit($isSync ? $limit : 300)->get();
+        $hasMore = $isSync && $rows->count() === $limit;
+
+        return response()->json(['data' => $rows->map(fn (Cellule $cellule): array => [
             'id' => $cellule->id,
             'name' => $cellule->name,
             'church_id' => $cellule->church_id,
@@ -149,23 +158,33 @@ class DataController extends Controller
             'leader' => $cellule->leader?->full_name,
             'total_donations' => (float) ($cellule->total_donations ?? 0),
             'updated_at' => $cellule->updated_at?->toIso8601String(),
-        ])->all()]);
+        ])->all(), 'has_more' => $hasMore]);
     }
 
     public function categories(Request $request): JsonResponse
     {
-        $categories = CategoryDon::query()
+        [$isSync, $afterId, $limit] = $this->syncOptions($request);
+
+        $query = CategoryDon::query()
             ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
-            ->orderBy('name')
-            ->get();
+            ->when($afterId > 0, fn ($query) => $query->where('id', '>', $afterId));
+
+        if ($isSync) {
+            $query->orderBy('id');
+        } else {
+            $query->orderBy('name');
+        }
+        $rows = $query->limit($isSync ? $limit : 300)->get();
+        $hasMore = $isSync && $rows->count() === $limit;
 
         return response()->json([
-            'data' => $categories->map(fn (CategoryDon $category): array => [
+            'data' => $rows->map(fn (CategoryDon $category): array => [
                 'id' => $category->id,
                 'name' => $category->name,
                 'color' => $category->color,
                 'updated_at' => $category->updated_at?->toIso8601String(),
             ])->all(),
+            'has_more' => $hasMore,
         ]);
     }
 

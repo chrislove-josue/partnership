@@ -23,29 +23,6 @@ class MobileImportApiTest extends TestCase
         return User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
     }
 
-    /**
-     * @param  array<int, string>  $headers
-     * @param  array<int, array<int, mixed>>  $rows
-     */
-    private function uploadXlsx(array $headers, array $rows): UploadedFile
-    {
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->fromArray($headers, null, 'A1');
-        $sheet->fromArray($rows, null, 'A2');
-
-        $path = tempnam(sys_get_temp_dir(), 'mobile-import').'.xlsx';
-        (new Xlsx($spreadsheet))->save($path);
-
-        return new UploadedFile(
-            $path,
-            'import.xlsx',
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            null,
-            true,
-        );
-    }
-
     public function test_mobile_can_download_import_templates(): void
     {
         $user = $this->superAdmin();

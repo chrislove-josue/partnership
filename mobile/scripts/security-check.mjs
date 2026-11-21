@@ -20,6 +20,10 @@ function check(label, fn) {
   }
 }
 
+function skip(label, detail) {
+  results.push({ label, ok: true, skipped: true, detail });
+}
+
 function read(relativePath) {
   return fs.readFileSync(path.join(ROOT, relativePath), 'utf8');
 }
@@ -237,18 +241,17 @@ check('F10 : validation des montants, églises et tailles de fichiers', () => {
 });
 
 if (!SOURCE_ONLY) {
-  check('APK : signature et manifeste (mode complet)', () => {
-    const candidates = [
-      'android/app/build/outputs/apk/release/app-release.apk',
-      ...walk('.').filter((file) => /^FinanceMobile-.*\.apk$/.test(path.basename(file))),
-    ].filter((file) => exists(file));
+  const candidates = [
+    'android/app/build/outputs/apk/release/app-release.apk',
+    ...walk('.').filter((file) => /^FinanceMobile-.*\.apk$/.test(path.basename(file))),
+  ].filter((file) => exists(file));
+  const apk = candidates.length > 0 ? path.join(ROOT, candidates[candidates.length - 1]) : null;
 
-    if (candidates.length === 0) {
-      // Aucun APK : les contrôles source restent applicables.
-      return;
+  check('APK : manifeste (mode complet)', () => {
+    if (!apk) {
+      throw new Error('Aucun APK présent');
     }
 
-    const apk = path.join(ROOT, candidates[candidates.length - 1]);
     let aaptOutput = '';
     try {
       aaptOutput = execFileSync('aapt', ['dump', 'xmltree', apk, 'AndroidManifest.xml'], {
@@ -257,22 +260,29 @@ if (!SOURCE_ONLY) {
       });
     } catch (error) {
       if (error?.code === 'ENOENT') {
-        return; // aapt absent : contrôle ignoré, pas une failure.
+        skip('APK : manifeste (mode complet)', 'aapt absent : contrôle ignoré');
+        return;
       }
       throw error;
     }
     assert.ok(!/usesCleartextTraffic/i.test(aaptOutput), 'l\'APK demande du trafic en clair');
     assert.ok(!/MANAGE_EXTERNAL_STORAGE|POST_NOTIFICATIONS|SYSTEM_ALERT_WINDOW/.test(aaptOutput), 'permissions excessives dans l\'APK');
+  });
+
+  check('APK : signature de release (mode complet)', () => {
+    if (!apk) {
+      throw new Error('Aucun APK présent');
+    }
 
     let signature = '';
     try {
-      const result = execFileSync('apksigner', ['verify', '--print-certs', apk], {
+      signature = execFileSync('apksigner', ['verify', '--print-certs', apk], {
         encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'pipe'],
+        stdio: ['ignore', 'pipe', 'ignore'],
       });
-      signature = result;
     } catch (error) {
       if (error?.code === 'ENOENT') {
+        skip('APK : signature de release (mode complet)', 'apksigner absent : contrôle ignoré');
         return;
       }
       signature = `${error.stdout ?? ''}\n${error.stderr ?? ''}`;

@@ -185,19 +185,37 @@ export function DonationsScreen() {
           />
 
           <Card>
-            <SectionTitle>Filtres</SectionTitle>
+            <SectionTitle>Recherche et filtres</SectionTitle>
+            <TextField
+              label="Rechercher"
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Partenaire, église, catégorie, montant"
+            />
             <SelectField
               label="Église"
               value={churchFilter}
               options={[{ label: 'Toutes les églises', value: '' }, ...churchOptions]}
               onChange={setChurchFilter}
+              searchable
             />
             <SelectField
               label="Catégorie"
               value={categoryFilter}
               options={[{ label: 'Toutes les catégories', value: '' }, ...categoryOptions]}
               onChange={setCategoryFilter}
+              searchable
             />
+            <SelectField
+              label="Partenaire"
+              value={partnerFilter}
+              options={[{ label: 'Tous les partenaires', value: '' }, ...partnerOptions]}
+              onChange={setPartnerFilter}
+              searchable
+            />
+            <DateField label="Du" value={dateFrom} onChange={setDateFrom} allowEmpty />
+            <DateField label="Au" value={dateTo} onChange={setDateTo} allowEmpty />
+            <SecondaryButton title="Réinitialiser les filtres" onPress={resetFilters} />
           </Card>
 
           {visibleDonations.length === 0 ? <EmptyState message="Aucun don pour ces filtres." /> : null}
@@ -239,9 +257,10 @@ export function DonationsScreen() {
             <SelectField
               label="Partenaire"
               value={partnerId}
-              options={partnerOptions}
+              options={formPartnerOptions}
               onChange={setPartnerId}
               placeholder="Choisir un partenaire"
+              searchable
             />
             <SelectField label="Catégorie" value={categoryId} options={categoryOptions} onChange={setCategoryId} />
             {formError ? <Text style={styles.error}>{formError}</Text> : null}

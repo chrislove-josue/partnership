@@ -23,8 +23,25 @@ class DataController extends Controller
         private readonly DonationNotifier $notifier,
     ) {}
 
+    /**
+     * Options utilisées par la synchronisation incrémentale de l'APK.
+     * La limite est plafonnée et le curseur `after_id` permet de reprendre
+     * exactement là où le téléphone s'est arrêté, même au-delà de 500 lignes.
+     *
+     * @return array{0: bool, 1: int, 2: int}
+     */
+    private function syncOptions(Request $request): array
+    {
+        return [
+            $request->boolean('sync'),
+            $request->integer('after_id'),
+            min(max($request->integer('limit', 500), 1), 500),
+        ];
+    }
+
     public function churches(Request $request): JsonResponse
     {
+        [$isSync, $afterId, $limit] = $this->syncOptions($request);
         $since = $request->string('updated_after')->toString();
         $churches = $this->access->accessibleChurches($request->user());
 
@@ -32,6 +49,16 @@ class DataController extends Controller
             $churches = $churches->filter(
                 fn (Church $church): bool => (string) $church->updated_at?->toIso8601String() > $since,
             );
+        }
+        if ($afterId > 0) {
+            $churches = $churches->filter(fn (Church $church): bool => $church->id > $afterId);
+        }
+
+        $hasMore = false;
+        if ($isSync) {
+            $churches = $churches->sortBy('id')->values();
+            $hasMore = $churches->count() > $limit;
+            $churches = $churches->take($limit);
         }
 
         return response()->json([
@@ -43,6 +70,7 @@ class DataController extends Controller
                 'is_active' => $church->is_active,
                 'updated_at' => $church->updated_at?->toIso8601String(),
             ])->values()->all(),
+            'has_more' => $hasMore,
         ]);
     }
 

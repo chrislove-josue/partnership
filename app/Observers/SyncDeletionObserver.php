@@ -42,7 +42,9 @@ class SyncDeletionObserver
         if ($model instanceof Church) {
             // Le périmètre est calculé après la suppression : on rattache la
             // suppression à l'église parente encore visible pour le pasteur.
-            return $model->parent_id ?? $model->id;
+            // Une église racine n'a plus de parent visible : sa suppression est
+            // globale, sinon les super administrateurs ne la recevraient jamais.
+            return $model->parent_id;
         }
 
         if ($model instanceof Cellule) {

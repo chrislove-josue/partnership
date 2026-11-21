@@ -175,9 +175,9 @@ check('F5 : le serveur ne peut pas imposer l\'URL de l\'API', () => {
 
 check('F5 : le droit de configuration est recalculé depuis /me', () => {
   const auth = read('src/context/AuthContext.tsx');
-  assert.ok(!/ADMIN_DEVICE_KEY\s*=\s*'/.test(auth.replace('LEGACY_', '')), 'ancien drapeau local encore utilisé');
   assert.ok(/isSuperAdmin\(response\.user\)/.test(auth), 'le droit n\'est pas recalculé depuis /me');
   assert.ok(!/getItemAsync\(LEGACY_ADMIN_DEVICE_KEY\)/.test(auth), 'l\'ancien drapeau est encore lu');
+  assert.ok(!/setItemAsync\(LEGACY_ADMIN_DEVICE_KEY\)/.test(auth), 'l\'ancien drapeau est encore écrit');
 });
 
 check('F6 : permissions Android minimales', () => {
@@ -223,7 +223,7 @@ check('F9/F8 : journalisation et messages d\'erreur maîtrisés', () => {
       index = text.indexOf('console.', index + 1);
     }
   }
-  assert.ok(!/Adresse utilisée/.test(read('src/screens/LoginScreen.tsx')), 'l\'adresse est still affichée dans une erreur');
+  assert.ok(!/Adresse utilisée/.test(read('src/screens/LoginScreen.tsx')), 'l\'adresse est encore affichée dans une erreur');
 });
 
 check('F10 : validation des montants, églises et tailles de fichiers', () => {

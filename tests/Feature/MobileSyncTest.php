@@ -84,6 +84,44 @@ class MobileSyncTest extends TestCase
             ]);
     }
 
+    public function test_church_list_exposes_donation_totals(): void
+    {
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $local = Church::query()->create([
+            'name' => 'EGLISE TOTALE SYNC',
+            'type' => ChurchType::LOCAL,
+            'parent_id' => $group->id,
+        ]);
+        $category = CategoryDon::query()->firstOrFail();
+        $partner = Partner::query()->create([
+            'first_name' => 'Total',
+            'last_name' => 'Eglise',
+            'church_id' => $group->id,
+        ]);
+
+        foreach ([[1500, $group->id], [2500, $local->id]] as [$amount, $churchId]) {
+            Donation::query()->create([
+                'amount' => $amount,
+                'date' => now()->toDateString(),
+                'church_id' => $churchId,
+                'partner_id' => $partner->id,
+                'category_id' => $category->id,
+            ]);
+        }
+
+        $rows = $this->actingAs($this->superAdmin(), 'sanctum')
+            ->getJson('/api/churches?sync=1')
+            ->assertOk()
+            ->json('data');
+
+        $totals = collect($rows)->mapWithKeys(fn (array $row): array => [
+            $row['id'] => $row['total_donations'],
+        ]);
+
+        $this->assertEquals(1500, $totals[$group->id]);
+        $this->assertEquals(2500, $totals[$local->id]);
+    }
+
     public function test_donations_sync_can_be_paged_with_after_id(): void
     {
         $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();

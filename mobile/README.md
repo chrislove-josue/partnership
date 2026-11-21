@@ -52,8 +52,8 @@ Sans ces quatre variables, toute tâche Gradle dont le nom contient `release` é
 
 L’adresse de l’API peut être modifiée **depuis l’application**, sans recompiler :
 
-- à la connexion : champ **Adresse du serveur** puis **Utiliser cette adresse** (super administrateur) ;
-- ensuite dans **Profil → Connexion au serveur**. Le droit de configuration est recalculé depuis `/me` à chaque démarrage : un ancien drapeau stocké sur l'appareil n'est plus accepté.
+- à la connexion : champ **Adresse du serveur** puis **Utiliser cette adresse**, disponible avant toute authentification pour permettre la première connexion à une nouvelle installation ;
+- ensuite dans **Profil → Connexion au serveur**, réservé au super administrateur. Le droit de configuration est recalculé depuis `/me` à chaque démarrage : un ancien drapeau stocké sur l'appareil n'est plus accepté.
 - le site web peut **proposer** une adresse, mais l'administrateur doit la confirmer explicitement avant qu'elle soit appliquée.
 
 Sur un téléphone physique, utilisez une URL HTTPS accessible depuis l'appareil. La copie publique non chiffrée de `finance.sqlite` n'est plus créée ; l'ancienne copie est supprimée à la déconnexion ou au changement de compte, avec toutes les tables locales (entités, outbox, conflits, métadonnées).

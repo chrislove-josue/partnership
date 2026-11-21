@@ -87,11 +87,12 @@ class ManagementController extends Controller
         }
 
         $church->update(['is_active' => false]);
+        $payload = $this->churchPayload($church);
 
         return response()->json([
             'message' => 'Église désactivée.',
-            'church' => $this->churchPayload($church),
-            'data' => $this->churchPayload($church),
+            'church' => $payload,
+            'data' => $payload,
         ]);
     }
 
@@ -104,11 +105,12 @@ class ManagementController extends Controller
         }
 
         $church->update(['is_active' => true]);
+        $payload = $this->churchPayload($church);
 
         return response()->json([
             'message' => 'Église réactivée.',
-            'church' => $this->churchPayload($church),
-            'data' => $this->churchPayload($church),
+            'church' => $payload,
+            'data' => $payload,
         ]);
     }
 
@@ -429,6 +431,8 @@ class ManagementController extends Controller
             'type' => $church->type?->value ?? (string) $church->type,
             'parent_id' => $church->parent_id,
             'manager_id' => $church->manager_id,
+            'is_active' => $church->is_active,
+            'updated_at' => $church->updated_at?->toIso8601String(),
         ];
     }
 

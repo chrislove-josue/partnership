@@ -40,6 +40,7 @@ class DataController extends Controller
                 'name' => $church->name,
                 'type' => $church->type?->value ?? (string) $church->type,
                 'parent_id' => $church->parent_id,
+                'is_active' => $church->is_active,
                 'updated_at' => $church->updated_at?->toIso8601String(),
             ])->values()->all(),
         ]);

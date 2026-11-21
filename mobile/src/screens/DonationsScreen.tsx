@@ -253,6 +253,7 @@ export function DonationsScreen() {
                 setChurchId(value);
                 setPartnerId('');
               }}
+              searchable
             />
             <SelectField
               label="Partenaire"

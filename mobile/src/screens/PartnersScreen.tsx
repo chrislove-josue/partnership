@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage, invalidateCache } from '../api/client';
+import { FilterCard } from '../components/FilterCard';
+import { SecondaryButton } from '../components/ui';
 import type { Cellule, Church, Partner } from '../api/types';
 import { ImportExportCard } from '../components/ImportExportCard';
 import {
@@ -29,6 +31,7 @@ export function PartnersScreen() {
   const [cellules, setCellules] = useState<Cellule[]>([]);
   const [search, setSearch] = useState('');
   const [churchFilter, setChurchFilter] = useState('');
+  const [celluleFilter, setCelluleFilter] = useState('');
   const [editing, setEditing] = useState<Partner | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -56,9 +59,12 @@ export function PartnersScreen() {
       if (churchFilter) {
         query.set('church_id', churchFilter);
       }
+      if (celluleFilter) {
+        query.set('cellule_id', celluleFilter);
+      }
       const [partnerData, churchData, celluleData] = await Promise.all([
         api<{ data: Partner[] }>(`/partners${query.toString() ? `?${query}` : ''}`, {
-          cacheKey: `partners:${search}:${churchFilter}`,
+          cacheKey: `partners:${search}:${churchFilter}:${celluleFilter}`,
         }),
         api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
         api<{ data: Cellule[] }>('/cellules', { cacheKey: 'cellules' }),
@@ -72,7 +78,7 @@ export function PartnersScreen() {
     } finally {
       setLoading(false);
     }
-  }, [search, churchFilter]);
+  }, [search, churchFilter, celluleFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 250);

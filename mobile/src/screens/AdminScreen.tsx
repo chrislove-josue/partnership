@@ -141,6 +141,7 @@ export function AdminScreen() {
     .filter((user) => !userActiveFilter || (user.is_active ? '1' : '0') === userActiveFilter);
 
   const filteredPastors = filteredUsers.filter(isPastor);
+  const userSection = section === 'users' || section === 'pasteurs';
 
   const openForm = (record?: Editable) => {
     setFormError('');

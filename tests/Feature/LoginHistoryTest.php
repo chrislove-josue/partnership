@@ -54,6 +54,7 @@ class LoginHistoryTest extends TestCase
             'event' => LoginHistory::EVENT_LOGOUT,
             'source' => LoginHistory::SOURCE_WEB,
         ]);
+        $this->assertDatabaseCount('login_histories', 1);
     }
 
     public function test_mobile_login_and_logout_are_recorded(): void

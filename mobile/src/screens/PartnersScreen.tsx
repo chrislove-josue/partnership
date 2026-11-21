@@ -90,8 +90,16 @@ export function PartnersScreen() {
   }, [load]));
 
   const churchOptions = churches.map((church) => ({ label: church.name, value: String(church.id) }));
-  const visibleCellules = cellules.filter((cellule) => !churchId || cellule.church_id === Number(churchId));
-  const celluleOptions = visibleCellules.map((cellule) => ({ label: cellule.name, value: String(cellule.id) }));
+  const celluleOptions = cellules.map((cellule) => ({ label: cellule.name, value: String(cellule.id) }));
+  const formCelluleOptions = cellules
+    .filter((cellule) => !churchId || cellule.church_id === Number(churchId))
+    .map((cellule) => ({ label: cellule.name, value: String(cellule.id) }));
+
+  const resetFilters = () => {
+    setSearch('');
+    setChurchFilter('');
+    setCelluleFilter('');
+  };
 
   const openForm = (partner?: Partner) => {
     setFormError('');
@@ -169,15 +177,31 @@ export function PartnersScreen() {
         onImported={() => void load()}
       />
 
-      <Card>
-        <TextField label="Rechercher" value={search} onChangeText={setSearch} placeholder="Nom, téléphone, handle KC" />
+      <FilterCard
+        query={search}
+        onQueryChange={setSearch}
+        placeholder="Nom, email, téléphone, handle KC"
+        onReset={resetFilters}
+        active={Boolean(search || churchFilter || celluleFilter)}
+      >
         <SelectField
           label="Église"
           value={churchFilter}
           options={[{ label: 'Toutes les églises', value: '' }, ...churchOptions]}
           onChange={setChurchFilter}
+          searchable
         />
-      </Card>
+        <SelectField
+          label="Cellule"
+          value={celluleFilter}
+          options={[{ label: 'Toutes les cellules', value: '' }, ...celluleOptions]}
+          onChange={setCelluleFilter}
+          searchable
+        />
+      </FilterCard>
+      <View style={styles.filtersActions}>
+        <SecondaryButton title="Actualiser" onPress={() => void load()} />
+      </View>
 
       {loading ? <LoadingView /> : null}
       {!loading && error ? <ErrorView message={error} onRetry={() => void load()} /> : null}
@@ -213,12 +237,13 @@ export function PartnersScreen() {
             <TextField label="Identifiant KingsChat (handle KC)" value={handleKc} onChangeText={setHandleKc} />
             <TextField label="Adresse" value={address} onChangeText={setAddress} />
             <DateField label="Date de naissance" value={birthdate} onChange={setBirthdate} allowEmpty />
-            <SelectField label="Église" value={churchId} options={churchOptions} onChange={(value) => { setChurchId(value); setCelluleId(''); }} />
+            <SelectField label="Église" value={churchId} options={churchOptions} onChange={(value) => { setChurchId(value); setCelluleId(''); }} searchable />
             <SelectField
               label="Cellule"
               value={celluleId}
-              options={[{ label: 'Aucune', value: '' }, ...celluleOptions]}
+              options={[{ label: 'Aucune', value: '' }, ...formCelluleOptions]}
               onChange={setCelluleId}
+              searchable
             />
             {formError ? <Text style={styles.error}>{formError}</Text> : null}
             <PrimaryButton title="Enregistrer" onPress={() => void save()} loading={saving} disabled={!firstName || !lastName || !churchId} />
@@ -246,4 +271,5 @@ const styles = StyleSheet.create({
   edit: { color: colors.blue, fontWeight: '700', fontSize: 13 },
   delete: { color: colors.red, fontWeight: '700', fontSize: 13 },
   error: { color: colors.red, marginBottom: 12 },
+  filtersActions: { marginBottom: 12 },
 });

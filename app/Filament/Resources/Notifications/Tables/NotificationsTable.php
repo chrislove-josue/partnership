@@ -31,6 +31,10 @@ class NotificationsTable
                     ->label('Titre')
                     ->searchable()
                     ->limit(40),
+                TextColumn::make('message')
+                    ->label('Message')
+                    ->searchable()
+                    ->limit(50),
                 TextColumn::make('user.name')
                     ->label('Destinataire')
                     ->searchable(),

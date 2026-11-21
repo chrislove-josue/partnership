@@ -71,7 +71,7 @@ class WebFeatureParityTest extends TestCase
         $this->assertFalse($entries->contains(fn (LoginHistoryModel $entry): bool => $entry->id === $web->id));
     }
 
-    public function test_report_search_filters_the_displayed_tables_and_shows_donation_details(): void
+    public function test_report_section_filter_shows_donation_details(): void
     {
         $this->seed();
 
@@ -111,14 +111,14 @@ class WebFeatureParityTest extends TestCase
             ->set('data.type', 'month')
             ->set('data.month', 11)
             ->set('data.year', 2026)
-            ->set('data.report_search', 'Alice')
-            ->assertSee('Détail des dons');
+            ->set('data.report_section', 'donations')
+            ->assertSee('Détail des dons')
+            ->assertDontSee('Dons par catégorie');
 
         $report = $component->instance()->getReport();
 
-        $this->assertCount(1, $report['partners']);
-        $this->assertSame('Alice A', $report['partners'][0]['name']);
-        $this->assertCount(1, $report['donations']);
-        $this->assertSame('Alice A', $report['donations'][0]['partner']);
+        $this->assertSame('donations', $report['report_section']);
+        $this->assertCount(2, $report['partners']);
+        $this->assertCount(2, $report['donations']);
     }
 }

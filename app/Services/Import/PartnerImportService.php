@@ -41,7 +41,7 @@ class PartnerImportService extends BaseImportService
                     throw new RuntimeException('Champs obligatoires manquants (firstName, lastName, churchName)');
                 }
 
-                $church = $this->resolveChurch($churchName);
+                $church = $this->resolveChurch($churchName, $actor);
                 $this->assertCanModify($actor, $church);
 
                 $celluleId = null;
@@ -69,7 +69,12 @@ class PartnerImportService extends BaseImportService
                 $phone = $this->helpers->normalizePhone($row['phone'] ?? null);
                 $handleKC = $this->helpers->normalizeHandleKC($this->text($row, 'handlekc'));
 
-                $partner = $this->findPartner($row, $phone, $handleKC);
+                $partner = $this->findPartner($actor, $row, $phone, $handleKC);
+
+                if ($partner) {
+                    $this->assertCanModifyPartner($actor, $partner);
+                }
+
                 $data = [
                     'first_name' => $firstName,
                     'last_name' => $lastName,

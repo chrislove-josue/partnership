@@ -36,12 +36,27 @@ mobile/FinanceMobile-1.3.1.apk
 mobile/FinanceMobile-1.3.2.apk
 ```
 
-Il est signé avec la clé de debug générée par Expo : il s’installe directement sur Android, mais n’est pas destiné au Play Store. L’adresse de l’API peut être modifiée **depuis l’application**, sans recompiler :
+**Les APK livrés restent signés avec la clé de debug** : ils s'installent directement sur Android, mais ne doivent pas être distribués comme release. Aucune clé de production n'est fournie dans ce dépôt et `android/app/debug.keystore` n'est plus versionné.
 
-- à la connexion : champ **Adresse du serveur** puis **Utiliser cette adresse** ;
-- ensuite dans **Profil → Connexion au serveur**.
+Pour compiler une release signée, fournissez une clé de production via l'environnement :
 
-Pour un téléphone physique, utilisez l’IP de la machine qui héberge Laravel, par exemple `http://192.168.1.10:8000/api`. Le PC et le téléphone doivent être sur le même réseau, et le serveur doit écouter sur `0.0.0.0` (`php artisan serve --host=0.0.0.0`).
+```bash
+ANDROID_KEYSTORE_FILE=/chemin/vers/release.jks \
+ANDROID_KEYSTORE_PASSWORD=... \
+ANDROID_KEYALIAS=... \
+ANDROID_KEYPASSWORD=... \
+cd android && ./gradlew assembleRelease
+```
+
+Sans ces quatre variables, toute tâche Gradle dont le nom contient `release` échoue immédiatement : il n'y a plus de repli silencieux sur la signature debug.
+
+L’adresse de l’API peut être modifiée **depuis l’application**, sans recompiler :
+
+- à la connexion : champ **Adresse du serveur** puis **Utiliser cette adresse** (super administrateur) ;
+- ensuite dans **Profil → Connexion au serveur**. Le droit de configuration est recalculé depuis `/me` à chaque démarrage : un ancien drapeau stocké sur l'appareil n'est plus accepté.
+- le site web peut **proposer** une adresse, mais l'administrateur doit la confirmer explicitement avant qu'elle soit appliquée.
+
+Sur un téléphone physique, utilisez une URL HTTPS accessible depuis l'appareil. La copie publique non chiffrée de `finance.sqlite` n'est plus créée ; l'ancienne copie est supprimée à la déconnexion ou au changement de compte, avec toutes les tables locales (entités, outbox, conflits, métadonnées).
 
 ## Cache local
 
@@ -70,7 +85,12 @@ Le jeton Sanctum, les informations du compte et les détails de la session sont 
 
 ```bash
 npm run typecheck
+npm run security:check -- --source-only
 ```
+
+`security:check` n'utilise que les modules intégrés à Node. Le mode `--source-only` vérifie le code source, les manifestes, les règles de sauvegarde et l'absence de keystore versionné sans exiger un APK reconstruit. Le mode complet (`npm run security:check`) vérifie en plus le dernier APK présent avec `aapt` et `apksigner` **s'ils sont installés** ; si ces outils sont absents, ces contrôles sont ignorés et signalés comme tels. Les APK historiques du dossier restent signés en debug tant qu'une clé de production n'est pas fournie.
+
+Contrôles couverts : signature de release, keystore suivi par Git, trafic clair, URL HTTP en dur, copie publique de la base, exclusions de sauvegarde, validation HTTPS, URL imposée par le serveur, permissions Android, purge locale, messages d'erreur, journalisation et limites de validation.
 
 Les tests back-end de l’API se lancent depuis la racine Laravel :
 

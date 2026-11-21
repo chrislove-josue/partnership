@@ -19,8 +19,11 @@ abstract class BaseImportService
         protected readonly ChurchAccessService $access,
     ) {}
 
-    /** Recherche insensible à la casse, avec auto-création d'une église locale. */
-    protected function resolveChurch(string $name): Church
+    /**
+     * Recherche insensible à la casse, avec auto-création d'une église locale.
+     * L'auto-création reste limitée à une église du périmètre de l'acteur.
+     */
+    protected function resolveChurch(string $name, User $actor): Church
     {
         $name = trim($name);
         $church = Church::whereRaw('LOWER(name) = ?', [mb_strtolower($name)])->first();
@@ -29,12 +32,22 @@ abstract class BaseImportService
             return $church;
         }
 
-        $group = Church::where('type', ChurchType::GROUP)->first();
+        if (! $this->access->canCreateChurch($actor, ChurchType::LOCAL)) {
+            throw new RuntimeException('Création automatique d’église non autorisée.');
+        }
+
+        $parent = $this->access->accessibleChurches($actor)->first(
+            fn (Church $candidate): bool => in_array($candidate->type, [ChurchType::GROUP, ChurchType::SUB_GROUP], true),
+        );
+
+        if (! $parent) {
+            throw new RuntimeException('Aucune église parente accessible pour la création automatique.');
+        }
 
         return Church::create([
             'name' => $name,
             'type' => ChurchType::LOCAL,
-            'parent_id' => $group?->id,
+            'parent_id' => $parent->id,
         ]);
     }
 
@@ -51,11 +64,12 @@ abstract class BaseImportService
     }
 
     /**
-     * Partenaire existant reconnu par email, téléphone OU handle KingsChat.
+     * Partenaire existant reconnu par email, téléphone OU handle KingsChat,
+     * uniquement parmi les églises accessibles à l'acteur.
      *
      * @param  array<string, mixed>  $row
      */
-    protected function findPartner(array $row, ?string $phone = null, ?string $handleKC = null): ?Partner
+    protected function findPartner(User $actor, array $row, ?string $phone = null, ?string $handleKC = null): ?Partner
     {
         $conditions = [];
 
@@ -74,6 +88,7 @@ abstract class BaseImportService
         }
 
         return Partner::query()
+            ->whereIn('church_id', $this->access->accessibleChurchIds($actor))
             ->where(function ($query) use ($conditions): void {
                 foreach ($conditions as $condition) {
                     $query->orWhereRaw("LOWER({$condition['column']}) = ?", [$condition['value']]);
@@ -86,6 +101,13 @@ abstract class BaseImportService
     {
         if (! $this->access->canModifyChurchData($actor, $church->id)) {
             throw new RuntimeException('Permission refusée pour l\'église '.$church->name);
+        }
+    }
+
+    protected function assertCanModifyPartner(User $actor, Partner $partner): void
+    {
+        if (! $this->access->canModifyChurchData($actor, $partner->church_id)) {
+            throw new RuntimeException('Permission refusée pour modifier ce partenaire.');
         }
     }
 

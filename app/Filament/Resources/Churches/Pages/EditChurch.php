@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Churches\Pages;
 
+use App\Filament\Resources\Churches\Actions\ChurchDeleteGuard;
 use App\Filament\Resources\Churches\Actions\ChurchStatusActions;
 use App\Filament\Resources\Churches\ChurchResource;
 use App\Filament\Resources\Concerns\RedirectsToListAfterSave;
@@ -19,7 +20,8 @@ class EditChurch extends EditRecord
         return [
             ChurchStatusActions::deactivate(),
             ChurchStatusActions::activate(),
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->before(fn (DeleteAction $action) => ChurchDeleteGuard::beforeDelete($action)),
         ];
     }
 }

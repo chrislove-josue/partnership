@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Churches\Tables;
 
 use App\Enums\ChurchType;
+use App\Filament\Resources\Churches\Actions\ChurchDeleteGuard;
 use App\Filament\Resources\Churches\Actions\ChurchStatusActions;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

@@ -49,7 +49,7 @@
                 </table>
             </div>
 
-            <div class="lh-footer">{{ $entries->links() }}</div>
+            <div class="lh-footer">{{ $entries->links('filament.pages.partials.login-history-pagination') }}</div>
         @endif
     </div>
 </x-filament-panels::page>

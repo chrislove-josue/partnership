@@ -156,6 +156,27 @@ export function ReportsScreen() {
     return { label: value, value };
   });
 
+  const filteredReport = report ? {
+    categories: filterBy(report.categories, reportSearch, [(item) => item.name, (item) => item.amount]),
+    partners: filterBy(report.partners, reportSearch, [(item) => item.name, (item) => item.amount, (item) => item.cellule]),
+    partnersWithoutDonation: filterBy(report.partnersWithoutDonation, reportSearch, [
+      (item) => item.name,
+      (item) => item.cellule,
+    ]),
+    donations: filterBy(report.donations, reportSearch, [
+      (item) => item.partner,
+      (item) => item.category,
+      (item) => item.amount,
+      (item) => item.date,
+    ]),
+  } : null;
+
+  const showSection = (key: string) => !reportSection || reportSection === key;
+  const resetReportFilters = () => {
+    setReportSearch('');
+    setReportSection('');
+  };
+
   return (
     <Screen title="Rapport de partenariat" subtitle="Générez, exportez et envoyez à la hiérarchie">
       <Card>
@@ -198,8 +219,29 @@ export function ReportsScreen() {
       {loading && !report ? <LoadingView /> : null}
       {!loading && !report && !error ? <EmptyState message="Choisissez une église puis générez le rapport." /> : null}
 
-      {report ? (
+      {report && filteredReport ? (
         <>
+          <FilterCard
+            query={reportSearch}
+            onQueryChange={setReportSearch}
+            placeholder="Partenaire, catégorie, montant, date"
+            onReset={resetReportFilters}
+            active={Boolean(reportSearch || reportSection)}
+          >
+            <SelectField
+              label="Section"
+              value={reportSection}
+              options={[
+                { label: 'Toutes les sections', value: '' },
+                { label: 'Par catégorie', value: 'categories' },
+                { label: 'Partenaires', value: 'partners' },
+                { label: 'Sans don', value: 'without' },
+                { label: 'Détail des dons', value: 'donations' },
+              ]}
+              onChange={setReportSection}
+            />
+          </FilterCard>
+
           <Card>
             <SectionTitle>{report.church.name}</SectionTitle>
             <Badge text={report.period.label} />
@@ -210,52 +252,59 @@ export function ReportsScreen() {
             <PrimaryButton title="Préparer l’envoi" onPress={() => void prepareSend()} loading={loading} disabled={loading} />
           </Card>
 
-          <Card>
-            <SectionTitle>Par catégorie</SectionTitle>
-            {report.categories.length === 0 ? <Text style={styles.meta}>Aucune catégorie pour cette période.</Text> : null}
-            {report.categories.map((category) => (
-              <View key={category.name} style={styles.listRow}>
-                <View style={[styles.color, { backgroundColor: category.color }]} />
-                <Text style={styles.listLabel}>{category.name}</Text>
-                <Text style={styles.listValue}>{formatMoney(category.amount)}</Text>
-              </View>
-            ))}
-          </Card>
+          {showSection('categories') ? (
+            <Card>
+              <SectionTitle>Par catégorie</SectionTitle>
+              {filteredReport.categories.length === 0 ? <Text style={styles.meta}>Aucune catégorie pour ces filtres.</Text> : null}
+              {filteredReport.categories.map((category) => (
+                <View key={category.name} style={styles.listRow}>
+                  <View style={[styles.color, { backgroundColor: category.color }]} />
+                  <Text style={styles.listLabel}>{category.name}</Text>
+                  <Text style={styles.listValue}>{formatMoney(category.amount)}</Text>
+                </View>
+              ))}
+            </Card>
+          ) : null}
 
-          <Card>
-            <SectionTitle>Partenaires</SectionTitle>
-            {report.partners.length === 0 ? <Text style={styles.meta}>Aucun partenaire avec don.</Text> : null}
-            {report.partners.map((partner) => (
-              <View key={partner.name} style={styles.listRow}>
-                <Text style={styles.listLabel}>{partner.name}</Text>
-                <Text style={styles.listValue}>{formatMoney(partner.amount)}</Text>
-              </View>
-            ))}
-          </Card>
+          {showSection('partners') ? (
+            <Card>
+              <SectionTitle>Partenaires</SectionTitle>
+              {filteredReport.partners.length === 0 ? <Text style={styles.meta}>Aucun partenaire pour ces filtres.</Text> : null}
+              {filteredReport.partners.map((partner) => (
+                <View key={partner.name} style={styles.listRow}>
+                  <Text style={styles.listLabel}>{partner.name}</Text>
+                  <Text style={styles.listValue}>{formatMoney(partner.amount)}</Text>
+                </View>
+              ))}
+            </Card>
+          ) : null}
 
-          {report.partnersWithoutDonation.length > 0 ? (
+          {showSection('without') && filteredReport.partnersWithoutDonation.length > 0 ? (
             <Card>
               <SectionTitle>Sans don sur la période</SectionTitle>
-              {report.partnersWithoutDonation.map((partner) => (
+              {filteredReport.partnersWithoutDonation.map((partner) => (
                 <Text key={partner.name} style={styles.meta}>{partner.name}</Text>
               ))}
             </Card>
           ) : null}
 
-          <Card>
-            <SectionTitle>Détail des dons</SectionTitle>
-            <ScrollView horizontal>
-              <View>
-                {report.donations.map((donation) => (
-                  <View key={`${donation.date}-${donation.partner}-${donation.amount}`} style={styles.listRow}>
-                    <Text style={styles.listLabel}>{donation.partner} · {donation.category}</Text>
-                    <Text style={styles.listValue}>{formatMoney(donation.amount)}</Text>
-                    <Text style={styles.meta}>{formatDate(donation.date)}</Text>
-                  </View>
-                ))}
-              </View>
-            </ScrollView>
-          </Card>
+          {showSection('donations') ? (
+            <Card>
+              <SectionTitle>Détail des dons</SectionTitle>
+              {filteredReport.donations.length === 0 ? <Text style={styles.meta}>Aucun don pour ces filtres.</Text> : null}
+              <ScrollView horizontal>
+                <View>
+                  {filteredReport.donations.map((donation) => (
+                    <View key={`${donation.date}-${donation.partner}-${donation.amount}`} style={styles.listRow}>
+                      <Text style={styles.listLabel}>{donation.partner} · {donation.category}</Text>
+                      <Text style={styles.listValue}>{formatMoney(donation.amount)}</Text>
+                      <Text style={styles.meta}>{formatDate(donation.date)}</Text>
+                    </View>
+                  ))}
+                </View>
+              </ScrollView>
+            </Card>
+          ) : null}
         </>
       ) : null}
 

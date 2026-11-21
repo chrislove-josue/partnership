@@ -107,8 +107,8 @@ class SecurityHardeningTest extends TestCase
         ]);
 
         $this->actingAs($pastor)
-            ->get(EditNotification::getUrl('edit', ['record' => $notification]))
-            ->assertForbidden();
+            ->get(EditNotification::getUrl(['record' => $notification]))
+            ->assertNotFound();
     }
 
     public function test_report_export_neutralizes_excel_formulas_from_user_data(): void

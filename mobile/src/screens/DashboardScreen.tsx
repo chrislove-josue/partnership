@@ -157,6 +157,24 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
 
   const maxCategoryAmount = Math.max(1, ...summary.categories.map((category) => category.amount));
 
+  const visibleDonations = filterBy(summary.recentDonations, search, [
+    (donation) => donation.partner,
+    (donation) => donation.category,
+    (donation) => donation.church,
+    (donation) => donation.amount,
+    (donation) => donation.date,
+  ]);
+  const visibleCategories = filterBy(summary.categories, search, [
+    (category) => category.name,
+    (category) => category.amount,
+  ]);
+  const visibleNotifications = filterBy(summary.recentNotifications, search, [
+    (notification) => notification.title,
+    (notification) => notification.message,
+    (notification) => notification.created_at,
+  ]);
+  const visibleMaxCategoryAmount = Math.max(1, ...visibleCategories.map((category) => category.amount));
+
   return (
     <Screen
       title="Tableau de bord"

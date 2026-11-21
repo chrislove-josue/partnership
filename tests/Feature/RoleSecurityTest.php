@@ -74,16 +74,20 @@ class RoleSecurityTest extends TestCase
         $pastor = $this->makeUser(RoleName::GROUP_PASTOR->value, $group, 'pasteur-form-role@example.test');
         $role = Role::where('name', RoleName::STAFF->value)->firstOrFail();
 
-        Livewire::actingAs($pastor)
-            ->test(EditRole::class, ['record' => $role->id])
-            ->fillForm([
-                'name' => 'ROLE ESCALADE',
-                'is_system' => true,
-            ])
-            ->assertFormSet([
-                'name' => $role->name,
-                'is_system' => $role->is_system,
-            ]);
+        $this->actingAs($pastor);
+
+        $schema = RoleForm::configure(Schema::make());
+        $fields = [];
+
+        foreach ($schema->getComponents() as $component) {
+            if (method_exists($component, 'getName')) {
+                $fields[$component->getName()] = $component;
+            }
+        }
+
+        $this->assertTrue($fields['name']->isDisabled());
+        $this->assertTrue($fields['permissions']->isDisabled());
+        $this->assertTrue($fields['is_system']->isDisabled());
     }
 
     public function test_super_admin_keeps_role_management(): void

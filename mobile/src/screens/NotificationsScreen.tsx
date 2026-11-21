@@ -49,6 +49,17 @@ export function NotificationsScreen() {
     void load();
   }, [load]));
 
+  const visibleNotifications = filterBy(notifications, search, [
+    (notification) => notification.title,
+    (notification) => notification.message,
+    (notification) => notification.created_at,
+  ]).filter((notification) => !readFilter || (notification.is_read ? 'read' : 'unread') === readFilter);
+
+  const resetFilters = () => {
+    setSearch('');
+    setReadFilter('');
+  };
+
   const markRead = async (id: string) => {
     try {
       await api(`/notifications/${id}/read`, { method: 'POST' });
@@ -65,11 +76,30 @@ export function NotificationsScreen() {
       subtitle={`${unread} non lue(s)`}
       actions={unread > 0 ? <Badge text={`${unread}`} color={colors.gold} /> : undefined}
     >
+      <FilterCard
+        query={search}
+        onQueryChange={setSearch}
+        placeholder="Titre, message"
+        onReset={resetFilters}
+        active={Boolean(search || readFilter)}
+      >
+        <SelectField
+          label="Statut"
+          value={readFilter}
+          options={[
+            { label: 'Toutes les notifications', value: '' },
+            { label: 'Non lues', value: 'unread' },
+            { label: 'Lues', value: 'read' },
+          ]}
+          onChange={setReadFilter}
+        />
+      </FilterCard>
+
       {loading ? <LoadingView /> : null}
       {!loading && error ? <ErrorView message={error} onRetry={() => void load()} /> : null}
-      {!loading && !error && notifications.length === 0 ? <EmptyState message="Aucune notification." /> : null}
+      {!loading && !error && visibleNotifications.length === 0 ? <EmptyState message="Aucune notification trouvée." /> : null}
 
-      {!loading && !error ? notifications.map((notification) => (
+      {!loading && !error ? visibleNotifications.map((notification) => (
         <Card key={notification.id} style={notification.is_read ? undefined : styles.unread}>
           <Text style={styles.title}>{notification.title}</Text>
           <Text style={styles.message}>{notification.message}</Text>

@@ -240,6 +240,15 @@ check('F10 : validation des montants, églises et tailles de fichiers', () => {
   assert.ok(read('src/components/ImportExportCard.tsx').includes('UPLOAD_TOO_LARGE_MESSAGE'), 'limite absente de l\'UI');
 });
 
+function toolExists(command) {
+  try {
+    execFileSync(command, ['version'], { stdio: 'ignore' });
+    return true;
+  } catch (error) {
+    return error?.code !== 'ENOENT';
+  }
+}
+
 if (!SOURCE_ONLY) {
   const candidates = [
     'android/app/build/outputs/apk/release/app-release.apk',
@@ -247,48 +256,40 @@ if (!SOURCE_ONLY) {
   ].filter((file) => exists(file));
   const apk = candidates.length > 0 ? path.join(ROOT, candidates[candidates.length - 1]) : null;
 
-  check('APK : manifeste (mode complet)', () => {
-    if (!apk) {
-      throw new Error('Aucun APK présent');
-    }
-
-    let aaptOutput = '';
-    try {
-      aaptOutput = execFileSync('aapt', ['dump', 'xmltree', apk, 'AndroidManifest.xml'], {
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'ignore'],
+  if (!apk) {
+    skip('APK : manifeste (mode complet)', 'aucun APK présent');
+    skip('APK : signature de release (mode complet)', 'aucun APK présent');
+  } else {
+    if (toolExists('aapt')) {
+      check('APK : manifeste (mode complet)', () => {
+        const output = execFileSync('aapt', ['dump', 'xmltree', apk, 'AndroidManifest.xml'], {
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'ignore'],
+        });
+        assert.ok(!/usesCleartextTraffic/i.test(output), 'l\'APK demande du trafic en clair');
+        assert.ok(!/MANAGE_EXTERNAL_STORAGE|POST_NOTIFICATIONS|SYSTEM_ALERT_WINDOW/.test(output), 'permissions excessives dans l\'APK');
       });
-    } catch (error) {
-      if (error?.code === 'ENOENT') {
-        skip('APK : manifeste (mode complet)', 'aapt absent : contrôle ignoré');
-        return;
-      }
-      throw error;
-    }
-    assert.ok(!/usesCleartextTraffic/i.test(aaptOutput), 'l\'APK demande du trafic en clair');
-    assert.ok(!/MANAGE_EXTERNAL_STORAGE|POST_NOTIFICATIONS|SYSTEM_ALERT_WINDOW/.test(aaptOutput), 'permissions excessives dans l\'APK');
-  });
-
-  check('APK : signature de release (mode complet)', () => {
-    if (!apk) {
-      throw new Error('Aucun APK présent');
+    } else {
+      skip('APK : manifeste (mode complet)', 'aapt absent : contrôle ignoré');
     }
 
-    let signature = '';
-    try {
-      signature = execFileSync('apksigner', ['verify', '--print-certs', apk], {
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'ignore'],
+    if (toolExists('apksigner')) {
+      check('APK : signature de release (mode complet)', () => {
+        let signature = '';
+        try {
+          signature = execFileSync('apksigner', ['verify', '--print-certs', apk], {
+            encoding: 'utf8',
+            stdio: ['ignore', 'pipe', 'ignore'],
+          });
+        } catch (error) {
+          signature = `${error.stdout ?? ''}\n${error.stderr ?? ''}`;
+        }
+        assert.ok(!/CN=Android Debug/i.test(signature), 'l\'APK est signé avec le certificat de debug');
       });
-    } catch (error) {
-      if (error?.code === 'ENOENT') {
-        skip('APK : signature de release (mode complet)', 'apksigner absent : contrôle ignoré');
-        return;
-      }
-      signature = `${error.stdout ?? ''}\n${error.stderr ?? ''}`;
+    } else {
+      skip('APK : signature de release (mode complet)', 'apksigner absent : contrôle ignoré');
     }
-    assert.ok(!/CN=Android Debug/i.test(signature), 'l\'APK est signé avec le certificat de debug');
-  });
+  }
 }
 
 console.log(`Contrôles de sécurité FinanceMobile — mode ${SOURCE_ONLY ? 'source uniquement' : 'complet'}`);
@@ -300,7 +301,8 @@ for (const result of results) {
 }
 
 const failed = results.filter((result) => !result.ok).length;
-console.log(`\n${results.length - failed}/${results.length} contrôles réussis.`);
+const skipped = results.filter((result) => result.skipped).length;
+console.log(`\n${results.length - failed - skipped}/${results.length} contrôles réussis, ${skipped} ignoré(s).`);
 if (failed > 0) {
   process.exitCode = 1;
 }

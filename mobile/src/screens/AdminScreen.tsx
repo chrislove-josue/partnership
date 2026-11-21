@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { api, getErrorMessage, invalidateCache } from '../api/client';
+import { filterBy } from '../utils/search';
 import type { Category, Cellule, Church, Partner, RoleOption, User } from '../api/types';
 import {
   Badge,
@@ -19,7 +20,7 @@ import {
   TextField,
 } from '../components/ui';
 
-type Section = 'churches' | 'cellules' | 'categories' | 'users';
+type Section = 'churches' | 'cellules' | 'categories' | 'users' | 'pasteurs';
 type Editable = Church | Cellule | Category | User;
 
 const sections: Array<{ key: Section; label: string }> = [
@@ -27,7 +28,18 @@ const sections: Array<{ key: Section; label: string }> = [
   { key: 'cellules', label: 'Cellules' },
   { key: 'categories', label: 'Catégories' },
   { key: 'users', label: 'Utilisateurs' },
+  { key: 'pasteurs', label: 'Pasteurs' },
 ];
+
+const PASTOR_ROLES = ['GROUP_PASTOR', 'SUBGROUP_PASTOR', 'LOCAL_PASTOR'];
+
+function hasRole(user: User, role: string): boolean {
+  return user.role === role || (user.roles ?? []).includes(role);
+}
+
+function isPastor(user: User): boolean {
+  return PASTOR_ROLES.some((role) => hasRole(user, role));
+}
 
 export function AdminScreen() {
   const [loading, setLoading] = useState(true);
@@ -39,6 +51,11 @@ export function AdminScreen() {
   const [users, setUsers] = useState<User[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [roles, setRoles] = useState<RoleOption[]>([]);
+  const [search, setSearch] = useState('');
+  const [churchTypeFilter, setChurchTypeFilter] = useState('');
+  const [celluleChurchFilter, setCelluleChurchFilter] = useState('');
+  const [userRoleFilter, setUserRoleFilter] = useState('');
+  const [userActiveFilter, setUserActiveFilter] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Editable | null>(null);
   const [toDelete, setToDelete] = useState<Editable | null>(null);
@@ -96,6 +113,34 @@ export function AdminScreen() {
     label: partner.full_name ?? `${partner.first_name} ${partner.last_name}`,
     value: String(partner.id),
   }));
+
+  const filteredChurches = filterBy(churches, search, [
+    (church) => church.name,
+    (church) => church.type,
+    (church) => church.parent,
+  ]).filter((church) => !churchTypeFilter || church.type === churchTypeFilter);
+
+  const filteredCellules = filterBy(cellules, search, [
+    (cellule) => cellule.name,
+    (cellule) => cellule.church,
+    (cellule) => cellule.leader,
+  ]).filter((cellule) => !celluleChurchFilter || cellule.church_id === Number(celluleChurchFilter));
+
+  const filteredCategories = filterBy(categories, search, [(category) => category.name]);
+
+  const filteredUsers = filterBy(users, search, [
+    (user) => user.name,
+    (user) => user.email,
+    (user) => user.phone,
+    (user) => user.handle_kc,
+    (user) => user.role,
+    (user) => user.roles?.join(' '),
+    (user) => user.assigned_church?.name,
+  ])
+    .filter((user) => !userRoleFilter || hasRole(user, userRoleFilter))
+    .filter((user) => !userActiveFilter || (user.is_active ? '1' : '0') === userActiveFilter);
+
+  const filteredPastors = filteredUsers.filter(isPastor);
 
   const openForm = (record?: Editable) => {
     setFormError('');

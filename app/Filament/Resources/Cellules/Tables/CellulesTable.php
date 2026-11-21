@@ -25,6 +25,7 @@ class CellulesTable
                     ->searchable(),
                 TextColumn::make('leader.full_name')
                     ->label('Responsable')
+                    ->searchable(['first_name', 'last_name'])
                     ->placeholder('—'),
                 TextColumn::make('partners_count')
                     ->label('Partenaires')

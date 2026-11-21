@@ -10,6 +10,7 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -63,6 +64,11 @@ class ChurchesTable
                     ->options(collect(ChurchType::cases())->mapWithKeys(
                         fn (ChurchType $type) => [$type->value => $type->label()]
                     )->all()),
+                TernaryFilter::make('is_active')
+                    ->label('Statut')
+                    ->trueLabel('Actives')
+                    ->falseLabel('Inactives')
+                    ->nullableLabel('Toutes'),
             ])
             ->recordActions([
                 EditAction::make(),

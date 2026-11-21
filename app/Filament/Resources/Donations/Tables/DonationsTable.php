@@ -22,11 +22,13 @@ class DonationsTable
                 TextColumn::make('date')
                     ->label('Date')
                     ->date('d/m/Y')
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('amount')
                     ->label('Montant')
                     ->money('XOF', divideBy: 1)
-                    ->sortable(),
+                    ->sortable()
+                    ->searchable(),
                 TextColumn::make('partner.full_name')
                     ->label('Partenaire')
                     ->searchable(['first_name', 'last_name']),

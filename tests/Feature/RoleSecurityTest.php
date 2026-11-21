@@ -3,15 +3,15 @@
 namespace Tests\Feature;
 
 use App\Enums\RoleName;
-use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Roles\RoleResource;
+use App\Filament\Resources\Roles\Schemas\RoleForm;
 use App\Models\Church;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Gate;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
-use Livewire\Livewire;
 use Tests\TestCase;
 
 class RoleSecurityTest extends TestCase

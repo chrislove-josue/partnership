@@ -93,6 +93,34 @@ class ChurchAccessService
         return $targetChurch->parent_id === $user->assigned_church_id;
     }
 
+    /**
+     * Autorise la désactivation/réactivation d'une église pour les pasteurs
+     * de groupe et de sous-groupe, sur leur église assignée ou l'un de ses
+     * descendants. Les super administrateurs conservent tous les droits.
+     */
+    public function canToggleChurchActive(User $user, int $targetChurchId): bool
+    {
+        if ($this->isSuperAdmin($user)) {
+            return true;
+        }
+
+        if (! in_array($user->roleName(), [
+            RoleName::GROUP_PASTOR->value,
+            RoleName::SUBGROUP_PASTOR->value,
+        ], true) || ! $user->assigned_church_id) {
+            return false;
+        }
+
+        if ($user->assigned_church_id === $targetChurchId) {
+            return true;
+        }
+
+        $baseChurch = Church::query()->find($user->assigned_church_id);
+
+        return $baseChurch !== null
+            && in_array($targetChurchId, $baseChurch->descendantIds(), true);
+    }
+
     // ─────────────────────────────────────────────────────────────────────
     // GESTION DES UTILISATEURS
     // ─────────────────────────────────────────────────────────────────────

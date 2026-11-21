@@ -35,6 +35,11 @@ class ChurchPolicy
 
     public function delete(User $user, Church $church): bool
     {
-        return $this->access->canModifyChurchData($user, $church->id);
+        return $user->isSuperAdmin();
+    }
+
+    public function toggleActive(User $user, Church $church): bool
+    {
+        return $this->access->canToggleChurchActive($user, $church->id);
     }
 }

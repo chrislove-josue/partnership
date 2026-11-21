@@ -11,6 +11,7 @@ class SyncDeletion extends Model
     protected $fillable = [
         'entity',
         'entity_id',
+        'church_id',
         'deleted_at',
     ];
 

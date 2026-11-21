@@ -32,7 +32,24 @@ class SyncDeletionObserver
         SyncDeletion::query()->create([
             'entity' => $entity,
             'entity_id' => $model->getKey(),
+            'church_id' => $this->churchIdFor($model),
             'deleted_at' => now(),
         ]);
+    }
+
+    private function churchIdFor(Model $model): ?int
+    {
+        if ($model instanceof Church) {
+            return $model->id;
+        }
+
+        if ($model instanceof Cellule) {
+            return $model->church_id;
+        }
+
+        // Les catégories sont globales et partagées : aucune restriction d'église.
+        return $model instanceof Partner || $model instanceof Donation
+            ? $model->church_id
+            : null;
     }
 }

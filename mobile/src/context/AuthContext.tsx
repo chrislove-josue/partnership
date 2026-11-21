@@ -27,6 +27,8 @@ interface AuthContextValue {
   loading: boolean;
   apiUrl: string;
   canConfigureApiUrl: boolean;
+  /** Adresse saisie sur l'écran de connexion, avant toute authentification. */
+  configureApiUrl: (url: string) => Promise<void>;
   updateApiUrl: (url: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -53,15 +55,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     sessionRef.current = session;
   }, [session]);
 
+  // L'écran de connexion doit pouvoir choisir le serveur avant d'être authentifié :
+  // c'est le seul moyen d'atteindre une nouvelle installation. La validation de
+  // l'URL et la persistance restent identiques au changement fait depuis le profil.
+  const configureApiUrl = useCallback(async (url: string) => {
+    const normalized = setApiUrl(url);
+    await SecureStore.setItemAsync(API_URL_KEY, normalized);
+    setApiUrlState(normalized);
+  }, []);
+
   const updateApiUrl = useCallback(async (url: string) => {
     if (!canConfigureApiUrl) {
       throw new Error('Seul le super administrateur peut modifier l’adresse de l’API.');
     }
 
-    const normalized = setApiUrl(url);
-    await SecureStore.setItemAsync(API_URL_KEY, normalized);
-    setApiUrlState(normalized);
-  }, [canConfigureApiUrl]);
+    await configureApiUrl(url);
+  }, [canConfigureApiUrl, configureApiUrl]);
 
   const forget = useCallback(async () => {
     clearCache();
@@ -232,13 +241,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loading,
       apiUrl,
       canConfigureApiUrl,
+      configureApiUrl,
       updateApiUrl,
       login,
       logout,
       refreshUser,
       markSynced,
     }),
-    [user, session, loading, apiUrl, canConfigureApiUrl, updateApiUrl, login, logout, refreshUser, markSynced],
+    [user, session, loading, apiUrl, canConfigureApiUrl, configureApiUrl, updateApiUrl, login, logout, refreshUser, markSynced],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

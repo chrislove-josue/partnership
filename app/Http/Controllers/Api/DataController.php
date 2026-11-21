@@ -78,11 +78,14 @@ class DataController extends Controller
     {
         Gate::authorize('viewAny', Partner::class);
 
+        [$isSync, $afterId, $limit] = $this->syncOptions($request);
+
         $query = Partner::query()
             ->with(['church:id,name', 'cellule:id,name'])
             ->withTotalDonations()
             ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
             ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
+            ->when($afterId > 0, fn ($query) => $query->where('id', '>', $afterId))
             ->when($request->string('search')->toString(), function ($query, string $search): void {
                 $query->where(function ($query) use ($search): void {
                     $query->where('first_name', 'like', "%{$search}%")
@@ -92,12 +95,17 @@ class DataController extends Controller
                 });
             })
             ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))
-            ->when($request->filled('cellule_id'), fn ($query) => $query->where('cellule_id', $request->integer('cellule_id')))
-            ->orderBy('last_name')
-            ->orderBy('first_name')
-            ->limit(300);
+            ->when($request->filled('cellule_id'), fn ($query) => $query->where('cellule_id', $request->integer('cellule_id')));
 
-        return response()->json(['data' => $query->get()->map(fn (Partner $partner): array => [
+        if ($isSync) {
+            $query->orderBy('id');
+        } else {
+            $query->orderBy('last_name')->orderBy('first_name');
+        }
+        $rows = $query->limit($isSync ? $limit : 300)->get();
+        $hasMore = $isSync && $rows->count() === $limit;
+
+        return response()->json(['data' => $rows->map(fn (Partner $partner): array => [
             'id' => $partner->id,
             'first_name' => $partner->first_name,
             'last_name' => $partner->last_name,

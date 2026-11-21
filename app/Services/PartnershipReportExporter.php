@@ -156,10 +156,10 @@ class PartnershipReportExporter
 
         $row = 2;
         foreach ($report['partners'] as $i => $partner) {
-            $sheet->setCellValue("A{$row}", $partner['name']);
-            $sheet->setCellValue("B{$row}", $partner['cellule'] ?? '—');
-            $sheet->setCellValue("C{$row}", $partner['email'] ?? '—');
-            $sheet->setCellValue("D{$row}", $partner['phone'] ?? '—');
+            $sheet->setCellValue("A{$row}", self::safeText($partner['name']));
+            $sheet->setCellValue("B{$row}", self::safeText($partner['cellule'] ?? '—'));
+            $sheet->setCellValue("C{$row}", self::safeText($partner['email'] ?? '—'));
+            $sheet->setCellValue("D{$row}", self::safeText($partner['phone'] ?? '—'));
             $sheet->setCellValue("E{$row}", $partner['count']);
             $sheet->setCellValue("F{$row}", $partner['amount']);
             $sheet->getStyle("F{$row}")->getNumberFormat()->setFormatCode(self::CURRENCY_FORMAT);
@@ -183,13 +183,19 @@ class PartnershipReportExporter
 
         $row = 2;
         foreach ($report['partnersWithoutDonation'] as $i => $partner) {
-            $sheet->setCellValue("A{$row}", $partner['name']);
-            $sheet->setCellValue("B{$row}", $partner['cellule'] ?? '—');
-            $sheet->setCellValue("C{$row}", $partner['email'] ?? '—');
-            $sheet->setCellValue("D{$row}", $partner['phone'] ?? '—');
+            $sheet->setCellValue("A{$row}", self::safeText($partner['name']));
+            $sheet->setCellValue("B{$row}", self::safeText($partner['cellule'] ?? '—'));
+            $sheet->setCellValue("C{$row}", self::safeText($partner['email'] ?? '—'));
+            $sheet->setCellValue("D{$row}", self::safeText($partner['phone'] ?? '—'));
             $this->stripe($sheet, "A{$row}:D{$row}", $i % 2 === 1 ? self::ORANGE_STRIPE : null);
             $row++;
         }
+    }
+
+    /** Neutralise les formules Excel injectées via un nom, un email ou un téléphone. */
+    private static function safeText(string $value): string
+    {
+        return preg_match('/^[\s]*[=+\-@]/', $value) ? "'".$value : $value;
     }
 
     /**

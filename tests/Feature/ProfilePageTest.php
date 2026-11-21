@@ -26,6 +26,28 @@ class ProfilePageTest extends TestCase
             ->assertSee('Tableau de bord');
     }
 
+    public function test_current_password_is_requested_before_the_new_password(): void
+    {
+        $this->seed();
+        $user = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
+
+        $component = Livewire::actingAs($user)->test(EditProfile::class)->instance();
+        $names = collect($component->form->getComponents(withHidden: true))
+            ->map(fn ($component): ?string => $component->getName())
+            ->values()
+            ->all();
+
+        $currentPassword = array_search('currentPassword', $names, true);
+        $newPassword = array_search('password', $names, true);
+        $confirmation = array_search('passwordConfirmation', $names, true);
+
+        $this->assertNotFalse($currentPassword);
+        $this->assertNotFalse($newPassword);
+        $this->assertNotFalse($confirmation);
+        $this->assertLessThan($newPassword, $currentPassword);
+        $this->assertLessThan($confirmation, $newPassword);
+    }
+
     public function test_user_can_update_phone_and_kingschat_handle_from_profile(): void
     {
         $this->seed();

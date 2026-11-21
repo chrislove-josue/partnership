@@ -18,6 +18,7 @@ use App\Services\MagicTokenService;
 use App\Services\PartnershipReportExporter;
 use App\Services\PartnershipReportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Hash;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use Tests\TestCase;
@@ -105,6 +106,8 @@ class SecurityHardeningTest extends TestCase
             'user_id' => $other->id,
             'is_read' => false,
         ]);
+
+        $this->assertTrue(Gate::forUser($pastor)->denies('update', $notification));
 
         $this->actingAs($pastor)
             ->get(EditNotification::getUrl(['record' => $notification]))

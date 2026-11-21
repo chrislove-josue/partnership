@@ -157,7 +157,9 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
   return (
     <Screen
       title="Tableau de bord"
-      subtitle={user?.assigned_church?.name ?? 'ChurchManager'}
+      subtitle={typeof user?.assigned_church === 'string'
+        ? user.assigned_church
+        : user?.assigned_church?.name ?? 'ChurchManager'}
       actions={unread > 0 ? <Badge text={`${unread} non lue(s)`} color={colors.gold} /> : undefined}
     >
       <Card style={styles.hero}>

@@ -135,7 +135,9 @@ export function AdminScreen() {
     (user) => user.handle_kc,
     (user) => user.role,
     (user) => user.roles?.join(' '),
-    (user) => user.assigned_church?.name,
+    (user) => typeof user.assigned_church === 'string'
+      ? user.assigned_church
+      : user.assigned_church?.name,
   ])
     .filter((user) => !userRoleFilter || hasRole(user, userRoleFilter))
     .filter((user) => !userActiveFilter || (user.is_active ? '1' : '0') === userActiveFilter);
@@ -420,24 +422,27 @@ export function AdminScreen() {
                   value={parentId}
                   options={[{ label: 'Aucune', value: '' }, ...churchOptions]}
                   onChange={setParentId}
+                  searchable
                 />
                 <SelectField
                   label="Responsable"
                   value={leaderId}
                   options={[{ label: 'Aucun', value: '' }, ...userOptions]}
                   onChange={setLeaderId}
+                  searchable
                 />
               </>
             ) : null}
 
             {section === 'cellules' ? (
               <>
-                <SelectField label="Église" value={churchId} options={churchOptions} onChange={setChurchId} />
+                <SelectField label="Église" value={churchId} options={churchOptions} onChange={setChurchId} searchable />
                 <SelectField
                   label="Responsable (partenaire)"
                   value={leaderId}
                   options={[{ label: 'Aucun', value: '' }, ...partnerOptions]}
                   onChange={setLeaderId}
+                  searchable
                 />
               </>
             ) : null}
@@ -461,7 +466,7 @@ export function AdminScreen() {
                     onChange={(checked) => toggleRole(role.name, checked)}
                   />
                 ))}
-                <SelectField label="Église assignée" value={assignedChurchId} options={churchOptions} onChange={setAssignedChurchId} />
+                <SelectField label="Église assignée" value={assignedChurchId} options={churchOptions} onChange={setAssignedChurchId} searchable />
                 <CheckboxField label="Compte actif" checked={active} onChange={setActive} />
               </>
             ) : null}

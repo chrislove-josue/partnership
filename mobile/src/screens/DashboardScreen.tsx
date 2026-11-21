@@ -54,17 +54,19 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unread, setUnread] = useState(0);
   const [search, setSearch] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (refresh = false) => {
     setLoading(true);
     setError('');
     try {
       const [churchResponse, donationResponse, partnerResponse, notificationResponse] = await Promise.all([
-        api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
-        api<{ data: Donation[] }>('/donations', { cacheKey: 'donations' }),
-        api<{ data: Partner[] }>('/partners', { cacheKey: 'partners' }),
+        api<{ data: Church[] }>('/churches', { cacheKey: 'churches', refresh }),
+        api<{ data: Donation[] }>('/donations', { cacheKey: 'donations', refresh }),
+        api<{ data: Partner[] }>('/partners', { cacheKey: 'partners', refresh }),
         api<{ data: AppNotification[]; unread_count: number }>('/notifications', {
           cacheKey: `notifications:${user?.id ?? 'me'}`,
+          refresh,
         }),
       ]);
 

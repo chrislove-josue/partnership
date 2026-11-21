@@ -268,7 +268,7 @@ async function performRequest<T>(
       body: body ? JSON.stringify(body) : undefined,
     });
   } catch (error) {
-    if (method === 'GET' && cacheKey) {
+    if (method === 'GET' && cacheKey && !refresh) {
       const stale = readStaleCache<T>(cacheKey);
       if (stale !== null) {
         return stale;
@@ -283,7 +283,7 @@ async function performRequest<T>(
     handleUnauthorized(sendsToken && response.status === 401);
 
     // Une session expirée ne doit jamais être masquée par des données périmées.
-    if (method === 'GET' && cacheKey && response.status !== 401) {
+    if (method === 'GET' && cacheKey && !refresh && response.status !== 401) {
       const stale = readStaleCache<T>(cacheKey);
       if (stale !== null) {
         return stale;
@@ -513,7 +513,7 @@ export async function api<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { method = 'GET', skipOffline = false } = options;
+  const { method = 'GET', skipOffline = false, refresh = false } = options;
 
   try {
     const result = await performRequest<T>(path, options);
@@ -530,7 +530,7 @@ export async function api<T>(
       if (method !== 'GET' && SYNCABLE_WRITE_PATTERN.test(path)) {
         return queueOfflineWrite<T>(path, method, options.body ?? {});
       }
-      if (method === 'GET') {
+      if (method === 'GET' && !refresh) {
         const local = await tryReadLocal<T>(path);
         if (local !== null) {
           return local;

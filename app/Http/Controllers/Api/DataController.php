@@ -61,6 +61,14 @@ class DataController extends Controller
             $churches = $churches->take($limit);
         }
 
+        // L'APK affiche le total par église : il doit être calculé ici comme
+        // dans le tableau de bord Filament (dons rattachés directement).
+        $totals = Donation::query()
+            ->selectRaw('church_id, COALESCE(SUM(amount), 0) as total')
+            ->whereIn('church_id', $churches->pluck('id'))
+            ->groupBy('church_id')
+            ->pluck('total', 'church_id');
+
         return response()->json([
             'data' => $churches->map(fn (Church $church): array => [
                 'id' => $church->id,
@@ -68,6 +76,7 @@ class DataController extends Controller
                 'type' => $church->type?->value ?? (string) $church->type,
                 'parent_id' => $church->parent_id,
                 'is_active' => $church->is_active,
+                'total_donations' => (float) ($totals[$church->id] ?? 0),
                 'updated_at' => $church->updated_at?->toIso8601String(),
             ])->values()->all(),
             'has_more' => $hasMore,

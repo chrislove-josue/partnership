@@ -14,7 +14,10 @@ use App\Services\ReportCache;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\ServiceProvider;
 
@@ -62,6 +65,14 @@ class AppServiceProvider extends ServiceProvider
         ], 'fr', 'filament-forms');
 
         Event::listen([Login::class, Logout::class], RecordLoginHistory::class);
+
+        // Limiteurs partagés : API, connexion par email/IP et liens magiques.
+        RateLimiter::for('api', fn (Request $request): Limit => Limit::perMinute(120)
+            ->by((string) ($request->user()?->id ?: $request->ip())));
+        RateLimiter::for('login', fn (Request $request): Limit => Limit::perMinute(5)
+            ->by(mb_strtolower(trim((string) $request->input('email'))).'|'.$request->ip()));
+        RateLimiter::for('magic', fn (Request $request): Limit => Limit::perMinute(10)
+            ->by((string) $request->ip()));
 
         $invalidateReports = fn () => app(ReportCache::class)->invalidate();
 

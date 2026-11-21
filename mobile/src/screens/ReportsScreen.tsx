@@ -35,10 +35,6 @@ export function ReportsScreen() {
   const [loadingChurches, setLoadingChurches] = useState(true);
   const [churches, setChurches] = useState<Church[]>([]);
   const [churchId, setChurchId] = useState('');
-  const [type, setType] = useState('month');
-  const [month, setMonth] = useState(String(new Date().getMonth() + 1));
-  const [quarter, setQuarter] = useState(String(Math.floor(new Date().getMonth() / 3) + 1));
-  const [year, setYear] = useState(String(new Date().getFullYear()));
   const [report, setReport] = useState<PartnershipReport | null>(null);
   const [reportSearch, setReportSearch] = useState('');
   const [reportSection, setReportSection] = useState('');
@@ -63,19 +59,15 @@ export function ReportsScreen() {
   }, []);
 
   const query = useCallback(() => {
+    const period = currentPeriod();
     const params = new URLSearchParams({
       church_id: churchId,
-      type,
-      year,
+      type: period.type,
+      month: period.month,
+      year: period.year,
     });
-    if (type === 'month') {
-      params.set('month', month);
-    }
-    if (type === 'quarter') {
-      params.set('quarter', quarter);
-    }
     return params.toString();
-  }, [churchId, type, year, month, quarter]);
+  }, [churchId]);
 
   const generate = async () => {
     if (!churchId) {
@@ -156,10 +148,6 @@ export function ReportsScreen() {
   };
 
   const churchOptions = churches.map((church) => ({ label: church.name, value: String(church.id) }));
-  const yearOptions = Array.from({ length: 7 }, (_, index) => {
-    const value = String(new Date().getFullYear() - 5 + index);
-    return { label: value, value };
-  });
 
   const filteredReport = report ? {
     categories: filterBy(report.categories, reportSearch, [(item) => item.name, (item) => item.amount]),

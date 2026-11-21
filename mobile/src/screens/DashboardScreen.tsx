@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage } from '../api/client';
+import { FilterCard } from '../components/FilterCard';
+import { filterBy } from '../utils/search';
 import type { AppNotification, Church, Donation, Partner } from '../api/types';
 import { useAuth } from '../context/AuthContext';
 import {
@@ -51,6 +53,7 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
   const [partners, setPartners] = useState<Partner[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [unread, setUnread] = useState(0);
+  const [search, setSearch] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);

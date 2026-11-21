@@ -21,10 +21,15 @@ import {
   SelectField,
 } from '../components/ui';
 
-const months = [
-  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre',
-];
+/** Le rapport reste calculé sur le mois courant : la période n'est pas configurable dans l'APK. */
+function currentPeriod(): { type: string; month: string; year: string } {
+  const today = new Date();
+  return {
+    type: 'month',
+    month: String(today.getMonth() + 1),
+    year: String(today.getFullYear()),
+  };
+}
 
 export function ReportsScreen() {
   const [loadingChurches, setLoadingChurches] = useState(true);

@@ -35,8 +35,6 @@ export function DonationsScreen() {
   const [churchFilter, setChurchFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [partnerFilter, setPartnerFilter] = useState('');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
@@ -56,8 +54,6 @@ export function DonationsScreen() {
       if (churchFilter) query.set('church_id', churchFilter);
       if (categoryFilter) query.set('category_id', categoryFilter);
       if (partnerFilter) query.set('partner_id', partnerFilter);
-      if (dateFrom) query.set('date_from', dateFrom);
-      if (dateTo) query.set('date_to', dateTo);
       const donationPath = `/donations${query.toString() ? `?${query}` : ''}`;
 
       const [donationData, churchData, partnerData, categoryData] = await Promise.all([
@@ -77,7 +73,7 @@ export function DonationsScreen() {
     } finally {
       setLoading(false);
     }
-  }, [churchFilter, categoryFilter, partnerFilter, dateFrom, dateTo]);
+  }, [churchFilter, categoryFilter, partnerFilter]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 250);
@@ -89,8 +85,6 @@ export function DonationsScreen() {
     setChurchFilter('');
     setCategoryFilter('');
     setPartnerFilter('');
-    setDateFrom('');
-    setDateTo('');
   };
 
   useFocusEffect(useCallback(() => {
@@ -219,8 +213,6 @@ export function DonationsScreen() {
               onChange={setPartnerFilter}
               searchable
             />
-            <DateField label="Du" value={dateFrom} onChange={setDateFrom} allowEmpty />
-            <DateField label="Au" value={dateTo} onChange={setDateTo} allowEmpty />
             <SecondaryButton title="Réinitialiser les filtres" onPress={resetFilters} />
           </Card>
 

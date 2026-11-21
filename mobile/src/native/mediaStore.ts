@@ -8,7 +8,7 @@ interface FinanceMediaStoreNative {
     fileName: string,
     mimeType: string,
   ): Promise<string>;
-  readDocument(relativePath: string, fileName: string): Promise<string | null>;
+  deleteDocument(relativePath: string, fileName: string): Promise<void>;
 }
 
 const native = NativeModules.FinanceMediaStore as FinanceMediaStoreNative | undefined;
@@ -37,9 +37,6 @@ export function saveToDocuments(
   return module().saveDocument(base64, relativePath, fileName, mimeType);
 }
 
-export function readFromDocuments(
-  relativePath: string,
-  fileName: string,
-): Promise<string | null> {
-  return module().readDocument(relativePath, fileName);
+export function deleteDocument(relativePath: string, fileName: string): Promise<void> {
+  return module().deleteDocument(relativePath, fileName);
 }

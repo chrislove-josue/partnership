@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { api, getErrorMessage } from '../api/client';
+import { api, getErrorMessage, normalizeApiUrl } from '../api/client';
 import { formatSessionDate } from '../api/session';
 import type { User } from '../api/types';
 import { useAuth } from '../context/AuthContext';
@@ -38,6 +38,7 @@ export function ProfileScreen() {
   const [confirmation, setConfirmation] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [serverUrl, setServerUrl] = useState(apiUrl);
+  const [proposedApiUrl, setProposedApiUrl] = useState('');
 
   useEffect(() => {
     setServerUrl(apiUrl);
@@ -142,16 +143,47 @@ export function ProfileScreen() {
     setSaving(true);
     setError('');
     setSuccess('');
+    setProposedApiUrl('');
     try {
       const response = await api<{ api_url: string }>('/settings/api-url');
-      await updateApiUrl(response.api_url);
-      setServerUrl(response.api_url);
-      setSuccess('Adresse du site web appliquée.');
-    } catch (caught) {
-      setError(getErrorMessage(caught, 'Adresse du site web indisponible.'));
+      // Le serveur n'est pas autorisé à changer l'adresse utilisée par l'app :
+      // on la propose seulement à l'administrateur, qui doit la confirmer.
+      const proposal = normalizeApiUrl(response.api_url ?? '');
+      if (!proposal) {
+        throw new Error('Adresse vide.');
+      }
+      setProposedApiUrl(proposal);
+      setSuccess('Adresse proposée par le site web : vérifiez-la avant de l’appliquer.');
+    } catch {
+      setError('L’adresse proposée par le site web est invalide.');
     } finally {
       setSaving(false);
     }
+  };
+
+  const applyProposedApiUrl = () => {
+    Alert.alert(
+      'Confirmer l’adresse de l’API',
+      `Remplacer l’adresse utilisée par ${proposedApiUrl} ?`,
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Appliquer',
+          style: 'destructive',
+          onPress: () => {
+            void updateApiUrl(proposedApiUrl)
+              .then(() => {
+                setServerUrl(proposedApiUrl);
+                setProposedApiUrl('');
+                setSuccess('Adresse de l’API mise à jour.');
+              })
+              .catch((caught: unknown) => {
+                setError(getErrorMessage(caught, 'Adresse de l’API invalide.'));
+              });
+          },
+        },
+      ],
+    );
   };
 
   const disconnect = () => {
@@ -189,20 +221,30 @@ export function ProfileScreen() {
               label="Adresse de l'API (super administrateur)"
               value={serverUrl}
               onChangeText={setServerUrl}
-              placeholder="http://192.168.1.10:8000/api"
+              placeholder="https://exemple.fr/api"
             />
             <Text style={styles.help}>
-              Utilisez l’adresse de la machine qui héberge Laravel, suivie de /api.
+              Utilisez une URL HTTPS. Le HTTP n’est accepté en développement que pour localhost et l’émulateur.
             </Text>
             <SecondaryButton
-              title="Charger l’adresse configurée sur le site web"
+              title="Voir l’adresse configurée sur le site web"
               onPress={() => void loadWebApiUrl()}
               disabled={saving}
             />
+            {proposedApiUrl ? (
+              <>
+                <Text style={styles.help}>Adresse proposée : {proposedApiUrl}</Text>
+                <SecondaryButton
+                  title="Appliquer l’adresse proposée"
+                  onPress={applyProposedApiUrl}
+                  disabled={saving}
+                />
+              </>
+            ) : null}
           </>
         ) : (
           <Text style={styles.help}>
-            Adresse utilisée : {apiUrl}. Seul le super administrateur peut la modifier.
+            Adresse configurée sur cet appareil : {apiUrl}. Seul le super administrateur peut la modifier.
           </Text>
         )}
       </Card>

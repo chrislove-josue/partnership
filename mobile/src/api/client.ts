@@ -14,17 +14,67 @@ import { readCache, readStaleCache, writeCache } from './cache';
 
 export { clearCache, invalidateCache } from './cache';
 
-const DEFAULT_API_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? 'http://172.16.206.66:8000/api';
+const DEFAULT_API_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
-let apiUrl = DEFAULT_API_URL;
+const INVALID_API_URL_MESSAGE =
+  'Adresse de l’API invalide. Utilisez une URL HTTPS ; HTTP n’est autorisé en développement que pour localhost ou 10.0.2.2.';
+
+const LOCAL_CLEARTEXT_HOSTS = ['localhost', '127.0.0.1', '10.0.2.2'];
+
+/**
+ * Valide et normalise une URL d'API : pas d'identifiants, ni query, ni hash.
+ * En release, seul HTTPS est accepté. En développement, HTTP reste limité à
+ * localhost et à l'émulateur Android.
+ */
+export function normalizeApiUrl(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(trimmed);
+  } catch {
+    throw new Error(INVALID_API_URL_MESSAGE);
+  }
+
+  const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
+  const isLocalCleartext =
+    parsed.protocol === 'http:' &&
+    isDev &&
+    LOCAL_CLEARTEXT_HOSTS.includes(parsed.hostname);
+
+  if (parsed.protocol !== 'https:' && !isLocalCleartext) {
+    throw new Error(INVALID_API_URL_MESSAGE);
+  }
+  if (parsed.username || parsed.password) {
+    throw new Error(INVALID_API_URL_MESSAGE);
+  }
+
+  parsed.search = '';
+  parsed.hash = '';
+  return parsed.toString().replace(/\/+$/, '');
+}
+
+function initialApiUrl(): string {
+  try {
+    return normalizeApiUrl(DEFAULT_API_URL);
+  } catch {
+    // Une variable d'environnement invalide ne doit pas empêcher le démarrage.
+    return '';
+  }
+}
+
+let apiUrl = initialApiUrl();
 
 export function getApiUrl(): string {
   return apiUrl;
 }
 
-export function setApiUrl(url: string): void {
-  apiUrl = url.trim().replace(/\/+$/, '');
+export function setApiUrl(url: string): string {
+  apiUrl = normalizeApiUrl(url);
+  return apiUrl;
 }
 
 let authToken: string | null = null;
@@ -79,6 +129,9 @@ function handleUnauthorized(sendsToken: boolean): void {
 export const NETWORK_ERROR_MESSAGE =
   'Impossible de joindre le serveur. Vérifiez votre connexion et l’adresse de l’API.';
 
+export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+export const UPLOAD_TOO_LARGE_MESSAGE = 'Le fichier ne doit pas dépasser 10 Mo.';
+
 export class ApiError extends Error {
   constructor(
     message: string,
@@ -102,16 +155,22 @@ function defaultMessage(status: number, fallback: string): string {
       return 'La ressource demandée est introuvable.';
     case 422:
       return 'Vérifiez les informations saisies.';
-    case 500:
-      return 'Une erreur est survenue côté serveur. Veuillez réessayer.';
     default:
+      if (status >= 500) {
+        return 'Une erreur est survenue côté serveur. Veuillez réessayer.';
+      }
       return fallback;
   }
 }
 
 function messageFromData(data: Record<string, unknown>, status: number, fallback: string): string {
-  const message = typeof data.message === 'string' ? data.message.trim() : '';
+  // Les erreurs 5xx et les corps non JSON sont remplacés par un message figé :
+  // le texte du serveur peut contenir des détails techniques sensibles.
+  if (status >= 500) {
+    return defaultMessage(status, fallback);
+  }
 
+  const message = typeof data.message === 'string' ? data.message.trim().slice(0, 200) : '';
   return message || defaultMessage(status, fallback);
 }
 
@@ -125,12 +184,12 @@ export function getErrorMessage(caught: unknown, fallback: string): string {
     return details[0] ?? (caught.message || fallback);
   }
 
-  if (caught instanceof Error && caught.message.trim() !== '') {
+  if (caught instanceof Error) {
     if (/network request failed|failed to fetch|networkerror|timeout/i.test(caught.message)) {
       return NETWORK_ERROR_MESSAGE;
     }
 
-    return caught.message;
+    return fallback;
   }
 
   return fallback;
@@ -166,7 +225,8 @@ async function parseResponse(response: Response): Promise<Record<string, unknown
   try {
     return JSON.parse(text) as Record<string, unknown>;
   } catch {
-    return { message: text };
+    // Le texte brut n'est jamais transformé en message affichable.
+    return {};
   }
 }
 
@@ -485,6 +545,7 @@ export interface UploadFile {
   uri: string;
   name: string;
   mimeType?: string | null;
+  size?: number | null;
 }
 
 export async function apiUpload<T>(
@@ -492,6 +553,10 @@ export async function apiUpload<T>(
   file: UploadFile,
   field = 'file',
 ): Promise<T> {
+  if (typeof file.size === 'number' && file.size > MAX_UPLOAD_BYTES) {
+    throw new ApiError(UPLOAD_TOO_LARGE_MESSAGE, 413);
+  }
+
   const form = new FormData();
   form.append(field, {
     uri: file.uri,

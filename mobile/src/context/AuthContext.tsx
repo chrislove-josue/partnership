@@ -13,11 +13,13 @@ import {
 import { clearSession, loadSession, saveSession } from '../api/session';
 import type { SessionInfo } from '../api/session';
 import { isSuperAdmin, type User } from '../api/types';
+import { clearLocalData } from '../db/database';
 
 const TOKEN_KEY = 'churchmanager_token';
 const USER_KEY = 'churchmanager_user';
 const API_URL_KEY = 'churchmanager_api_url';
-const ADMIN_DEVICE_KEY = 'churchmanager_api_admin';
+// Ancien drapeau local : le droit de configuration est recalculé depuis /me.
+const LEGACY_ADMIN_DEVICE_KEY = 'churchmanager_api_admin';
 
 interface AuthContextValue {
   user: User | null;
@@ -33,6 +35,10 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function isSameUser(first: User | null, second: User | null): boolean {
+  return first !== null && second !== null && first.id === second.id;
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<SessionInfo | null>(null);
@@ -45,20 +51,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error('Seul le super administrateur peut modifier l’adresse de l’API.');
     }
 
-    const normalized = url.trim().replace(/\/+$/, '');
+    const normalized = setApiUrl(url);
     await SecureStore.setItemAsync(API_URL_KEY, normalized);
-    setApiUrl(normalized);
     setApiUrlState(normalized);
   }, [canConfigureApiUrl]);
 
   const forget = useCallback(async () => {
     clearCache();
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
-    await SecureStore.deleteItemAsync(USER_KEY);
-    await clearSession();
+    // La purge locale et la suppression de l'ancienne copie publique ne doivent
+    // jamais empêcher la déconnexion si le stockage est indisponible.
+    await Promise.allSettled([
+      SecureStore.deleteItemAsync(TOKEN_KEY),
+      SecureStore.deleteItemAsync(USER_KEY),
+      SecureStore.deleteItemAsync(LEGACY_ADMIN_DEVICE_KEY),
+      clearSession(),
+      clearLocalData(),
+    ]);
     setAuthToken(null);
     setUser(null);
     setSession(null);
+    setCanConfigureApiUrl(false);
   }, []);
 
   useEffect(() => {
@@ -68,12 +80,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const storedUrl = await SecureStore.getItemAsync(API_URL_KEY);
         if (storedUrl) {
-          setApiUrl(storedUrl);
-          setApiUrlState(storedUrl);
+          try {
+            setApiUrlState(setApiUrl(storedUrl));
+          } catch {
+            // Une URL stockée invalide est supprimée : on revient au réglage
+            // compilé sans laisser l'application avec une adresse douteuse.
+            await SecureStore.deleteItemAsync(API_URL_KEY);
+            setApiUrlState(getApiUrl());
+          }
         }
-
-        const adminDevice = await SecureStore.getItemAsync(ADMIN_DEVICE_KEY);
-        setCanConfigureApiUrl(adminDevice === '1');
 
         const token = await SecureStore.getItemAsync(TOKEN_KEY);
         if (!token) {
@@ -82,8 +97,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         setAuthToken(token);
         const saved = await SecureStore.getItemAsync(USER_KEY);
+        let cachedUser: User | null = null;
         if (saved) {
-          setUser(JSON.parse(saved) as User);
+          try {
+            cachedUser = JSON.parse(saved) as User;
+            setUser(cachedUser);
+          } catch {
+            cachedUser = null;
+          }
         }
         const storedSession = await loadSession();
         if (storedSession) {
@@ -95,7 +116,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
 
+        if (!isSameUser(cachedUser, response.user)) {
+          await clearLocalData();
+        }
         setUser(response.user);
+        setCanConfigureApiUrl(isSuperAdmin(response.user));
         await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
         const synced: SessionInfo = {
           connectedAt: storedSession?.connectedAt ?? new Date().toISOString(),
@@ -145,10 +170,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       authenticated: false,
     });
 
+    if (!isSameUser(user, response.user)) {
+      await clearLocalData();
+    }
+
     const allowed = isSuperAdmin(response.user);
     await SecureStore.setItemAsync(TOKEN_KEY, response.token);
     await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
-    await SecureStore.setItemAsync(ADMIN_DEVICE_KEY, allowed ? '1' : '0');
     setCanConfigureApiUrl(allowed);
     const now = new Date().toISOString();
     const opened: SessionInfo = { connectedAt: now, lastSyncAt: now };
@@ -156,15 +184,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthToken(response.token);
     setUser(response.user);
     setSession(opened);
-  }, []);
+  }, [user]);
 
   const refreshUser = useCallback(async () => {
     try {
       const response = await api<{ user: User }>('/me');
       setUser(response.user);
-      const allowed = isSuperAdmin(response.user);
-      await SecureStore.setItemAsync(ADMIN_DEVICE_KEY, allowed ? '1' : '0');
-      setCanConfigureApiUrl(allowed);
+      setCanConfigureApiUrl(isSuperAdmin(response.user));
       await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));
       const synced: SessionInfo = {
         connectedAt: session?.connectedAt ?? new Date().toISOString(),

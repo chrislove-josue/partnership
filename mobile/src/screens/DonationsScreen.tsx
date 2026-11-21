@@ -141,13 +141,19 @@ export function DonationsScreen() {
   };
 
   const save = async () => {
-    setSaving(true);
     setFormError('');
+    const parsedAmount = Number(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
+      setFormError('Le montant doit être un nombre positif.');
+      return;
+    }
+
+    setSaving(true);
     try {
       await api('/donations', {
         method: 'POST',
         body: {
-          amount: Number(amount),
+          amount: parsedAmount,
           date,
           church_id: Number(churchId),
           partner_id: Number(partnerId),

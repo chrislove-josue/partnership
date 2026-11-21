@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sauvegardes Android < 12 : ni la base locale, ni les secrets SecureStore ne sortent de l'appareil. -->
+<full-backup-content>
+  <exclude domain="database" path="finance.sqlite" />
+  <exclude domain="sharedpref" path="SecureStore.xml" />
+  <exclude domain="root" path="SecureStore.xml" />
+</full-backup-content>

@@ -19,7 +19,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo): void {
-    console.error('Erreur de rendu de FinanceMobile', error, info.componentStack);
+    if (__DEV__) {
+      console.error('Erreur de rendu de FinanceMobile', error, info.componentStack);
+    }
   }
 
   private handleRetry = (): void => {

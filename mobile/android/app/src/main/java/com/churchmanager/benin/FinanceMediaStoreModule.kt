@@ -53,7 +53,8 @@ class FinanceMediaStoreModule(private val reactContext: ReactApplicationContext)
                 promise.resolve(Uri.fromFile(file).toString())
             }
         } catch (error: Exception) {
-            promise.reject("SAVE_DOWNLOAD_FAILED", error.message, error)
+            // Aucun détail technique n'est renvoyé au JavaScript (F8).
+            promise.reject("SAVE_DOWNLOAD_FAILED", "Impossible d'enregistrer le fichier dans Téléchargements.")
         }
     }
 
@@ -92,12 +93,13 @@ class FinanceMediaStoreModule(private val reactContext: ReactApplicationContext)
                 promise.resolve(Uri.fromFile(file).toString())
             }
         } catch (error: Exception) {
-            promise.reject("SAVE_DOCUMENT_FAILED", error.message, error)
+            promise.reject("SAVE_DOCUMENT_FAILED", "Impossible d'enregistrer le document.")
         }
     }
 
+    /** Supprime un document public, utilisé pour nettoyer l'ancienne copie de la base. */
     @ReactMethod
-    fun readDocument(relativePath: String, fileName: String, promise: Promise) {
+    fun deleteDocument(relativePath: String, fileName: String, promise: Promise) {
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val collection = MediaStore.Files.getContentUri("external")
@@ -112,30 +114,21 @@ class FinanceMediaStoreModule(private val reactContext: ReactApplicationContext)
                 )
 
                 cursor?.use {
-                    if (it.moveToFirst()) {
+                    while (it.moveToNext()) {
                         val id = it.getLong(it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID))
                         val uri = ContentUris.withAppendedId(collection, id)
-                        val bytes = reactContext.contentResolver.openInputStream(uri)?.use { input ->
-                            input.readBytes()
-                        }
-                        if (bytes != null) {
-                            promise.resolve(Base64.encodeToString(bytes, Base64.NO_WRAP))
-                            return
-                        }
+                        reactContext.contentResolver.delete(uri, null, null)
                     }
                 }
-                promise.resolve(null)
             } else {
                 val file = File(File(Environment.getExternalStorageDirectory(), relativePath), fileName)
-                if (!file.exists()) {
-                    promise.resolve(null)
-                } else {
-                    val bytes = file.readBytes()
-                    promise.resolve(Base64.encodeToString(bytes, Base64.NO_WRAP))
+                if (file.exists() && !file.delete()) {
+                    throw IllegalStateException("Suppression impossible")
                 }
             }
+            promise.resolve(null)
         } catch (error: Exception) {
-            promise.reject("READ_DOCUMENT_FAILED", error.message, error)
+            promise.reject("DELETE_DOCUMENT_FAILED", "Impossible de supprimer le document.")
         }
     }
 

@@ -2,7 +2,6 @@ import { ApiError, api, getAuthToken, getErrorMessage } from '../api/client';
 import {
   addConflict,
   countPendingChanges,
-  backupDatabaseFile,
   clearEntityPending,
   deleteEntity,
   getMeta,
@@ -159,7 +158,6 @@ async function runSync(): Promise<SyncSummary> {
 
   const { pushed, conflicts } = await pushOutbox();
   const pulled = await pullChanges((await getMeta('last_sync')) ?? '');
-  await backupDatabaseFile();
 
   return {
     pushed,

@@ -1,5 +1,5 @@
 import { openDatabaseAsync, type SQLiteDatabase } from 'expo-sqlite';
-import { backupDatabase, ensureStorageAccess, restoreDatabaseBackup } from './storage';
+import { deleteLegacyPublicBackup, ensureStorageAccess } from './storage';
 
 export type EntityName = 'churches' | 'cellules' | 'categories' | 'partners' | 'donations';
 export type SyncOperation = 'create' | 'update' | 'delete';
@@ -80,7 +80,6 @@ export async function initDatabase(): Promise<void> {
   if (!initialization) {
     initialization = (async () => {
       await ensureStorageAccess();
-      await restoreDatabaseBackup();
       database = await openDatabaseAsync(DATABASE_NAME);
       await database.execAsync(SCHEMA);
     })().catch((error: unknown) => {
@@ -100,23 +99,6 @@ function db(): SQLiteDatabase {
 
 export function isDatabaseReady(): boolean {
   return database !== null;
-}
-
-/** Copie la base dans le dossier public après l'avoir fermée proprement. */
-export async function backupDatabaseFile(): Promise<void> {
-  if (!database) {
-    return;
-  }
-
-  const current = database;
-  database = null;
-  try {
-    await current.closeAsync();
-    await backupDatabase();
-  } finally {
-    database = await openDatabaseAsync(DATABASE_NAME);
-    await database.execAsync(SCHEMA);
-  }
 }
 
 export async function upsertEntity(
@@ -243,4 +225,21 @@ export async function clearConflicts(): Promise<void> {
 export async function countPendingChanges(): Promise<number> {
   const row = await db().getFirstAsync<{ count: number }>('SELECT COUNT(*) AS count FROM outbox');
   return row?.count ?? 0;
+}
+
+/**
+ * Vide toutes les données locales liées au compte et supprime l'ancienne copie
+ * publique de la base. Appelé à la déconnexion et lors d'un changement de compte.
+ */
+export async function clearLocalData(): Promise<void> {
+  await deleteLegacyPublicBackup();
+  if (!database) {
+    await initDatabase();
+  }
+
+  const current = db();
+  await current.runAsync('DELETE FROM entities');
+  await current.runAsync('DELETE FROM outbox');
+  await current.runAsync('DELETE FROM conflicts');
+  await current.runAsync('DELETE FROM meta');
 }

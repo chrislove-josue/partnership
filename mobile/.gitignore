@@ -8,4 +8,8 @@
 /.fleet
 /.idea
 /node_modules
+# Keystore de debug généré localement : jamais versionné.
+android/app/debug.keystore
+android/app/*.jks
+android/app/*.keystore
 

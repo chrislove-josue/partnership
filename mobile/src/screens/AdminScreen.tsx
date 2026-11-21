@@ -239,7 +239,7 @@ export function AdminScreen() {
       handle_kc: handleKc || null,
       ...(password ? { password } : {}),
       roles: userRoles,
-      assigned_church_id: Number(assignedChurchId),
+      assigned_church_id: assignedChurchId ? Number(assignedChurchId) : null,
       is_active: active,
     };
   };

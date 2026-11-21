@@ -12,11 +12,8 @@
     "android": {
       "package": "com.churchmanager.benin",
       "permissions": [
-        "INTERNET",
-        "WRITE_EXTERNAL_STORAGE",
-        "MANAGE_EXTERNAL_STORAGE"
+        "INTERNET"
       ],
-      "usesCleartextTraffic": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0F2B46"

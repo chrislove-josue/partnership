@@ -22,16 +22,16 @@ class RolePolicy
 
     public function create(User $user): bool
     {
-        return $this->access->canCrudCategoryAndRole($user);
+        return $user->isSuperAdmin();
     }
 
     public function update(User $user, Role $role): bool
     {
-        return $this->access->canCrudCategoryAndRole($user);
+        return $user->isSuperAdmin();
     }
 
     public function delete(User $user, Role $role): bool
     {
-        return ! $role->is_system && $this->access->canCrudCategoryAndRole($user);
+        return $user->isSuperAdmin() && ! $role->is_system;
     }
 }

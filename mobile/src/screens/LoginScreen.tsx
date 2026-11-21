@@ -23,8 +23,13 @@ export function LoginScreen() {
     if (!canConfigureApiUrl) {
       return;
     }
-    await updateApiUrl(serverUrl);
-    setServerSaved(true);
+    setError('');
+    try {
+      await updateApiUrl(serverUrl);
+      setServerSaved(true);
+    } catch {
+      setError('Adresse de l’API invalide. Utilisez une URL HTTPS.');
+    }
   };
 
   const submit = async () => {
@@ -39,8 +44,7 @@ export function LoginScreen() {
       }
       await login(email.trim(), password);
     } catch (caught) {
-      const message = getErrorMessage(caught, 'Connexion impossible.');
-      setError(`${message}\nAdresse utilisée : ${getApiUrl()}`);
+      setError(getErrorMessage(caught, 'Connexion impossible. Vérifiez l’adresse de l’API et vos identifiants.'));
     } finally {
       setLoading(false);
     }
@@ -73,7 +77,7 @@ export function LoginScreen() {
                   setServerUrl(value);
                   setServerSaved(false);
                 }}
-                placeholder="http://192.168.1.10:8000/api"
+                placeholder="https://exemple.fr/api"
               />
               <Pressable style={styles.serverButton} onPress={() => void applyServer()}>
                 <Text style={styles.serverButtonText}>

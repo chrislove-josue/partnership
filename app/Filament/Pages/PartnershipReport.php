@@ -160,9 +160,96 @@ class PartnershipReport extends Page
         }
     }
 
+    /**
+     * Filtre uniquement l'affichage : l'export et l'envoi utilisent le rapport
+     * complet, comme dans l'application mobile.
+     *
+     * @param  array<string, mixed>  $report
+     * @return array<string, mixed>
+     */
+    private function filterReportForDisplay(array $report): array
+    {
+        $report['report_section'] = (string) ($this->data['report_section'] ?? '');
+        $search = mb_strtolower(trim((string) ($this->data['report_search'] ?? '')));
+
+        if ($search === '') {
+            return $report;
+        }
+
+        $report['categories'] = array_values(array_filter(
+            $report['categories'],
+            fn (array $category): bool => $this->matchesReportSearch($search, [
+                $category['name'] ?? null,
+                $category['count'] ?? null,
+                $category['amount'] ?? null,
+            ]),
+        ));
+
+        $report['partners'] = array_values(array_filter(
+            $report['partners'],
+            fn (array $partner): bool => $this->matchesReportSearch($search, [
+                $partner['name'] ?? null,
+                $partner['cellule'] ?? null,
+                $partner['email'] ?? null,
+                $partner['phone'] ?? null,
+                $partner['count'] ?? null,
+                $partner['amount'] ?? null,
+            ]),
+        ));
+
+        $report['partnersWithoutDonation'] = array_values(array_filter(
+            $report['partnersWithoutDonation'],
+            fn (array $partner): bool => $this->matchesReportSearch($search, [
+                $partner['name'] ?? null,
+                $partner['cellule'] ?? null,
+                $partner['email'] ?? null,
+                $partner['phone'] ?? null,
+            ]),
+        ));
+
+        $report['donations'] = array_values(array_filter(
+            $report['donations'],
+            fn (array $donation): bool => $this->matchesReportSearch($search, [
+                $donation['partner'] ?? null,
+                $donation['category'] ?? null,
+                $donation['amount'] ?? null,
+                $donation['date'] ?? null,
+            ]),
+        ));
+
+        return $report;
+    }
+
+    /** @param array<int, mixed> $values */
+    private function matchesReportSearch(string $search, array $values): bool
+    {
+        foreach ($values as $value) {
+            if ($value === null || $value === '') {
+                continue;
+            }
+
+            if (str_contains(mb_strtolower((string) $value), $search)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('resetReportFilters')
+                ->label('Réinitialiser les filtres')
+                ->color('gray')
+                ->visible(fn (): bool => filled($this->data['report_search'] ?? null)
+                    || filled($this->data['report_section'] ?? null))
+                ->action(function (): void {
+                    $this->data['report_search'] = '';
+                    $this->data['report_section'] = '';
+                    $this->form->fill($this->data);
+                }),
+
             Action::make('export')
                 ->label('Exporter en Excel')
                 ->icon('heroicon-o-arrow-down-tray')

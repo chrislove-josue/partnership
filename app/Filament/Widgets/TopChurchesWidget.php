@@ -26,7 +26,7 @@ class TopChurchesWidget extends TableWidget
 
     public function getHeading(): ?string
     {
-        return 'Top 5 des Ǹglises partenaires';
+        return 'Top 5 des églises partenaires';
     }
 
     public function table(Table $table): Table
@@ -49,10 +49,12 @@ class TopChurchesWidget extends TableWidget
             })
             ->columns([
                 TextColumn::make('name')
-                    ->label('Église'),
+                    ->label('Église')
+                    ->searchable(),
                 TextColumn::make('type')
                     ->label('Type')
                     ->badge()
+                    ->searchable()
                     ->formatStateUsing(fn (ChurchType $state) => $state->label())
                     ->color(fn (ChurchType $state) => match ($state) {
                         ChurchType::GROUP => 'success',

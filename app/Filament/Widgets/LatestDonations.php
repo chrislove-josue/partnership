@@ -37,17 +37,22 @@ class LatestDonations extends TableWidget
             ->columns([
                 TextColumn::make('date')
                     ->label('Date')
-                    ->date('d/m/Y'),
+                    ->date('d/m/Y')
+                    ->searchable(),
                 TextColumn::make('partner.full_name')
-                    ->label('Partenaire'),
+                    ->label('Partenaire')
+                    ->searchable(['first_name', 'last_name']),
                 TextColumn::make('church.name')
-                    ->label('Église'),
+                    ->label('Église')
+                    ->searchable(),
                 TextColumn::make('category.name')
                     ->label('Catégorie')
-                    ->badge(),
+                    ->badge()
+                    ->searchable(),
                 TextColumn::make('amount')
                     ->label('Montant')
                     ->money('XOF')
+                    ->searchable()
                     ->alignEnd(),
             ])
             ->paginated([5])

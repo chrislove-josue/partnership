@@ -123,9 +123,9 @@ class SecurityHardeningTest extends TestCase
         Donation::create([
             'partner_id' => $partner->id,
             'church_id' => $church->id,
-            'category_don_id' => $category->id,
+            'category_id' => $category->id,
             'amount' => 1000,
-            'donated_at' => '2026-11-01 10:00:00',
+            'date' => '2026-11-01 10:00:00',
         ]);
 
         $report = app(PartnershipReportService::class)

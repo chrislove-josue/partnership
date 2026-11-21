@@ -90,6 +90,16 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
     void load();
   }, [load]));
 
+  /** Force une lecture en ligne : aucun cache ni données locales ne sont utilisés. */
+  const refreshOnline = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await load(true);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [load]);
+
   const summary = useMemo(() => {
     const total = donations.reduce((sum, donation) => sum + Number(donation.amount), 0);
     const now = new Date();
@@ -189,7 +199,20 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
         <Text style={styles.greeting}>Bonjour, {user?.name ?? ''}</Text>
         <Text style={styles.role}>{user?.role ?? 'Utilisateur'}</Text>
         <View style={styles.heroTotal}>
-          <Text style={styles.heroTotalLabel}>Total général des dons</Text>
+          <View style={styles.heroTotalHeader}>
+            <Text style={styles.heroTotalLabel}>Total général des dons</Text>
+            <Pressable
+              style={[styles.heroRefresh, (loading || refreshing) && styles.heroRefreshDisabled]}
+              onPress={() => void refreshOnline()}
+              disabled={loading || refreshing}
+              accessibilityRole="button"
+              accessibilityLabel="Actualiser les dons depuis le serveur"
+            >
+              <Text style={styles.heroRefreshText}>
+                {refreshing ? 'Actualisation…' : '↻ Actualiser'}
+              </Text>
+            </Pressable>
+          </View>
           <Text style={styles.heroTotalValue}>{formatMoney(summary.total)}</Text>
           <Text style={styles.heroTotalHint}>Sur toutes les églises accessibles</Text>
         </View>
@@ -359,7 +382,16 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.border,
   },
-  heroTotalLabel: { fontSize: 12, color: colors.muted },
+  heroTotalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 10 },
+  heroTotalLabel: { fontSize: 12, color: colors.muted, flex: 1 },
+  heroRefresh: {
+    backgroundColor: colors.lightBlue,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  heroRefreshDisabled: { opacity: 0.6 },
+  heroRefreshText: { color: colors.blue, fontWeight: '700', fontSize: 12 },
   heroTotalValue: { fontSize: 26, fontWeight: '800', color: colors.blue, marginTop: 2 },
   heroTotalHint: { fontSize: 11, color: colors.muted, marginTop: 2 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },

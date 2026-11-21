@@ -34,6 +34,8 @@ mobile/FinanceMobile-1.2.0.apk
 mobile/FinanceMobile-1.3.0.apk
 mobile/FinanceMobile-1.3.1.apk
 mobile/FinanceMobile-1.3.2.apk
+mobile/FinanceMobile-1.5.2.apk
+mobile/FinanceMobile-1.5.3.apk
 ```
 
 **Les APK livrés restent signés avec la clé de debug** : ils s'installent directement sur Android, mais ne doivent pas être distribués comme release. Aucune clé de production n'est fournie dans ce dépôt et `android/app/debug.keystore` n'est plus versionné.

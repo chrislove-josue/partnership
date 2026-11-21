@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\HtmlString;
 
 /**
- * Port de lib/auth.config.ts + components/login-form.tsx : la connexion renvoie
- * un code explicite traduit en message français, affiché dans une alerte globale
- * sous les champs (et non dans le cadre d'un seul champ).
+ * Port de lib/auth.config.ts + components/login-form.tsx : les échecs
+ * d'authentification partagent un message générique en français, affiché dans
+ * une alerte globale sous les champs (et non dans le cadre d'un seul champ).
  */
 class Login extends BaseLogin
 {
@@ -54,14 +54,6 @@ class Login extends BaseLogin
     {
         $this->loginError = null;
 
-        try {
-            $this->rateLimit(5);
-        } catch (TooManyRequestsException $exception) {
-            $this->getRateLimitedNotification($exception)?->send();
-
-            return null;
-        }
-
         $data = $this->form->getState();
         $email = trim((string) ($data['email'] ?? ''));
         $password = (string) ($data['password'] ?? '');
@@ -70,24 +62,40 @@ class Login extends BaseLogin
             return $this->failLogin('missing_fields');
         }
 
+        // Limitation par IP et adresse email : un attaquant ne peut pas bloquer
+        // tous les comptes depuis la même machine, ni tester un compte depuis
+        // plusieurs adresses IP sans limite locale.
+        $rateKey = 'web-login:'.sha1(request()->ip().'|'.mb_strtolower($email));
+
+        if (RateLimiter::tooManyAttempts($rateKey, 5)) {
+            return $this->failLogin('rate_limited');
+        }
+
+        RateLimiter::hit($rateKey, 60);
+
         $user = User::query()->where('email', $email)->first();
 
         if (! $user) {
+            Hash::check($password, self::DUMMY_PASSWORD_HASH);
+
             return $this->failLogin('user_not_found');
         }
 
         if (! $user->password) {
-            return $this->failLogin('no_password');
-        }
+            Hash::check($password, self::DUMMY_PASSWORD_HASH);
 
-        if (! $user->is_active) {
-            return $this->failLogin('account_disabled');
+            return $this->failLogin('no_password');
         }
 
         if (! Hash::check($password, $user->password)) {
             return $this->failLogin('wrong_password');
         }
 
+        if (! $user->is_active) {
+            return $this->failLogin('account_disabled');
+        }
+
+        RateLimiter::clear($rateKey);
         Filament::auth()->login($user, (bool) ($data['remember'] ?? false));
         session()->regenerate();
 

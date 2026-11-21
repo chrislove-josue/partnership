@@ -32,4 +32,6 @@ Route::get('/login', Login::class)
     ])
     ->name('login');
 
-Route::get('/magic', MagicLoginController::class)->name('magic.login');
+Route::get('/magic', MagicLoginController::class)
+    ->middleware('throttle:magic')
+    ->name('magic.login');

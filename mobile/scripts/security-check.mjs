@@ -294,7 +294,7 @@ if (!SOURCE_ONLY) {
 
 console.log(`Contrôles de sécurité FinanceMobile — mode ${SOURCE_ONLY ? 'source uniquement' : 'complet'}`);
 for (const result of results) {
-  console.log(`${result.ok ? 'OK   ' : 'ÉCHEC'} ${result.label}`);
+  console.log(`${result.skipped ? 'IGNORÉ' : result.ok ? 'OK   ' : 'ÉCHEC'} ${result.label}`);
   if (!result.ok && result.detail) {
     console.log(`      ${result.detail}`);
   }

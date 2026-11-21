@@ -6,6 +6,9 @@ use App\Models\MagicToken;
 
 class MagicTokenService
 {
+    /** Les liens magiques expirent rapidement pour limiter la fenêtre d'abus. */
+    public const TTL_MINUTES = 30;
+
     public function generate(string $email, ?string $baseUrl = null): string
     {
         $token = bin2hex(random_bytes(32));
@@ -16,7 +19,7 @@ class MagicTokenService
         MagicToken::create([
             'token' => $hash,
             'email' => $email,
-            'expires_at' => now()->addHours(24),
+            'expires_at' => now()->addMinutes(self::TTL_MINUTES),
             'used' => false,
         ]);
 

@@ -181,7 +181,7 @@ export function ReportsScreen() {
     <Screen title="Rapport de partenariat" subtitle="Générez, exportez et envoyez à la hiérarchie">
       <Card>
         {loadingChurches ? <LoadingView /> : null}
-        <SelectField label="Église" value={churchId} options={churchOptions} onChange={setChurchId} />
+        <SelectField label="Église" value={churchId} options={churchOptions} onChange={setChurchId} searchable />
         <SelectField
           label="Période"
           value={type}

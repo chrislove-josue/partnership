@@ -3,7 +3,6 @@ import { StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage } from '../api/client';
 import { FilterCard } from '../components/FilterCard';
-import { SecondaryButton } from '../components/ui';
 import { filterBy } from '../utils/search';
 import type { LoginHistoryEntry } from '../api/types';
 import {

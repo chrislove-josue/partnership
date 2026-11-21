@@ -3,7 +3,6 @@
 namespace App\Filament\Pages\Auth;
 
 use App\Models\User;
-use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Facades\Filament;
@@ -12,6 +11,7 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Html;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\HtmlString;
 
 /**

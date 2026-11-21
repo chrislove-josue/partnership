@@ -166,7 +166,8 @@ export function AdminScreen() {
     setFormOpen(true);
   };
 
-  const endpointFor = (target: Section): string => `/${target}`;
+  const endpointFor = (target: Section): string =>
+    target === 'pasteurs' ? '/users' : `/${target}`;
 
   const payloadFor = (): Record<string, unknown> => {
     if (section === 'churches') {
@@ -183,6 +184,7 @@ export function AdminScreen() {
     if (section === 'categories') {
       return { name, color };
     }
+    // Les onglets Utilisateurs et Pasteurs utilisent la même ressource.
     return {
       name,
       email,
@@ -249,11 +251,61 @@ export function AdminScreen() {
         ))}
       </ScrollView>
 
+      <Card>
+        <TextField label="Rechercher" value={search} onChangeText={setSearch} placeholder="Nom, email, téléphone, église" />
+        {section === 'churches' ? (
+          <SelectField
+            label="Type d’église"
+            value={churchTypeFilter}
+            options={[
+              { label: 'Tous les types', value: '' },
+              { label: 'Groupe', value: 'GROUP' },
+              { label: 'Sous-groupe', value: 'SUB_GROUP' },
+              { label: 'Locale', value: 'LOCAL' },
+            ]}
+            onChange={setChurchTypeFilter}
+          />
+        ) : null}
+        {section === 'cellules' ? (
+          <SelectField
+            label="Église"
+            value={celluleChurchFilter}
+            options={[{ label: 'Toutes les églises', value: '' }, ...churchOptions]}
+            onChange={setCelluleChurchFilter}
+            searchable
+          />
+        ) : null}
+        {userSection ? (
+          <>
+            <SelectField
+              label="Rôle"
+              value={userRoleFilter}
+              options={[
+                { label: 'Tous les rôles', value: '' },
+                ...roles.map((role) => ({ label: role.label, value: role.name })),
+              ]}
+              onChange={setUserRoleFilter}
+              searchable
+            />
+            <SelectField
+              label="Statut"
+              value={userActiveFilter}
+              options={[
+                { label: 'Tous les comptes', value: '' },
+                { label: 'Actifs', value: '1' },
+                { label: 'Inactifs', value: '0' },
+              ]}
+              onChange={setUserActiveFilter}
+            />
+          </>
+        ) : null}
+      </Card>
+
       {loading ? <LoadingView /> : null}
       {!loading && error ? <ErrorView message={error} onRetry={() => void load()} /> : null}
 
       {!loading && !error && section === 'churches' ? (
-        churches.length === 0 ? <EmptyState message="Aucune église." /> : churches.map((church) => (
+        filteredChurches.length === 0 ? <EmptyState message="Aucune église trouvée." /> : filteredChurches.map((church) => (
           <Card key={church.id}>
             <View style={styles.row}>
               <Text style={styles.itemTitle}>{church.name}</Text>
@@ -269,7 +321,7 @@ export function AdminScreen() {
       ) : null}
 
       {!loading && !error && section === 'cellules' ? (
-        cellules.length === 0 ? <EmptyState message="Aucune cellule." /> : cellules.map((cellule) => (
+        filteredCellules.length === 0 ? <EmptyState message="Aucune cellule trouvée." /> : filteredCellules.map((cellule) => (
           <Card key={cellule.id}>
             <Text style={styles.itemTitle}>{cellule.name}</Text>
             <Text style={styles.meta}>{cellule.church ?? '—'}</Text>
@@ -283,7 +335,7 @@ export function AdminScreen() {
       ) : null}
 
       {!loading && !error && section === 'categories' ? (
-        categories.length === 0 ? <EmptyState message="Aucune catégorie." /> : categories.map((category) => (
+        filteredCategories.length === 0 ? <EmptyState message="Aucune catégorie trouvée." /> : filteredCategories.map((category) => (
           <Card key={category.id}>
             <View style={styles.row}>
               <View style={[styles.color, { backgroundColor: category.color }]} />
@@ -298,14 +350,39 @@ export function AdminScreen() {
       ) : null}
 
       {!loading && !error && section === 'users' ? (
-        users.length === 0 ? <EmptyState message="Aucun compte." /> : users.map((user) => (
+        filteredUsers.length === 0 ? <EmptyState message="Aucun compte trouvé." /> : filteredUsers.map((user) => (
           <Card key={user.id}>
             <View style={styles.row}>
               <Text style={styles.itemTitle}>{user.name}</Text>
               <Badge text={user.role ?? '—'} color={user.is_active ? colors.green : colors.red} />
             </View>
             <Text style={styles.meta}>{user.email}</Text>
-            <Text style={styles.meta}>{user.assigned_church?.name ?? '—'}</Text>
+            <Text style={styles.meta}>
+              {typeof user.assigned_church === 'string'
+                ? user.assigned_church
+                : user.assigned_church?.name ?? '—'}
+            </Text>
+            <View style={styles.actions}>
+              <Pressable onPress={() => openForm(user)}><Text style={styles.edit}>Modifier</Text></Pressable>
+              <Pressable onPress={() => setToDelete(user)}><Text style={styles.delete}>Supprimer</Text></Pressable>
+            </View>
+          </Card>
+        ))
+      ) : null}
+
+      {!loading && !error && section === 'pasteurs' ? (
+        filteredPastors.length === 0 ? <EmptyState message="Aucun pasteur trouvé." /> : filteredPastors.map((user) => (
+          <Card key={user.id}>
+            <View style={styles.row}>
+              <Text style={styles.itemTitle}>{user.name}</Text>
+              <Badge text={user.role ?? '—'} color={user.is_active ? colors.green : colors.red} />
+            </View>
+            <Text style={styles.meta}>{user.email}</Text>
+            <Text style={styles.meta}>
+              {typeof user.assigned_church === 'string'
+                ? user.assigned_church
+                : user.assigned_church?.name ?? '—'}
+            </Text>
             <View style={styles.actions}>
               <Pressable onPress={() => openForm(user)}><Text style={styles.edit}>Modifier</Text></Pressable>
               <Pressable onPress={() => setToDelete(user)}><Text style={styles.delete}>Supprimer</Text></Pressable>
@@ -321,7 +398,7 @@ export function AdminScreen() {
         >
           <Card>
             {section !== 'categories' ? (
-              <TextField label={section === 'users' ? 'Nom complet' : 'Nom'} value={name} onChangeText={setName} />
+              <TextField label={userSection ? 'Nom complet' : 'Nom'} value={name} onChangeText={setName} />
             ) : (
               <TextField label="Nom de la catégorie" value={name} onChangeText={setName} />
             )}
@@ -369,7 +446,7 @@ export function AdminScreen() {
               <TextField label="Couleur" value={color} onChangeText={setColor} placeholder="#3B82F6" />
             ) : null}
 
-            {section === 'users' ? (
+            {userSection ? (
               <>
                 <TextField label="Adresse email" value={email} onChangeText={setEmail} keyboardType="email-address" />
                 <TextField label="Téléphone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />

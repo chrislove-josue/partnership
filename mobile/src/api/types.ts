@@ -15,7 +15,7 @@ export interface User {
   roles?: string[];
   permissions?: string[];
   assigned_church_id?: number | null;
-  assigned_church?: { id: number; name: string; type: string } | null;
+  assigned_church?: { id: number; name: string; type: string } | string | null;
   is_active?: boolean;
 }
 

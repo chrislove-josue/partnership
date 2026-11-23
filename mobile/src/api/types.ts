@@ -55,6 +55,7 @@ export interface Partner {
   church?: string | null;
   cellule_id?: number | null;
   cellule?: string | null;
+  is_user?: boolean;
   total_donations?: number;
 }
 

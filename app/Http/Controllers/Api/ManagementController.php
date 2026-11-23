@@ -183,10 +183,12 @@ class ManagementController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('category_dons', 'name')],
             'color' => ['required', 'string', 'max:20'],
+            'group' => ['required', 'string', Rule::in(array_column(\App\Enums\CategoryGroup::cases(), 'value'))],
         ], [
             'name.required' => 'Le nom de la catégorie est obligatoire.',
             'name.unique' => 'Cette catégorie existe déjà.',
             'color.required' => 'La couleur est obligatoire.',
+            'group.required' => 'La famille de la catégorie est obligatoire.',
         ]);
 
         $category = CategoryDon::query()->create($data);

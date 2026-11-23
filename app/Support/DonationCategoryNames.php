@@ -9,6 +9,8 @@ class DonationCategoryNames
     public const CANONICAL = [
         'Dîmes',
         'Offrandes',
+        'Action de grâce',
+        'Semences',
         'Rhapsodie des Réalités',
         'Mission InnerCity',
         'École de Guérisons',

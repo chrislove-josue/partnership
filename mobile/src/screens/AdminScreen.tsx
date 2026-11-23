@@ -543,7 +543,19 @@ export function AdminScreen() {
             ) : null}
 
             {section === 'categories' ? (
-              <TextField label="Couleur" value={color} onChangeText={setColor} placeholder="#3B82F6" />
+              <>
+                <TextField label="Couleur" value={color} onChangeText={setColor} placeholder="#3B82F6" />
+                <SelectField
+                  label="Famille"
+                  value={categoryGroup}
+                  options={[
+                    { label: 'Finances de l\'église', value: 'church_finances' },
+                    { label: 'Partenariat du ministère', value: 'ministry_partnership' },
+                    { label: 'Partenariat local', value: 'local_partnership' },
+                  ]}
+                  onChange={setCategoryGroup}
+                />
+              </>
             ) : null}
 
             {userSection ? (

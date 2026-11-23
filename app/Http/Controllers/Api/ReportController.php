@@ -24,7 +24,10 @@ class ReportController extends Controller
             [$user, $churchId, $type, $year, $index] = $this->selection($request);
 
             return response()->json(app(PartnershipReportService::class)
-                ->buildReport($churchId, $type, $year, $index));
+                ->filterByCategoryGroup(
+                    app(PartnershipReportService::class)->buildReport($churchId, $type, $year, $index),
+                    (string) $request->string('category_group'),
+                ));
         } catch (AuthorizationException $exception) {
             return response()->json(['message' => $exception->getMessage()], 403);
         } catch (RuntimeException $exception) {
@@ -61,6 +64,7 @@ class ReportController extends Controller
             [, $churchId, $type, $year, $index] = $this->selection($request);
             $reports = app(PartnershipReportService::class);
             $report = $reports->buildReport($churchId, $type, $year, $index);
+            $report = $reports->filterByCategoryGroup($report, (string) $request->string('category_group'));
             $xlsx = app(PartnershipReportExporter::class)->toXlsx($report);
 
             return Response::make($xlsx, 200, [

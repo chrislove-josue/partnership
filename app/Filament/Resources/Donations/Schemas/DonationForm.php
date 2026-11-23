@@ -28,7 +28,7 @@ class DonationForm
                     ->label('Date')
                     ->required()
                     ->default(now()),
-                Select::make('church_id')
+                Select::make('church_id')->selectablePlaceholder(false)
                     ->label('Église')
                     ->relationship('church', 'name', fn ($query) => $query->whereIn('id', $churchIds))
                     ->default(fn (): ?int => $access->defaultChurchId($actor))
@@ -36,7 +36,7 @@ class DonationForm
                     ->preload()
                     ->required()
                     ->live(),
-                Select::make('partner_id')
+                Select::make('partner_id')->selectablePlaceholder(false)
                     ->label('Partenaire')
                     ->relationship('partner', 'first_name', fn ($query, $get) => $query
                         ->when($get('church_id'), fn ($q, $churchId) => $q->where('church_id', $churchId))
@@ -45,7 +45,7 @@ class DonationForm
                     ->searchable(['first_name', 'last_name'])
                     ->preload()
                     ->required(),
-                Select::make('category_id')
+                Select::make('category_id')->selectablePlaceholder(false)
                     ->label('Catégorie')
                     ->relationship('category', 'name')
                     ->searchable()

@@ -56,7 +56,7 @@ class UserForm
                     ->required(fn (string $operation) => $operation === 'create')
                     ->dehydrated(fn (?string $state) => filled($state))
                     ->maxLength(255),
-                Select::make('roles')
+                Select::make('roles')->selectablePlaceholder(false)
                     ->label('Rôles')
                     ->options($roleOptions)
                     ->multiple()
@@ -80,7 +80,7 @@ class UserForm
                             }
                         },
                     ]),
-                Select::make('assigned_church_id')
+                Select::make('assigned_church_id')->selectablePlaceholder(false)
                     ->label('Église assignée')
                     ->options($churchOptions)
                     ->default(fn (): ?int => $access->defaultChurchId($actor))

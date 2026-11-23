@@ -19,7 +19,7 @@ class CategoryDonForm
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
-                Select::make('group')
+                Select::make('group')->selectablePlaceholder(false)
                     ->label('Famille')
                     ->options(collect(CategoryGroup::cases())->mapWithKeys(
                         fn (CategoryGroup $group): array => [$group->value => $group->label()],

@@ -73,32 +73,32 @@ class PartnershipReport extends Page
 
         return $schema
             ->components([
-                Select::make('church_id')
+                Select::make('church_id')->selectablePlaceholder(false)
                     ->label('Église')
                     ->options($churches->pluck('name', 'id')->all())
                     ->searchable()
                     ->required()
                     ->live(),
 
-                Select::make('type')
+                Select::make('type')->selectablePlaceholder(false)
                     ->label('Période')
                     ->options($periods)
                     ->required()
                     ->live(),
 
-                Select::make('month')
+                Select::make('month')->selectablePlaceholder(false)
                     ->label('Mois')
                     ->options($months)
                     ->visible(fn (Get $get): bool => $get('type') === PeriodType::MONTH->value)
                     ->live(),
 
-                Select::make('quarter')
+                Select::make('quarter')->selectablePlaceholder(false)
                     ->label('Trimestre')
                     ->options([1 => 'T1', 2 => 'T2', 3 => 'T3', 4 => 'T4'])
                     ->visible(fn (Get $get): bool => $get('type') === PeriodType::QUARTER->value)
                     ->live(),
 
-                Select::make('year')
+                Select::make('year')->selectablePlaceholder(false)
                     ->label('Année')
                     ->options(collect(range((int) now()->year - 5, (int) now()->year + 1))
                         ->mapWithKeys(fn (int $year): array => [$year => (string) $year])
@@ -106,7 +106,7 @@ class PartnershipReport extends Page
                     ->required()
                     ->live(),
 
-                Select::make('report_section')
+                Select::make('report_section')->selectablePlaceholder(false)
                     ->label('Section')
                     ->options([
                         '' => 'Toutes les sections',
@@ -117,7 +117,7 @@ class PartnershipReport extends Page
                     ])
                     ->live(),
 
-                Select::make('category_group')
+                Select::make('category_group')->selectablePlaceholder(false)
                     ->label('Famille de catégorie')
                     ->options(array_merge(
                         ['' => 'Toutes les familles'],

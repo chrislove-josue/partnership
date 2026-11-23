@@ -42,7 +42,7 @@ class PartnerForm
                     ->label('Adresse'),
                 DatePicker::make('birthdate')
                     ->label('Date de naissance'),
-                Select::make('church_id')
+                Select::make('church_id')->selectablePlaceholder(false)
                     ->label('Église')
                     ->relationship('church', 'name', fn ($query) => $query->whereIn('id', $churchIds))
                     ->default(fn (): ?int => $access->defaultChurchId($actor))
@@ -50,7 +50,7 @@ class PartnerForm
                     ->preload()
                     ->required()
                     ->live(),
-                Select::make('cellule_id')
+                Select::make('cellule_id')->selectablePlaceholder(false)
                     ->label('Cellule')
                     ->relationship('cellule', 'name', fn ($query, $get) => $query
                         ->when($get('church_id'), fn ($q, $churchId) => $q->where('church_id', $churchId)))

@@ -22,7 +22,7 @@ class NotificationForm
 
         return $schema
             ->components([
-                Select::make('type')
+                Select::make('type')->selectablePlaceholder(false)
                     ->label('Type')
                     ->options(NotificationType::class)
                     ->required(),
@@ -35,7 +35,7 @@ class NotificationForm
                     ->required()
                     ->rows(4)
                     ->columnSpanFull(),
-                Select::make('user_id')
+                Select::make('user_id')->selectablePlaceholder(false)
                     ->label('Destinataire')
                     ->relationship('user', 'name', fn ($query) => $query->whereIn('assigned_church_id', $churchIds))
                     ->searchable()

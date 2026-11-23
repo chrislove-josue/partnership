@@ -49,7 +49,7 @@ class LoginHistory extends Page implements HasForms
                     ->label('Rechercher')
                     ->placeholder('Événement, source, IP ou appareil')
                     ->live(debounce: 300),
-                Select::make('event')
+                Select::make('event')->selectablePlaceholder(false)
                     ->label('Événement')
                     ->options([
                         LoginHistoryModel::EVENT_LOGIN => 'Connexion',
@@ -57,7 +57,7 @@ class LoginHistory extends Page implements HasForms
                     ])
                     ->placeholder('Tous les événements')
                     ->live(),
-                Select::make('source')
+                Select::make('source')->selectablePlaceholder(false)
                     ->label('Source')
                     ->options([
                         LoginHistoryModel::SOURCE_WEB => 'Site web',

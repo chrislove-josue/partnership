@@ -22,7 +22,7 @@ class CelluleForm
                     ->label('Nom de la cellule')
                     ->required()
                     ->maxLength(255),
-                Select::make('church_id')
+                Select::make('church_id')->selectablePlaceholder(false)
                     ->label('Église')
                     ->relationship('church', 'name', fn ($query) => $query->whereIn('id', $churchIds))
                     ->default(fn (): ?int => $access->defaultChurchId($actor))
@@ -30,7 +30,7 @@ class CelluleForm
                     ->preload()
                     ->required()
                     ->live(),
-                Select::make('leader_id')
+                Select::make('leader_id')->selectablePlaceholder(false)
                     ->label('Responsable (partenaire)')
                     ->relationship('leader', 'first_name', fn ($query, $get) => $query
                         ->when($get('church_id'), fn ($q, $churchId) => $q->where('church_id', $churchId))

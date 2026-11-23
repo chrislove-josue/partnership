@@ -28,13 +28,13 @@ class ChurchForm
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
-                Select::make('type')
+                Select::make('type')->selectablePlaceholder(false)
                     ->label('Type')
                     ->options($typeOptions)
                     ->default(array_key_first($typeOptions))
                     ->required()
                     ->live(),
-                Select::make('parent_id')
+                Select::make('parent_id')->selectablePlaceholder(false)
                     ->label('Église parente')
                     ->relationship('parent', 'name', fn ($query) => $actor
                         ? $query->whereIn('id', $access->accessibleChurchIds($actor))
@@ -44,7 +44,7 @@ class ChurchForm
                         : null)
                     ->searchable()
                     ->preload(),
-                Select::make('manager_id')
+                Select::make('manager_id')->selectablePlaceholder(false)
                     ->label('Responsable (pasteur)')
                     ->relationship('manager', 'name', fn ($query) => $actor
                         ? $query->whereIn('assigned_church_id', $access->accessibleChurchIds($actor))

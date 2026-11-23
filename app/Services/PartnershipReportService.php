@@ -275,6 +275,8 @@ class PartnershipReportService
         $report['totals']['amount'] = $total;
         $report['totals']['donationCount'] = count($filteredDonations);
         $report['totals']['partnersWithDonation'] = count($partners);
+        $report['category_group'] = $group;
+        $report['category_group_label'] = \App\Enums\CategoryGroup::tryFrom($group)?->label() ?? $group;
 
         return $report;
     }
@@ -292,9 +294,15 @@ class PartnershipReportService
     public function fileName(array $report): string
     {
         $church = preg_replace('/[^a-zA-Z0-9]+/', '_', $report['church']['name']) ?: 'eglise';
-        $period = preg_replace('/\s+/', '_', $report['period']['label']) ?: 'periode';
 
-        return "rapport_partenariat_{$church}_{$period}.xlsx";
+        $group = (string) ($report['category_group'] ?? '');
+        $groupSlug = $group === ''
+            ? 'toutes_familles'
+            : (preg_replace('/[^a-zA-Z0-9]+/', '_', $group) ?: 'famille');
+
+        $datetime = now()->format('Y-m-d_H-i-s');
+
+        return "rapport_partenariat_{$church}_{$groupSlug}_{$datetime}.xlsx";
     }
 
     /**

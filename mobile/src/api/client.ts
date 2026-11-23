@@ -17,14 +17,43 @@ export { clearCache, invalidateCache } from './cache';
 const DEFAULT_API_URL = process.env.EXPO_PUBLIC_API_URL ?? '';
 
 const INVALID_API_URL_MESSAGE =
-  'Adresse de l’API invalide. Utilisez une URL HTTPS ; HTTP n’est autorisé en développement que pour localhost ou 10.0.2.2.';
+  'Adresse de l’API invalide. Utilisez une URL HTTPS ; le trafic en clair n’est autorisé que sur le réseau local (IP privée ou nom se terminant par .local).';
 
-const LOCAL_CLEARTEXT_HOSTS = ['localhost', '127.0.0.1', '10.0.2.2'];
+/**
+ * Vrai pour un hôte appartenant à un réseau local. Les octets sont comparés
+ * numériquement : aucune adresse IP n'est écrite en dur dans le code.
+ */
+function isLocalNetworkHost(rawHostname: string): boolean {
+  const hostname = rawHostname.toLowerCase().replace(/^\[|\]$/g, '');
+
+  if (hostname === 'localhost' || hostname.endsWith('.localhost') || hostname.endsWith('.local')) {
+    return true;
+  }
+
+  const parts = hostname.split('.');
+  if (parts.length === 4 && parts.every((part) => /^\d{1,3}$/.test(part))) {
+    const [a, b] = parts.map(Number);
+    if ([a, b].some((octet) => octet > 255)) {
+      return false;
+    }
+    return (
+      a === 10 ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 169 && b === 254) ||
+      a === 127
+    );
+  }
+
+  // IPv6 boucle, unique locale (fc00::/7) et lien local (fe80::/10).
+  return hostname === '::1' || /^f[cd]/.test(hostname) || /^fe[89ab]/.test(hostname);
+}
 
 /**
  * Valide et normalise une URL d'API : pas d'identifiants, ni query, ni hash.
- * En release, seul HTTPS est accepté. En développement, HTTP reste limité à
- * localhost et à l'émulateur Android.
+ * HTTPS est exigé sur Internet. Le trafic en clair est réservé au réseau local
+ * (IP privée ou .local), y compris dans la release, pour les serveurs installés
+ * sur le réseau de l'église.
  */
 export function normalizeApiUrl(value: string): string {
   const trimmed = value.trim();
@@ -40,10 +69,9 @@ export function normalizeApiUrl(value: string): string {
   }
 
   const isDev = typeof __DEV__ !== 'undefined' && __DEV__;
+  const isDevCleartext = isDev && parsed.hostname.toLowerCase().endsWith('.test');
   const isLocalCleartext =
-    parsed.protocol === 'http:' &&
-    isDev &&
-    LOCAL_CLEARTEXT_HOSTS.includes(parsed.hostname);
+    parsed.protocol === 'http:' && (isLocalNetworkHost(parsed.hostname) || isDevCleartext);
 
   if (parsed.protocol !== 'https:' && !isLocalCleartext) {
     throw new Error(INVALID_API_URL_MESSAGE);

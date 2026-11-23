@@ -25,9 +25,7 @@ class CategoryDonsTable
                 TextColumn::make('group')
                     ->label('Famille')
                     ->badge()
-                    ->formatStateUsing(fn (?string $state): string => $state
-                        ? (CategoryGroup::tryFrom($state)?->label() ?? $state)
-                        : '—'),
+                    ->formatStateUsing(fn (?CategoryGroup $state): string => $state?->label() ?? '—'),
                 TextColumn::make('donations_count')
                     ->label('Dons')
                     ->counts('donations')

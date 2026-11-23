@@ -50,11 +50,24 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @forelse ($report['categories'] as $category)
-                        <tr>
-                            <td class="rp-strong">{{ $category['name'] }}</td>
-                            <td class="rp-center">{{ $category['count'] }}</td>
-                            <td class="rp-right rp-strong">{{ $format($category['amount']) }}</td>
+                    @php
+                        $groupedCategories = collect($report['categories'] ?? [])->groupBy('group_label');
+                    @endphp
+                    @forelse ($groupedCategories as $groupLabel => $groupCategories)
+                        <tr class="rp-group-row">
+                            <td colspan="3" class="rp-strong">{{ $groupLabel }}</td>
+                        </tr>
+                        @foreach ($groupCategories as $category)
+                            <tr>
+                                <td class="rp-strong" style="padding-left: 1.5rem;">{{ $category['name'] }}</td>
+                                <td class="rp-center">{{ $category['count'] }}</td>
+                                <td class="rp-right rp-strong">{{ $format($category['amount']) }}</td>
+                            </tr>
+                        @endforeach
+                        <tr class="rp-subtotal">
+                            <td>Sous-total — {{ $groupLabel }}</td>
+                            <td class="rp-center">{{ $groupCategories->sum('count') }}</td>
+                            <td class="rp-right">{{ $format($groupCategories->sum('amount')) }}</td>
                         </tr>
                     @empty
                         <tr>

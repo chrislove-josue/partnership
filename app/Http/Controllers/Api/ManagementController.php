@@ -203,6 +203,7 @@ class ManagementController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('category_dons', 'name')->ignore($category->id)],
             'color' => ['required', 'string', 'max:20'],
+            'group' => ['required', 'string', Rule::in(array_column(\App\Enums\CategoryGroup::cases(), 'value'))],
         ]);
 
         $category->update($data);

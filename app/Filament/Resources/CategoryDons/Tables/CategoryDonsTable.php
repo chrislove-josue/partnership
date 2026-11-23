@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CategoryDons\Tables;
 
+use App\Enums\CategoryGroup;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -24,7 +25,7 @@ class CategoryDonsTable
                     ->label('Famille')
                     ->badge()
                     ->formatStateUsing(fn (?string $state): string => $state
-                        ? (\App\Enums\CategoryGroup::tryFrom($state)?->label() ?? $state)
+                        ? (CategoryGroup::tryFrom($state)?->label() ?? $state)
                         : '—'),
                 TextColumn::make('donations_count')
                     ->label('Dons')

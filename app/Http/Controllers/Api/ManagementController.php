@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\CategoryGroup;
 use App\Enums\ChurchType;
 use App\Enums\RoleName;
 use App\Http\Controllers\Controller;
@@ -183,7 +184,7 @@ class ManagementController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('category_dons', 'name')],
             'color' => ['required', 'string', 'max:20'],
-            'group' => ['required', 'string', Rule::in(array_column(\App\Enums\CategoryGroup::cases(), 'value'))],
+            'group' => ['required', 'string', Rule::in(array_column(CategoryGroup::cases(), 'value'))],
         ], [
             'name.required' => 'Le nom de la catégorie est obligatoire.',
             'name.unique' => 'Cette catégorie existe déjà.',
@@ -203,7 +204,7 @@ class ManagementController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255', Rule::unique('category_dons', 'name')->ignore($category->id)],
             'color' => ['required', 'string', 'max:20'],
-            'group' => ['required', 'string', Rule::in(array_column(\App\Enums\CategoryGroup::cases(), 'value'))],
+            'group' => ['required', 'string', Rule::in(array_column(CategoryGroup::cases(), 'value'))],
         ]);
 
         $category->update($data);

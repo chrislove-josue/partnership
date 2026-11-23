@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CategoryGroup;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -16,7 +17,7 @@ class CategoryDon extends Model
     protected function casts(): array
     {
         return [
-            'group' => \App\Enums\CategoryGroup::class,
+            'group' => CategoryGroup::class,
         ];
     }
 
@@ -24,7 +25,7 @@ class CategoryDon extends Model
     {
         static::creating(function (self $category): void {
             if (blank($category->group)) {
-                $category->group = \App\Enums\CategoryGroup::fromName((string) $category->name);
+                $category->group = CategoryGroup::fromName((string) $category->name);
             }
         });
     }

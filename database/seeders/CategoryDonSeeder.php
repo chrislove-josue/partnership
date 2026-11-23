@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\CategoryGroup;
 use App\Models\CategoryDon;
 use App\Support\DonationCategoryNames;
 use Illuminate\Database\Seeder;
@@ -24,7 +25,7 @@ class CategoryDonSeeder extends Seeder
             fn (string $name, string $color): array => [
                 'name' => $name,
                 'color' => $color,
-                'group' => \App\Enums\CategoryGroup::fromName($name)->value,
+                'group' => CategoryGroup::fromName($name)->value,
             ],
             DonationCategoryNames::CANONICAL,
             $colors,

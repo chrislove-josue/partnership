@@ -112,7 +112,6 @@ class PartnershipReport extends Page
                         '' => 'Toutes les sections',
                         'categories' => 'Par catégorie',
                         'partners' => 'Partenaires',
-                        'without' => 'Sans don',
                         'donations' => 'Détail des dons',
                     ])
                     ->live(),

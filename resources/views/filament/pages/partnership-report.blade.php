@@ -118,37 +118,6 @@
             </div>
         @endif
 
-        @if ($showSection('without'))
-            <div class="rp-card">
-                <div class="rp-card-head">
-                    <h2 class="rp-card-title">Partenaires sans don sur la période</h2>
-                </div>
-                <table class="rp-table">
-                    <thead>
-                    <tr>
-                        <th>Partenaire</th>
-                        <th>Cellule</th>
-                        <th>Email</th>
-                        <th>Téléphone</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @forelse ($report['partnersWithoutDonation'] as $partner)
-                        <tr>
-                            <td class="rp-strong">{{ $partner['name'] }}</td>
-                            <td>{{ $partner['cellule'] ?? '—' }}</td>
-                            <td>{{ $partner['email'] ?? '—' }}</td>
-                            <td>{{ $partner['phone'] ?? '—' }}</td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="rp-empty">Aucun partenaire sans don pour ces filtres.</td>
-                        </tr>
-                    @endforelse
-                    </tbody>
-                </table>
-            </div>
-        @endif
 
         @if ($showSection('donations'))
             <div class="rp-card">

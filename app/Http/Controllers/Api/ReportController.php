@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\PeriodType;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\ChurchAccessService;
 use App\Services\PartnershipReportExporter;
 use App\Services\PartnershipReportSender;
@@ -84,6 +85,7 @@ class ReportController extends Controller
             'confirm' => ['required', 'boolean'],
             'cc_emails' => ['nullable', 'array'],
             'cc_emails.*' => ['email'],
+            'category_group' => ['nullable', 'string'],
         ], [
             'confirm.required' => 'La confirmation est obligatoire.',
             'cc_emails.array' => 'Les copies doivent être une liste d’adresses email.',
@@ -103,6 +105,7 @@ class ReportController extends Controller
                 $index,
                 $request->boolean('confirm'),
                 $ccEmails,
+                $data['category_group'] ?? null,
             );
 
             return response()->json($result);
@@ -116,7 +119,7 @@ class ReportController extends Controller
     }
 
     /**
-     * @return array{0: \App\Models\User, 1: int, 2: PeriodType, 3: int, 4: int|null}
+     * @return array{0: User, 1: int, 2: PeriodType, 3: int, 4: int|null}
      */
     private function selection(Request $request): array
     {

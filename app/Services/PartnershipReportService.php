@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\CategoryGroup;
 use App\Enums\ChurchType;
 use App\Enums\PeriodType;
 use App\Enums\RoleName;
@@ -276,7 +277,7 @@ class PartnershipReportService
         $report['totals']['donationCount'] = count($filteredDonations);
         $report['totals']['partnersWithDonation'] = count($partners);
         $report['category_group'] = $group;
-        $report['category_group_label'] = \App\Enums\CategoryGroup::tryFrom($group)?->label() ?? $group;
+        $report['category_group_label'] = CategoryGroup::tryFrom($group)?->label() ?? $group;
 
         return $report;
     }

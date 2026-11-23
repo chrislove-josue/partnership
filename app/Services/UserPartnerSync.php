@@ -30,7 +30,7 @@ class UserPartnerSync
 
         $partner = Partner::query()->where('user_id', $user->id)->first()
             ?? $this->findUnlinkedPartner($user)
-            ?? new Partner();
+            ?? new Partner;
 
         $partner->fill($this->attributesFor($user, $partner->id));
         $partner->user_id = $user->id;

@@ -33,7 +33,7 @@ class ImportLegacyData extends Command
         {--path= : Chemin du fichier JSON exporté (défaut: storage/app/legacy-export.json)}
         {--force : Ne pas demander de confirmation}';
 
-    protected $description = 'Migre les données de l\'ancienne base (Postgres/Neon) vers la nouvelle base MySQL';
+    protected $description = 'Migre les données de l\'ancienne base (Postgres/Prisma) vers la nouvelle base MySQL';
 
     /** @var array<string,int> */
     private array $churchMap = [];

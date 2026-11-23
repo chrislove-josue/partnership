@@ -267,16 +267,6 @@ via un export JSON intermédiaire.
    (l'export précédent est conservé en `.bak`). Les identifiants Prisma sont conservés pour
    reconstruire les relations.
 
-   Pour récupérer une version plus récente depuis la base Neon en ligne, générer d'abord le dump :
-   retirer les paramètres Prisma `pool_timeout`, `connection_limit` et `connect_timeout` de
-   `DATABASE_URL` (non reconnus par `pg_dump`), puis :
-
-   ```bash
-   pg_dump --dbname="<DATABASE_URL>" --column-inserts --no-owner --no-privileges \
-     --file=storage/app/neondb-backup.sql
-   php database/convert-pg-dump.php storage/app/neondb-backup.sql
-   ```
-
 2. Recréer les tables, puis importer :
 
    ```bash

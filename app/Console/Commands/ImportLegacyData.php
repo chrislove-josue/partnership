@@ -22,7 +22,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 /**
- * Importe les données de l'ancienne base (export Prisma/Neon au format JSON)
+ * Importe les données de l'ancienne base (export PostgreSQL/Prisma au format JSON)
  * vers la base MySQL de l'application Laravel.
  *
  * Usage: php artisan legacy:import [--path=storage/app/legacy-export.json] [--force]

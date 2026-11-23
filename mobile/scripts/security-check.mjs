@@ -284,7 +284,9 @@ if (!SOURCE_ONLY) {
           stdio: ['ignore', 'pipe', 'ignore'],
           shell: process.platform === 'win32',
         });
-        assert.ok(!/usesCleartextTraffic/i.test(output), 'l\'APK demande du trafic en clair');
+        // Le clair est autorisé au niveau système pour le réseau local, mais filtré
+        // par isLocalNetworkHost() dans le bundle JS (voir contrôle F2).
+        assert.ok(/usesCleartextTraffic/i.test(output), 'le trafic clair du réseau local est bloqué dans l’APK');
         assert.ok(!/MANAGE_EXTERNAL_STORAGE|POST_NOTIFICATIONS|SYSTEM_ALERT_WINDOW/.test(output), 'permissions excessives dans l\'APK');
       });
     } else {

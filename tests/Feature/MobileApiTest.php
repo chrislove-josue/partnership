@@ -26,7 +26,7 @@ class MobileApiTest extends TestCase
     public function test_user_can_log_in_and_read_his_profile(): void
     {
         $this->seed();
-        $user = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $user = User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
 
         $response = $this->postJson('/api/login', [
             'email' => $user->email,
@@ -53,7 +53,7 @@ class MobileApiTest extends TestCase
     public function test_profile_api_updates_phone_and_kingschat_handle(): void
     {
         $this->seed();
-        $user = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $user = User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
 
         $this->actingAs($user, 'sanctum')
             ->patchJson('/api/profile', [
@@ -128,7 +128,7 @@ class MobileApiTest extends TestCase
         $this->seed();
 
         $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();
-        $sender = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $sender = User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
 
         $recipient = User::factory()->create([
             'email' => 'pasteur@example.test',
@@ -168,7 +168,7 @@ class MobileApiTest extends TestCase
         $this->seed();
 
         $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();
-        $sender = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $sender = User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
 
         $this->actingAs($sender, 'sanctum')
             ->get('/api/reports/partnership/export?'.http_build_query([
@@ -183,7 +183,7 @@ class MobileApiTest extends TestCase
     public function test_notifications_are_private_to_the_authenticated_user(): void
     {
         $this->seed();
-        $admin = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $admin = User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
         $other = User::factory()->create();
 
         $mine = Notification::query()->create([
@@ -198,7 +198,7 @@ class MobileApiTest extends TestCase
         Notification::query()->create([
             'id' => (string) \Illuminate\Support\Str::uuid(),
             'type' => \App\Enums\NotificationType::NEW_DONATION->value,
-            'title' => 'Notification privée',
+            'title' => 'Notification privÃ©e',
             'message' => 'Test',
             'data' => [],
             'is_read' => false,

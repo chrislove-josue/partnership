@@ -94,9 +94,54 @@ class DefaultChurchSelectionTest extends TestCase
             ->assertSet('data.church_id', $this->local->id);
     }
 
+    public function test_a_subgroup_pastor_creates_a_local_church_under_his_church(): void
+    {
+        $subgroup = Church::create([
+            'name' => 'CE SOUS-GROUPE TEST',
+            'type' => ChurchType::SUB_GROUP,
+            'parent_id' => $this->group->id,
+        ]);
+
+        $pastor = User::create([
+            'name' => 'Pasteur Sous-groupe',
+            'email' => 'pasteur.sousgroupe@example.test',
+            'password' => Hash::make('azerty123'),
+            'assigned_church_id' => $subgroup->id,
+            'is_active' => true,
+        ]);
+        $pastor->syncRoles([RoleName::SUBGROUP_PASTOR->value]);
+
+        $this->actingAs($pastor);
+
+        Livewire::test(CreateChurch::class)
+            ->assertSchemaStateSet([
+                'type' => ChurchType::LOCAL->value,
+                'parent_id' => $subgroup->id,
+            ]);
+    }
+
+    public function test_a_group_pastor_creates_a_subgroup_under_his_church(): void
+    {
+        $pastor = User::create([
+            'name' => 'Pasteur Groupe',
+            'email' => 'pasteur.groupe@example.test',
+            'password' => Hash::make('azerty123'),
+            'assigned_church_id' => $this->group->id,
+            'is_active' => true,
+        ]);
+        $pastor->syncRoles([RoleName::GROUP_PASTOR->value]);
+
+        $this->actingAs($pastor);
+
+        Livewire::test(CreateChurch::class)
+            ->assertSchemaStateSet([
+                'type' => ChurchType::SUB_GROUP->value,
+                'parent_id' => $this->group->id,
+            ]);
+    }
+
     public function test_the_default_falls_back_to_the_first_accessible_church(): void
     {
-        // Un compte sans église affectée (super admin particulier) reste utilisable.
         $admin = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
         $admin->update(['assigned_church_id' => null]);
 

@@ -40,7 +40,13 @@ class DonationNotificationTest extends TestCase
 
     private function makeDonation(Church $church, ?string $partnerEmail): Donation
     {
-        $partner = Partner::create([
+        // Un compte utilisateur possède déjà un partenaire miroir : on le
+        // réutilise pour ne pas dupliquer son adresse email.
+        $partner = $partnerEmail !== null
+            ? Partner::where('email', $partnerEmail)->first()
+            : null;
+
+        $partner ??= Partner::create([
             'first_name' => 'Jean',
             'last_name' => 'Doe',
             'email' => $partnerEmail,

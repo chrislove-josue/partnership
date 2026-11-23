@@ -131,10 +131,24 @@ class PartnershipReportTest extends TestCase
         $report = app(PartnershipReportService::class)
             ->buildReport($church->id, PeriodType::MONTH, 2026, 2);
 
+        // Chaque compte utilisateur est aussi un partenaire de son église : le
+        // super admin du seed apparaît donc dans les partenaires sans don.
+        $accountPartnerIds = Partner::whereNotNull('user_id')
+            ->where('church_id', $church->id)
+            ->pluck('id')
+            ->all();
+        $registered = Partner::where('church_id', $church->id)->count();
+        $withoutDonationIds = array_column($report['partnersWithoutDonation'], 'id');
+
         $this->assertSame(1, $report['totals']['partnersWithDonation']);
-        $this->assertSame(1, $report['totals']['partnersWithoutDonation']);
-        $this->assertSame(2, $report['totals']['registeredPartners']);
-        $this->assertSame([$inactive->id], array_column($report['partnersWithoutDonation'], 'id'));
+        $this->assertSame($registered - 1, $report['totals']['partnersWithoutDonation']);
+        $this->assertSame($registered, $report['totals']['registeredPartners']);
+        $this->assertContains($inactive->id, $withoutDonationIds);
+
+        foreach ($accountPartnerIds as $accountPartnerId) {
+            $this->assertContains($accountPartnerId, $withoutDonationIds);
+        }
+
         $this->assertSame('Jean Doe', $report['partners'][0]['name']);
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
 use App\Services\ChurchAccessService;
 use App\Services\PartnershipReportExporter;
@@ -49,6 +50,7 @@ class PartnershipReport extends Page
             'quarter' => now()->quarter,
             'year' => now()->year,
             'report_section' => '',
+            'category_group' => '',
         ]);
     }
 

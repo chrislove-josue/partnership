@@ -79,6 +79,7 @@ class PartnershipReportSender
         }
 
         $report = $this->reports->buildReport($churchId, $type, $year, $index);
+        $report = $this->reports->filterByCategoryGroup($report, $categoryGroup);
         $xlsx = $this->exporter->toXlsx($report);
         $fileName = $this->reports->fileName($report);
 

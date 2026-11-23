@@ -97,7 +97,8 @@ class UserPartnerSyncTest extends TestCase
 
         $user = $this->makeUser(['email' => 'pasteur@example.test']);
 
-        $this->assertSame(1, Partner::count());
+        // Aucun partenaire non rattaché ne subsiste : l'existant a été repris.
+        $this->assertSame(0, Partner::whereNull('user_id')->count());
         $this->assertSame($user->id, $existing->refresh()->user_id);
     }
 

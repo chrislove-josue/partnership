@@ -83,6 +83,7 @@ class UserForm
                 Select::make('assigned_church_id')
                     ->label('Église assignée')
                     ->options($churchOptions)
+                    ->default(fn (): ?int => $access->defaultChurchId($actor))
                     ->searchable()
                     ->required(),
                 Toggle::make('is_active')

@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage, invalidateCache } from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import { defaultChurchId } from '../utils/church';
 import { filterBy } from '../utils/search';
 import type { Category, Church, Donation, Partner } from '../api/types';
 import { ImportExportCard } from '../components/ImportExportCard';
@@ -25,6 +27,7 @@ import {
 } from '../components/ui';
 
 export function DonationsScreen() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [donations, setDonations] = useState<Donation[]>([]);
@@ -66,14 +69,14 @@ export function DonationsScreen() {
       setChurches(churchData.data);
       setPartners(partnerData.data);
       setCategories(categoryData.data);
-      setChurchId((current) => current || churchData.data[0]?.id.toString() || '');
+      setChurchId((current) => current || defaultChurchId(churchData.data, user?.assigned_church_id));
       setCategoryId((current) => current || categoryData.data[0]?.id.toString() || '');
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger les dons.'));
     } finally {
       setLoading(false);
     }
-  }, [churchFilter, categoryFilter, partnerFilter]);
+  }, [churchFilter, categoryFilter, partnerFilter, user?.assigned_church_id]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 250);

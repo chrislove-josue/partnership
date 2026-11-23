@@ -45,6 +45,7 @@ class PartnerForm
                 Select::make('church_id')
                     ->label('Église')
                     ->relationship('church', 'name', fn ($query) => $query->whereIn('id', $churchIds))
+                    ->default(fn (): ?int => $access->defaultChurchId($actor))
                     ->searchable()
                     ->preload()
                     ->required()

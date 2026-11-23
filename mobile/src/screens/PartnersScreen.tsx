@@ -2,6 +2,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage, invalidateCache } from '../api/client';
+import { useAuth } from '../context/AuthContext';
+import { defaultChurchId } from '../utils/church';
 import { FilterCard } from '../components/FilterCard';
 import { SecondaryButton } from '../components/ui';
 import type { Cellule, Church, Partner } from '../api/types';
@@ -24,6 +26,7 @@ import {
 } from '../components/ui';
 
 export function PartnersScreen() {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [partners, setPartners] = useState<Partner[]>([]);
@@ -72,13 +75,13 @@ export function PartnersScreen() {
       setPartners(partnerData.data);
       setChurches(churchData.data);
       setCellules(celluleData.data);
-      setChurchId((current) => current || churchData.data[0]?.id.toString() || '');
+      setChurchId((current) => current || defaultChurchId(churchData.data, user?.assigned_church_id));
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger les partenaires.'));
     } finally {
       setLoading(false);
     }
-  }, [search, churchFilter, celluleFilter]);
+  }, [search, churchFilter, celluleFilter, user?.assigned_church_id]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 250);

@@ -281,6 +281,23 @@ class ChurchAccessService
     }
 
     /**
+     * Église proposée par défaut dans les formulaires et les rapports : celle qui
+     * est associée au compte connecté. À défaut, la première église accessible.
+     */
+    public function defaultChurchId(?User $user): ?int
+    {
+        if (! $user) {
+            return null;
+        }
+
+        if ($user->assigned_church_id !== null) {
+            return (int) $user->assigned_church_id;
+        }
+
+        return $this->accessibleChurches($user)->first()?->id;
+    }
+
+    /**
      * Filtre une collection d'items possédant church_id par les églises accessibles.
      *
      * @template T

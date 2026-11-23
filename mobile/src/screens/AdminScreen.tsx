@@ -232,7 +232,7 @@ export function AdminScreen() {
       return { name, church_id: Number(churchId), leader_id: leaderId ? Number(leaderId) : null };
     }
     if (section === 'categories') {
-      return { name, color };
+      return { name, color, group: categoryGroup };
     }
     // Les onglets Utilisateurs et Pasteurs utilisent la même ressource.
     return {

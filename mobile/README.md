@@ -17,9 +17,10 @@ Dans `.env`, renseignez `EXPO_PUBLIC_API_URL` :
 
 - émulateur Android : `http://10.0.2.2:8000/api`
 - simulateur iOS : `http://localhost:8000/api`
-- téléphone physique : une URL **HTTPS** (ex. `https://api.exemple.fr/api`)
+- téléphone physique sur le réseau local : l’adresse IP privée du serveur, terminée par `/api`
+- serveur public : une URL **HTTPS** (ex. `https://api.exemple.fr/api`)
 
-Le HTTP n'est accepté par l'application qu'en développement, et uniquement pour `localhost`, `127.0.0.1` et `10.0.2.2`. **Toute release doit utiliser HTTPS** : l'URL est validée avec `new URL()`, les identifiants intégrés, les paramètres de requête et les fragments sont refusés. Le trafic en clair n'est autorisé que par la configuration réseau des variants `debug` / `debugOptimized`.
+L’application accepte le trafic en clair **uniquement pour le réseau local** : IP privées (`10.x`, `172.16-31.x`, `192.168.x`, `169.254.x`, boucle locale) et noms se terminant par `.local`. Toute autre adresse doit utiliser HTTPS, y compris dans la release. L’URL est validée avec `new URL()` ; les identifiants intégrés, les paramètres de requête et les fragments sont refusés. Android ne permettant pas de limiter le clair à des plages d’IP dans `network_security_config`, le trafic clair est autorisé au niveau du manifeste puis filtré dans `src/api/client.ts` — aucune IP n’est écrite en dur.
 
 Le serveur Laravel doit tourner sur `http://localhost:8000` avec la base migrée (y compris la table `personal_access_tokens`). Le projet Laravel est aligné sur **PHP 8.3** (`composer.json` : `platform.php = 8.3.35`, Laravel 12).
 

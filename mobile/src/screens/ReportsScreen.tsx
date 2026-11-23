@@ -220,7 +220,6 @@ export function ReportsScreen() {
                 { label: 'Toutes les sections', value: '' },
                 { label: 'Par catégorie', value: 'categories' },
                 { label: 'Partenaires', value: 'partners' },
-                { label: 'Sans don', value: 'without' },
                 { label: 'Détail des dons', value: 'donations' },
               ]}
               onChange={setReportSection}

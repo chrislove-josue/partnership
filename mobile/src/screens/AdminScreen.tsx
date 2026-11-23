@@ -76,6 +76,7 @@ export function AdminScreen() {
   const [churchId, setChurchId] = useState('');
   const [leaderId, setLeaderId] = useState('');
   const [color, setColor] = useState('#3B82F6');
+  const [categoryGroup, setCategoryGroup] = useState('local_partnership');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [handleKc, setHandleKc] = useState('');
@@ -200,6 +201,7 @@ export function AdminScreen() {
       ? String(record.leader_id)
       : record && 'manager_id' in record && record.manager_id ? String(record.manager_id) : '');
     setColor(record && 'color' in record ? record.color : '#3B82F6');
+    setCategoryGroup(record && 'group' in record && record.group ? String(record.group) : 'local_partnership');
     setEmail(record && 'email' in record ? record.email : '');
     setPhone(record && 'phone' in record ? record.phone ?? '' : '');
     setHandleKc(record && 'handle_kc' in record ? record.handle_kc ?? '' : '');

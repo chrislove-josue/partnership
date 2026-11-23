@@ -6,6 +6,7 @@ use App\Enums\ChurchType;
 use App\Enums\RoleName;
 use App\Filament\Pages\PartnershipReport;
 use App\Filament\Resources\Cellules\Pages\CreateCellule;
+use App\Filament\Resources\Churches\Pages\CreateChurch;
 use App\Filament\Resources\Donations\Pages\CreateDonation;
 use App\Filament\Resources\Partners\Pages\CreatePartner;
 use App\Filament\Resources\Users\Pages\CreateUser;

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Partner extends Model
 {
     protected $fillable = [
+        'user_id',
         'first_name',
         'last_name',
         'email',
@@ -36,6 +37,17 @@ class Partner extends Model
     public function church(): BelongsTo
     {
         return $this->belongsTo(Church::class);
+    }
+
+    /** Compte utilisateur dont ce partenaire est le miroir, s'il existe. */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function isUserAccount(): bool
+    {
+        return $this->user_id !== null;
     }
 
     public function cellule(): BelongsTo

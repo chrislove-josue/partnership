@@ -120,7 +120,7 @@ class ImportLegacyDataTest extends TestCase
             ->assertExitCode(0);
 
         $this->assertSame(2, Church::count());
-        $this->assertSame(1, Partner::count());
+        $this->assertSame(1, Partner::whereNull('user_id')->count());
         $this->assertSame(1, Donation::count());
         $this->assertSame(1, Notification::count());
 
@@ -144,7 +144,7 @@ class ImportLegacyDataTest extends TestCase
         $this->assertTrue(Hash::check('azerty123', $superAdmin->password));
 
         // Partenaire -> cellule + église
-        $partner = Partner::firstOrFail();
+        $partner = Partner::whereNull('user_id')->firstOrFail();
         $this->assertSame($group->id, $partner->church_id);
         $this->assertSame('Cellule Test', $partner->cellule->name);
         $this->assertSame($partner->id, $partner->cellule->leader_id);

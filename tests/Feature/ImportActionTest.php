@@ -72,15 +72,17 @@ class ImportActionTest extends TestCase
             ->set('mountedActions.0.data.file', $file)
             ->call('callMountedAction');
 
-        $this->assertSame(2, Partner::count());
+        // Les comptes utilisateurs créés pendant le test ont aussi un partenaire
+        // miroir : on ne compte que les partenaires issus de l'import.
+        $this->assertSame(2, Partner::whereNull('user_id')->count());
         $this->assertSame(2, Donation::count());
         $this->assertSame(
             ['Alice', 'Bob'],
-            Partner::orderBy('id')->pluck('first_name')->all(),
+            Partner::whereNull('user_id')->orderBy('id')->pluck('first_name')->all(),
         );
         $this->assertSame(
             'Cellule Test',
-            Partner::firstOrFail()->cellule->name,
+            Partner::whereNull('user_id')->firstOrFail()->cellule->name,
         );
     }
 
@@ -109,7 +111,7 @@ class ImportActionTest extends TestCase
             ->call('callMountedAction');
 
         $this->assertSame(1, Donation::count());
-        $this->assertSame(1, Partner::count());
+        $this->assertSame(1, Partner::whereNull('user_id')->count());
         $this->assertSame(5000.0, (float) Donation::firstOrFail()->amount);
     }
 

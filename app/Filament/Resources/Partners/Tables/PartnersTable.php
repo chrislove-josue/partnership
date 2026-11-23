@@ -25,6 +25,12 @@ class PartnersTable
                     ->label('Email')
                     ->searchable()
                     ->placeholder('—'),
+                TextColumn::make('user.name')
+                    ->label('Compte utilisateur')
+                    ->badge()
+                    ->color('info')
+                    ->placeholder('—')
+                    ->toggleable(),
                 TextColumn::make('phone')
                     ->label('Téléphone')
                     ->searchable()

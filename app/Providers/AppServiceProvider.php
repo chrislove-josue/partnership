@@ -8,7 +8,9 @@ use App\Models\Cellule;
 use App\Models\Church;
 use App\Models\Donation;
 use App\Models\Partner;
+use App\Models\User;
 use App\Observers\SyncDeletionObserver;
+use App\Observers\UserObserver;
 use App\Services\ReportCache;
 use Filament\Auth\Http\Responses\Contracts\LogoutResponse as LogoutResponseContract;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -69,6 +71,9 @@ class AppServiceProvider extends ServiceProvider
             ->by((string) $request->ip()));
 
         $invalidateReports = fn () => app(ReportCache::class)->invalidate();
+
+        // Chaque compte utilisateur possède un partenaire miroir dans son église.
+        User::observe(UserObserver::class);
 
         foreach ([Donation::class, Partner::class, Church::class, CategoryDon::class, Cellule::class] as $model) {
             $model::created($invalidateReports);

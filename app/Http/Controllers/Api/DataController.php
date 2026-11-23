@@ -128,6 +128,7 @@ class DataController extends Controller
             'church' => $partner->church?->name,
             'cellule_id' => $partner->cellule_id,
             'cellule' => $partner->cellule?->name,
+            'is_user' => $partner->isUserAccount(),
             'total_donations' => (float) ($partner->total_donations ?? 0),
             'updated_at' => $partner->updated_at?->toIso8601String(),
         ])->all(), 'has_more' => $hasMore]);

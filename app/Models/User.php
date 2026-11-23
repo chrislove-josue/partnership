@@ -10,6 +10,7 @@ use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -53,6 +54,12 @@ class User extends Authenticatable implements FilamentUser
     public function assignedChurch(): BelongsTo
     {
         return $this->belongsTo(Church::class, 'assigned_church_id');
+    }
+
+    /** Partenaire miroir du compte, enregistré dans l'église affectée. */
+    public function partner(): HasOne
+    {
+        return $this->hasOne(Partner::class);
     }
 
     public function managedChurch(): BelongsTo

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Enums\RoleName;
 use App\Models\Church;
 use App\Models\User;
+use App\Services\UserPartnerSync;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -26,5 +27,9 @@ class UserSeeder extends Seeder
         );
 
         $superAdmin->syncRoles([RoleName::SUPER_ADMIN->value]);
+
+        // DatabaseSeeder désactive les événements de modèle : on synchronise
+        // explicitement le partenaire du compte créé.
+        app(UserPartnerSync::class)->sync($superAdmin);
     }
 }

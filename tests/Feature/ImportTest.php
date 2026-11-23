@@ -181,7 +181,7 @@ class ImportTest extends TestCase
         ]]);
 
         $this->assertSame(1, $result['success']);
-        $this->assertSame(1, Partner::count());
+        $this->assertSame(1, Partner::whereNull('user_id')->count());
         $existing->refresh();
         $this->assertSame('Nouveau', $existing->first_name);
         $this->assertSame('Prenom', $existing->last_name);
@@ -232,7 +232,7 @@ class ImportTest extends TestCase
         $this->assertSame(0, $first['errors']);
         $this->assertSame(2, $first['total']);
         $this->assertSame(1, Donation::count());
-        $this->assertSame(1, Partner::count());
+        $this->assertSame(1, Partner::whereNull('user_id')->count());
 
         $second = $service->import($admin, [$row]);
         $this->assertSame(0, $second['success']);

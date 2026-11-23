@@ -10,6 +10,7 @@ use App\Models\Notification;
 use App\Models\Partner;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\UserPartnerSync;
 use App\Support\DonationCategoryNames;
 use Database\Seeders\UserSeeder;
 use Illuminate\Console\Command;
@@ -95,6 +96,9 @@ class ImportLegacyData extends Command
             $this->importNotifications($data['notifications'] ?? []);
             $this->importMagicTokens($data['magicTokens'] ?? []);
         });
+
+        // Chaque compte importé devient aussi un partenaire de son église.
+        $this->syncUserPartners();
 
         // Garantir l'accès au super admin historique (déjà présent dans l'ancienne base).
         $this->call('db:seed', ['--class' => UserSeeder::class, '--force' => true]);
@@ -240,6 +244,22 @@ class ImportLegacyData extends Command
                 $this->warn("Rôle inconnu pour {$row['email']} (roleId: {$row['roleId']}).");
             }
         }
+    }
+
+    /**
+     * Crée le partenaire miroir de chaque compte importé, dans son église.
+     */
+    private function syncUserPartners(): void
+    {
+        $sync = app(UserPartnerSync::class);
+
+        User::query()
+            ->whereNotNull('assigned_church_id')
+            ->chunkById(200, function ($users) use ($sync): void {
+                foreach ($users as $user) {
+                    $sync->sync($user);
+                }
+            });
     }
 
     /**

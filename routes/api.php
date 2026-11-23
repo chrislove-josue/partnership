@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BirthdayController;
 use App\Http\Controllers\Api\DataController;
 use App\Http\Controllers\Api\ImportController;
 use App\Http\Controllers\Api\ManagementController;
@@ -68,4 +69,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
+
+    Route::get('/birthdays', [BirthdayController::class, 'index']);
 });

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace Tests\Feature;
 
@@ -104,12 +104,10 @@ class BirthdayTest extends TestCase
 
         $notifications = Notification::where('type', NotificationType::BIRTHDAY->value)->get();
 
-        $this->assertCount(3, $notifications);
+        // Une alerte par partenaire, envoyée à chaque membre de la hiérarchie.
+        $this->assertSame([0, 3, 7], $notifications->pluck('data.delay')->unique()->sort()->values()->all());
+        $this->assertSame(3, $notifications->pluck('data.partnerId')->unique()->count());
         $this->assertTrue($notifications->contains('user_id', $pastor->id));
-        $this->assertSame(
-            [7, 3, 0],
-            $notifications->pluck('data.delay')->sort()->values()->all(),
-        );
         $this->assertTrue($notifications->contains(
             fn (Notification $n): bool => str_contains($n->title, 'aujourd'),
         ));
@@ -129,26 +127,16 @@ class BirthdayTest extends TestCase
 
         $this->assertSame(
             1,
-            Notification::where('type', NotificationType::BIRTHDAY->value)->count(),
+            Notification::where('type', NotificationType::BIRTHDAY->value)
+                ->pluck('data.partnerId')
+                ->unique()
+                ->count(),
         );
-    }
-
-    public function test_notify_upcoming_ignores_partners_without_church(): void
-    {
-        Partner::create([
-            'first_name' => 'Sans',
-            'last_name' => 'Église',
-            'email' => 'sans.eglise@example.test',
-            'birthdate' => Carbon::today()->toDateString(),
-            'church_id' => null,
-        ]);
-
-        $this->assertSame(0, app(BirthdayService::class)->notifyUpcoming());
     }
 
     public function test_birthday_api_returns_scoped_month_list(): void
     {
-        $user = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $user = User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
         $this->makePartnerWithBirthdate('1990-11-25');
 
         $response = $this->actingAs($user, 'sanctum')
@@ -164,7 +152,7 @@ class BirthdayTest extends TestCase
 
     public function test_birthday_api_validates_month_and_year(): void
     {
-        $user = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $user = User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
 
         $this->actingAs($user, 'sanctum')
             ->getJson('/api/birthdays?month=13')

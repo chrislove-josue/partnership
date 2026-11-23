@@ -207,9 +207,10 @@ app/
   Http/Controllers/      MagicLoginController (connexion par lien magique)
   Mail/                  UserWelcomeMail, DonationConfirmationMail
   Models/                Church, User, Partner, Cellule, Donation, CategoryDon, Notification, MagicToken, Account, Role
+  Observers/             SyncDeletionObserver, UserObserver (partenaire miroir des comptes)
   Policies/              Autorisations par ressource (délèguent à ChurchAccessService)
   Providers/Filament/    AdminPanelProvider (panel /dashboard, login, profil)
-  Services/              ChurchAccessService, DonationNotifier, NotificationService, MagicTokenService, UserInviter
+  Services/              ChurchAccessService, DonationNotifier, NotificationService, MagicTokenService, UserInviter, UserPartnerSync
   Console/Commands/      ImportLegacyData (migration depuis l'ancienne base)
 database/
   migrations/            Churches, Church columns, Cellules, Partners, CategoryDons, Donations, Notifications, MagicTokens, Accounts

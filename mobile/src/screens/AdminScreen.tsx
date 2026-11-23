@@ -193,9 +193,9 @@ export function AdminScreen() {
     setFormError('');
     setEditing(record ?? null);
     setName(record ? ('name' in record ? record.name : '') : '');
-    setType(record && 'type' in record ? String(record.type) : 'LOCAL');
-    setParentId(record && 'parent_id' in record && record.parent_id ? String(record.parent_id) : '');
-    setChurchId(record && 'church_id' in record ? String(record.church_id) : churchId);
+    setType(record && 'type' in record ? String(record.type) : user?.role === 'GROUP_PASTOR' ? 'SUB_GROUP' : user?.role === 'SUBGROUP_PASTOR' ? 'LOCAL' : 'GROUP');
+    setParentId(record && 'parent_id' in record && record.parent_id ? String(record.parent_id) : user?.role === 'SUPER_ADMIN' ? '' : user?.assigned_church_id ? String(user.assigned_church_id) : '');
+    setChurchId(record && 'church_id' in record ? String(record.church_id) : defaultChurchId(churches, user?.assigned_church_id));
     setLeaderId(record && 'leader_id' in record && record.leader_id
       ? String(record.leader_id)
       : record && 'manager_id' in record && record.manager_id ? String(record.manager_id) : '');

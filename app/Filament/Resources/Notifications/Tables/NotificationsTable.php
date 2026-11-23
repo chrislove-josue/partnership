@@ -27,6 +27,7 @@ class NotificationsTable
                     ->color(fn (NotificationType $state) => match ($state) {
                         NotificationType::NEW_DONATION => 'success',
                         NotificationType::NEW_PARTNER => 'info',
+                        NotificationType::BIRTHDAY => 'warning',
                         NotificationType::SYSTEM => 'gray',
                     }),
                 TextColumn::make('title')

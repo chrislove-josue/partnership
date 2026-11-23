@@ -159,10 +159,6 @@ export function ReportsScreen() {
   const filteredReport = report ? {
     categories: filterBy(report.categories, reportSearch, [(item) => item.name, (item) => item.amount]),
     partners: filterBy(report.partners, reportSearch, [(item) => item.name, (item) => item.amount, (item) => item.cellule]),
-    partnersWithoutDonation: filterBy(report.partnersWithoutDonation, reportSearch, [
-      (item) => item.name,
-      (item) => item.cellule,
-    ]),
     donations: filterBy(report.donations, reportSearch, [
       (item) => item.partner,
       (item) => item.category,
@@ -262,15 +258,6 @@ export function ReportsScreen() {
                   <Text style={styles.listLabel}>{partner.name}</Text>
                   <Text style={styles.listValue}>{formatMoney(partner.amount)}</Text>
                 </View>
-              ))}
-            </Card>
-          ) : null}
-
-          {showSection('without') && filteredReport.partnersWithoutDonation.length > 0 ? (
-            <Card>
-              <SectionTitle>Sans don sur la période</SectionTitle>
-              {filteredReport.partnersWithoutDonation.map((partner) => (
-                <Text key={partner.name} style={styles.meta}>{partner.name}</Text>
               ))}
             </Card>
           ) : null}

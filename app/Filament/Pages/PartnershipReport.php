@@ -208,6 +208,7 @@ class PartnershipReport extends Page
 
                         $reports = app(PartnershipReportService::class);
                         $report = $reports->buildReport($churchId, $type, $year, $index);
+                        $report = $reports->filterByCategoryGroup($report, (string) ($this->data['category_group'] ?? ''));
                         $xlsx = app(PartnershipReportExporter::class)->toXlsx($report);
 
                         return response()->streamDownload(

@@ -115,6 +115,16 @@ class PartnershipReport extends Page
                         'donations' => 'Détail des dons',
                     ])
                     ->live(),
+
+                Select::make('category_group')
+                    ->label('Famille de catégorie')
+                    ->options(array_merge(
+                        ['' => 'Toutes les familles'],
+                        collect(CategoryGroup::cases())->mapWithKeys(
+                            fn (CategoryGroup $group): array => [$group->value => $group->label()],
+                        )->all(),
+                    ))
+                    ->live(),
             ])
             ->columns(5)
             ->statePath('data')
@@ -148,6 +158,7 @@ class PartnershipReport extends Page
             [$type, $year, $index] = $this->periodFromState($state);
 
             $report = app(PartnershipReportService::class)->buildReport($churchId, $type, $year, $index);
+            $report = app(PartnershipReportService::class)->filterByCategoryGroup($report, (string) ($this->data['category_group'] ?? ''));
 
             return $this->filterReportForDisplay($report);
         } catch (Throwable $exception) {

@@ -137,7 +137,7 @@ export interface PartnershipReport {
   church: { id: number; name: string; type: string; parentName?: string | null };
   period: { label: string; from: string; to: string; type: string };
   totals: ReportTotals;
-  categories: Array<{ name: string; color: string; amount: number; count: number }>;
+  categories: Array<{ name: string; color: string; group?: string | null; group_label?: string | null; amount: number; count: number }>;
   partners: Array<{ name: string; amount: number; count: number; cellule?: string | null }>;
   partnersWithoutDonation: Array<{ name: string; cellule?: string | null }>;
   donations: Array<{ amount: number; date: string; category: string; partner: string }>;

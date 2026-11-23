@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { api, apiDownload, getErrorMessage } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { FilterCard } from '../components/FilterCard';
+import { defaultChurchId } from '../utils/church';
 import { filterBy } from '../utils/search';
 import type { Church, PartnershipReport, RecipientsPreview } from '../api/types';
 import {
@@ -32,6 +34,7 @@ function currentPeriod(): { type: string; month: string; year: string } {
 }
 
 export function ReportsScreen() {
+  const { user } = useAuth();
   const [loadingChurches, setLoadingChurches] = useState(true);
   const [churches, setChurches] = useState<Church[]>([]);
   const [churchId, setChurchId] = useState('');
@@ -49,14 +52,14 @@ export function ReportsScreen() {
       try {
         const response = await api<{ data: Church[] }>('/churches', { cacheKey: 'churches' });
         setChurches(response.data);
-        setChurchId((current) => current || response.data[0]?.id.toString() || '');
+        setChurchId((current) => current || defaultChurchId(response.data, user?.assigned_church_id));
       } catch (caught) {
         setError(getErrorMessage(caught, 'Impossible de charger les églises.'));
       } finally {
         setLoadingChurches(false);
       }
     })();
-  }, []);
+  }, [user?.assigned_church_id]);
 
   const query = useCallback(() => {
     const period = currentPeriod();

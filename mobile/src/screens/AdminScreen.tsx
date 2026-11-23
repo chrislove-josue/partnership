@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { api, getErrorMessage, invalidateCache } from '../api/client';
 import { useAuth } from '../context/AuthContext';
+import { defaultChurchId } from '../utils/church';
 import { filterBy } from '../utils/search';
 import type { Category, Cellule, Church, Partner, RoleOption, User } from '../api/types';
 import {
@@ -101,14 +102,14 @@ export function AdminScreen() {
       setUsers(userData.data);
       setPartners(partnerData.data);
       setRoles(roleData.data);
-      setChurchId((current) => current || churchData.data[0]?.id.toString() || '');
-      setAssignedChurchId((current) => current || churchData.data[0]?.id.toString() || '');
+      setChurchId((current) => current || defaultChurchId(churchData.data, user?.assigned_church_id));
+      setAssignedChurchId((current) => current || defaultChurchId(churchData.data, user?.assigned_church_id));
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger l’administration.'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.assigned_church_id]);
 
   useEffect(() => {
     void load();

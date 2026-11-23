@@ -112,6 +112,8 @@ class PartnershipReportService
                 $categories[$categoryId] = [
                     'name' => $donation->category?->name ?? '—',
                     'color' => $donation->category?->color ?? '#1F4E78',
+                    'group' => $donation->category?->group?->value ?? 'local_partnership',
+                    'group_label' => $donation->category?->group?->label() ?? 'Partenariat local',
                     'amount' => 0.0,
                     'count' => 0,
                 ];

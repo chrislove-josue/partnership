@@ -20,6 +20,12 @@ class CategoryDonsTable
                 TextColumn::make('name')
                     ->label('Nom')
                     ->searchable(),
+                TextColumn::make('group')
+                    ->label('Famille')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => $state
+                        ? (\App\Enums\CategoryGroup::tryFrom($state)?->label() ?? $state)
+                        : '—'),
                 TextColumn::make('donations_count')
                     ->label('Dons')
                     ->counts('donations')

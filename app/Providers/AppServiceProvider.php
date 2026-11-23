@@ -60,6 +60,7 @@ class AppServiceProvider extends ServiceProvider
             'components.select.actions.clear.label' => 'Effacer la sélection',
             'components.select.actions.remove_option.label' => 'Retirer :label',
             'components.select.search_label' => 'Rechercher',
+            'components.select.placeholder' => '',
         ], 'fr', 'filament-forms');
 
         // Limiteurs partagés : API, connexion par email/IP et liens magiques.

@@ -186,9 +186,10 @@ class PartnershipReport extends Page
             Action::make('resetReportFilters')
                 ->label('Réinitialiser les filtres')
                 ->color('gray')
-                ->visible(fn (): bool => filled($this->data['report_section'] ?? null))
+                ->visible(fn (): bool => filled($this->data['report_section'] ?? null) || filled($this->data['category_group'] ?? null))
                 ->action(function (): void {
                     $this->data['report_section'] = '';
+                    $this->data['category_group'] = '';
                     $this->form->fill($this->data);
                 }),
 
@@ -244,6 +245,7 @@ class PartnershipReport extends Page
                                 $index,
                                 true,
                                 $data['cc_emails'] ?? null,
+                                (string) ($this->data['category_group'] ?? ''),
                             );
 
                         $body = count($result['to']).' destinataire(s) — '.$result['targetLabel'];

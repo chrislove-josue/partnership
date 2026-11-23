@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
+use App\Models\User;
 use App\Services\ChurchAccessService;
 use App\Services\PartnershipReportExporter;
 use App\Services\PartnershipReportSender;
@@ -177,6 +178,16 @@ class PartnershipReport extends Page
     {
         $report['report_section'] = (string) ($this->data['report_section'] ?? '');
 
+        $group = (string) ($this->data['category_group'] ?? '');
+
+        if ($group !== '') {
+            $report['category_group'] = $group;
+            $report['category_group_label'] = CategoryGroup::tryFrom($group)?->label() ?? $group;
+        } else {
+            $report['category_group'] = '';
+            $report['category_group_label'] = '';
+        }
+
         return $report;
     }
 
@@ -272,7 +283,7 @@ class PartnershipReport extends Page
         return is_array($this->data) ? $this->data : [];
     }
 
-    /** @return array{0: \App\Models\User, 1: int, 2: PeriodType, 3: int, 4: int|null} */
+    /** @return array{0: User, 1: int, 2: PeriodType, 3: int, 4: int|null} */
     private function readSelection(): array
     {
         $state = $this->rawSelectionState();

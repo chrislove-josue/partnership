@@ -39,7 +39,7 @@
         @if ($showSection('categories'))
             <div class="rp-card">
                 <div class="rp-card-head">
-                    <h2 class="rp-card-title">Dons par catégorie — {{ $report['period']['label'] }}</h2>
+                    <h2 class="rp-card-title">Dons par catégorie — {{ $report['period']['label'] }}@if (! empty($report['category_group_label'])) — {{ $report['category_group_label'] }}@endif</h2>
                 </div>
                 <table class="rp-table">
                     <thead>

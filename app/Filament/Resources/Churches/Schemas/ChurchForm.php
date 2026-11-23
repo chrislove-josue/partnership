@@ -31,7 +31,6 @@ class ChurchForm
                 Select::make('type')
                     ->label('Type')
                     ->options($typeOptions)
-                    ->default(array_key_first($typeOptions))
                     ->required()
                     ->live(),
                 Select::make('parent_id')
@@ -39,9 +38,6 @@ class ChurchForm
                     ->relationship('parent', 'name', fn ($query) => $actor
                         ? $query->whereIn('id', $access->accessibleChurchIds($actor))
                         : $query)
-                    ->default(fn (): ?int => $actor && ! $actor->isSuperAdmin()
-                        ? $access->defaultChurchId($actor)
-                        : null)
                     ->searchable()
                     ->preload(),
                 Select::make('manager_id')

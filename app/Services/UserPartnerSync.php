@@ -25,6 +25,10 @@ class UserPartnerSync
     public function sync(User $user): ?Partner
     {
         if (! $user->assigned_church_id) {
+            // Compte sans église : le partenaire cesse d'être le miroir du compte
+            // mais reste enregistré (il peut porter des dons) comme partenaire simple.
+            Partner::query()->where('user_id', $user->id)->update(['user_id' => null]);
+
             return null;
         }
 

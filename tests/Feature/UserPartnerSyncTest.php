@@ -143,6 +143,17 @@ class UserPartnerSyncTest extends TestCase
         $this->assertNull(Partner::where('user_id', $user->id)->first());
     }
 
+    public function test_unassigning_the_church_detaches_the_partner(): void
+    {
+        $user = $this->makeUser(['email' => 'detache@example.test']);
+        $partner = Partner::where('user_id', $user->id)->firstOrFail();
+
+        $user->update(['assigned_church_id' => null]);
+
+        $this->assertDatabaseHas('partners', ['id' => $partner->id, 'user_id' => null]);
+        $this->assertSame($this->church->id, $partner->refresh()->church_id);
+    }
+
     public function test_api_created_user_is_also_stored_as_a_partner(): void
     {
         $admin = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();

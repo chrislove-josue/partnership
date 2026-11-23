@@ -34,7 +34,7 @@ class CategoryDonSeeder extends Seeder
         foreach ($categories as $category) {
             CategoryDon::updateOrCreate(
                 ['name' => $category['name']],
-                ['color' => $category['color']],
+                ['color' => $category['color'], 'group' => $category['group']],
             );
         }
     }

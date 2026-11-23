@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class CategoryDonsTable
@@ -37,7 +38,11 @@ class CategoryDonsTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('group')
+                    ->label('Famille')
+                    ->options(collect(CategoryGroup::cases())->mapWithKeys(
+                        fn (CategoryGroup $group): array => [$group->value => $group->label()],
+                    )->all()),
             ])
             ->recordActions([
                 EditAction::make(),

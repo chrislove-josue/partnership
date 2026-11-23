@@ -162,6 +162,13 @@ class ManagementController extends Controller
     public function destroyPartner(Partner $partner): JsonResponse
     {
         Gate::authorize('delete', $partner);
+
+        if ($partner->user_id !== null) {
+            return response()->json([
+                'message' => 'Ce partenaire est lié à un compte utilisateur : modifiez ou supprimez ce compte depuis la gestion des utilisateurs.',
+            ], 409);
+        }
+
         $partner->delete();
 
         return response()->json(['message' => 'Partenaire supprimé.']);

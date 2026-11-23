@@ -173,4 +173,47 @@ class UserPartnerSyncTest extends TestCase
             $this->assertNotNull($user->partner, "Le compte {$user->email} n'a pas de partenaire.");
         }
     }
+
+    public function test_the_api_flags_partners_linked_to_a_user_account(): void
+    {
+        $admin = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
+        $plain = Partner::create([
+            'first_name' => 'Donateur',
+            'last_name' => 'Simple',
+            'church_id' => $this->church->id,
+        ]);
+
+        $response = $this->actingAs($admin, 'sanctum')->getJson('/api/partners')->assertOk();
+
+        $response->assertJsonFragment(['email' => $admin->email, 'is_user' => true]);
+        $response->assertJsonFragment(['id' => $plain->id, 'is_user' => false]);
+    }
+
+    public function test_the_api_refuses_to_delete_the_partner_of_a_user_account(): void
+    {
+        $admin = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
+        $partner = $admin->partner;
+
+        $this->actingAs($admin, 'sanctum')
+            ->deleteJson("/api/partners/{$partner->id}")
+            ->assertStatus(409);
+
+        $this->assertDatabaseHas('partners', ['id' => $partner->id, 'user_id' => $admin->id]);
+    }
+
+    public function test_the_api_still_deletes_a_plain_partner(): void
+    {
+        $admin = User::role(RoleName::SUPER_ADMIN->value)->firstOrFail();
+        $partner = Partner::create([
+            'first_name' => 'Donateur',
+            'last_name' => 'Simple',
+            'church_id' => $this->church->id,
+        ]);
+
+        $this->actingAs($admin, 'sanctum')
+            ->deleteJson("/api/partners/{$partner->id}")
+            ->assertOk();
+
+        $this->assertDatabaseMissing('partners', ['id' => $partner->id]);
+    }
 }

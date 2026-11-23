@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Partners\Tables;
 
+use App\Filament\Resources\Partners\Actions\PartnerDeleteGuard;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -81,7 +82,8 @@ class PartnersTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->before(fn (DeleteBulkAction $action) => PartnerDeleteGuard::beforeBulkDelete($action)),
                 ]),
             ]);
     }

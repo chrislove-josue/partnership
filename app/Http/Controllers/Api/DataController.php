@@ -192,6 +192,8 @@ class DataController extends Controller
                 'id' => $category->id,
                 'name' => $category->name,
                 'color' => $category->color,
+                'group' => $category->group?->value,
+                'group_label' => $category->group?->label(),
                 'updated_at' => $category->updated_at?->toIso8601String(),
             ])->all(),
             'has_more' => $hasMore,
@@ -208,7 +210,7 @@ class DataController extends Controller
             ->with([
                 'partner:id,first_name,last_name,email,phone,handle_kc',
                 'church:id,name',
-                'category:id,name,color',
+                'category:id,name,color,group',
             ])
             ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
             ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))

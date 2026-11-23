@@ -29,7 +29,7 @@ class PartnershipReportSender
      *
      * @return array<string, mixed>
      */
-    public function preview(User $user, int $churchId, PeriodType $type, int $year, ?int $index): array
+    public function preview(User $user, int $churchId, PeriodType $type, int $year, ?int $index, ?string $categoryGroup = null): array
     {
         $this->assertAccess($user, $churchId);
 
@@ -40,6 +40,7 @@ class PartnershipReportSender
         }
 
         $report = $this->reports->buildReport($churchId, $type, $year, $index);
+        $report = $this->reports->filterByCategoryGroup($report, $categoryGroup);
 
         return [
             'sent' => false,
@@ -61,13 +62,13 @@ class PartnershipReportSender
      * @param  array<int, string> | null  $ccEmails  Copies cochées par l'utilisateur ; null conserve toutes les copies proposées.
      * @return array<string, mixed>
      */
-    public function send(User $user, int $churchId, PeriodType $type, int $year, ?int $index, bool $confirm, ?array $ccEmails = null): array
+    public function send(User $user, int $churchId, PeriodType $type, int $year, ?int $index, bool $confirm, ?array $ccEmails = null, ?string $categoryGroup = null): array
     {
         if (! $confirm) {
             return $this->preview($user, $churchId, $type, $year, $index);
         }
 
-        $preview = $this->preview($user, $churchId, $type, $year, $index);
+        $preview = $this->preview($user, $churchId, $type, $year, $index, $categoryGroup);
         $cc = $preview['cc'];
 
         if ($ccEmails !== null) {

@@ -202,7 +202,83 @@ class PartnershipReportService
         ];
     }
 
-    /** Format d'affichage des montants en FCFA. */
+    /**
+     * Filtre un rapport déjà construit pour ne conserver que les catégories (et les
+     * dons) d'une famille donnée. Les totaux sont recalculés en conséquence.
+     * Une famille vide/null conserve le rapport tel quel.
+     *
+     * @param  array<string, mixed>  $report
+     * @return array<string, mixed>
+     */
+    public function filterByCategoryGroup(array $report, ?string $group): array
+    {
+        $group = $group === '' ? null : $group;
+
+        if ($group === null) {
+            return $report;
+        }
+
+        $filteredCategories = array_values(array_filter(
+            $report['categories'] ?? [],
+            fn (array $category): bool => ($category['group'] ?? '') === $group,
+        ));
+
+        $filteredCategoryNames = array_flip(array_column($filteredCategories, 'name'));
+
+        $filteredDonations = array_values(array_filter(
+            $report['donations'] ?? [],
+            fn (array $donation): bool => isset($filteredCategoryNames[$donation['category'] ?? '']),
+        ));
+
+        // Recalcul des montants par partenaire à partir des dons filtrés.
+        $partnerAmounts = [];
+        $partnerCounts = [];
+
+        foreach ($filteredDonations as $donation) {
+            $partnerName = $donation['partner'] ?? '—';
+
+            if (! isset($partnerAmounts[$partnerName])) {
+                $partnerAmounts[$partnerName] = 0.0;
+                $partnerCounts[$partnerName] = 0;
+            }
+
+            $partnerAmounts[$partnerName] += (float) $donation['amount'];
+            $partnerCounts[$partnerName]++;
+        }
+
+        $originalPartners = [];
+
+        foreach ($report['partners'] ?? [] as $partner) {
+            $originalPartners[$partner['name']] = $partner;
+        }
+
+        $partners = [];
+
+        foreach ($partnerAmounts as $name => $amount) {
+            $partner = $originalPartners[$name] ?? ['name' => $name];
+            $partner['amount'] = $amount;
+            $partner['count'] = $partnerCounts[$name];
+            $partners[] = $partner;
+        }
+
+        usort($partners, fn (array $a, array $b): int => $b['amount'] <=> $a['amount']);
+
+        $total = 0.0;
+
+        foreach ($filteredDonations as $donation) {
+            $total += (float) $donation['amount'];
+        }
+
+        $report['categories'] = $filteredCategories;
+        $report['donations'] = $filteredDonations;
+        $report['partners'] = $partners;
+        $report['totals']['amount'] = $total;
+        $report['totals']['donationCount'] = count($filteredDonations);
+        $report['totals']['partnersWithDonation'] = count($partners);
+
+        return $report;
+    }
+
     public function formatAmount(float|int $amount): string
     {
         return number_format((float) $amount, 0, ',', ' ').' FCFA';

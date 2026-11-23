@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Import des données de l'ancienne base PostgreSQL (projet Next.js / Prisma / Neon)
+ * Import des données de l'ancienne base PostgreSQL (projet Next.js / Prisma)
  * vers la base Laravel PostgreSQL courante.
  *
  * Usage : php database/import-nextjs.php
@@ -18,7 +18,7 @@ $app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
 // ---------------------------------------------------------------
-// 1. Connexion à l'ancienne base (Neon, projet Next.js)
+// 1. Connexion à l'ancienne base (PostgreSQL, projet Next.js)
 // ---------------------------------------------------------------
 $env = file_get_contents(__DIR__.'/../../sponsorship-traking/.env');
 if (! preg_match('/^DATABASE_URL="([^"]+)"/m', $env, $m)) {

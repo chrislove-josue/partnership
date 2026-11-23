@@ -72,6 +72,8 @@ export interface Category {
   id: number;
   name: string;
   color: string;
+  group?: string | null;
+  group_label?: string | null;
 }
 
 export interface Donation {

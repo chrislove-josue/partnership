@@ -177,6 +177,24 @@ Définis dans `app/Enums/RoleName.php` et `app/Enums/PermissionName.php`, semés
 | `LOCAL_PASTOR` | lecture de sa propre église, personnel |
 | `STAFF` | lecture de sa propre église |
 
+## Comptes utilisateurs et partenaires
+
+Chaque utilisateur (pasteur, personnel, administrateur) est aussi enregistré comme
+**partenaire de l'église qui lui est assignée**. Le compte reste la source de vérité :
+
+- à la création du compte, un partenaire miroir est créé dans `assigned_church_id` ;
+- le partenaire est mis à jour quand le nom, l'email, le téléphone, le handle KC ou
+  l'église assignée change (déplacement d'église inclus) ;
+- un partenaire existant non rattaché avec le même email / téléphone / handle KC est
+  réutilisé au lieu d'être dupliqué ;
+- la suppression du compte **détache** le partenaire (`partners.user_id = null`) sans
+  supprimer ses dons ;
+- un partenaire miroir ne peut pas être supprimé directement (UI ou API) : il faut
+  passer par la gestion des utilisateurs.
+
+Implémentation : `app/Services/UserPartnerSync.php` et `app/Observers/UserObserver.php`.
+La commande `legacy:import` et `UserSeeder` synchronisent aussi les comptes importés.
+
 ## Structure du projet
 
 ```

@@ -92,7 +92,7 @@ class PartnershipReportService
 
         $range = $this->resolvePeriodRange($type, $year, $index);
 
-        $donations = Donation::with(['category:id,name,color', 'partner.cellule:id,name'])
+        $donations = Donation::with(['category:id,name,color,group', 'partner.cellule:id,name'])
             ->where('church_id', $churchId)
             ->whereBetween('date', [$range['from'], $range['to']])
             ->orderBy('date')

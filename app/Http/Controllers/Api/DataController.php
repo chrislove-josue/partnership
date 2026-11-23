@@ -239,6 +239,8 @@ class DataController extends Controller
             'partner' => $donation->partner?->full_name,
             'category_id' => $donation->category_id,
             'category' => $donation->category?->name,
+            'category_group' => $donation->category?->group?->value,
+            'category_group_label' => $donation->category?->group?->label(),
             'color' => $donation->category?->color,
             'updated_at' => $donation->updated_at?->toIso8601String(),
         ])->all(), 'has_more' => $hasMore]);

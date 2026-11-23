@@ -41,6 +41,7 @@ export function ReportsScreen() {
   const [report, setReport] = useState<PartnershipReport | null>(null);
   const [reportSearch, setReportSearch] = useState('');
   const [reportSection, setReportSection] = useState('');
+  const [categoryGroup, setCategoryGroup] = useState('');
   const [preview, setPreview] = useState<RecipientsPreview | null>(null);
   const [selectedCc, setSelectedCc] = useState<string[]>([]);
   const [confirming, setConfirming] = useState(false);
@@ -69,8 +70,9 @@ export function ReportsScreen() {
       month: period.month,
       year: period.year,
     });
+    if (categoryGroup) params.set('category_group', categoryGroup);
     return params.toString();
-  }, [churchId]);
+  }, [churchId, categoryGroup]);
 
   const generate = async () => {
     if (!churchId) {
@@ -119,6 +121,7 @@ export function ReportsScreen() {
         quarter: params.get('quarter') ? Number(params.get('quarter')) : null,
         confirm: true,
         cc_emails: selectedCc,
+        category_group: categoryGroup || null,
       };
       const result = await api<{ sent: boolean; to: unknown[]; cc: unknown[] }>('/reports/partnership/send', {
         method: 'POST',
@@ -172,6 +175,7 @@ export function ReportsScreen() {
   const resetReportFilters = () => {
     setReportSearch('');
     setReportSection('');
+    setCategoryGroup('');
   };
 
   return (
@@ -179,6 +183,17 @@ export function ReportsScreen() {
       <Card>
         {loadingChurches ? <LoadingView /> : null}
         <SelectField label="Église" value={churchId} options={churchOptions} onChange={setChurchId} searchable />
+        <SelectField
+          label="Famille de catégorie"
+          value={categoryGroup}
+          options={[
+            { label: 'Toutes les familles', value: '' },
+            { label: 'Finances de l\'église', value: 'church_finances' },
+            { label: 'Partenariat du ministère', value: 'ministry_partnership' },
+            { label: 'Partenariat local', value: 'local_partnership' },
+          ]}
+          onChange={setCategoryGroup}
+        />
         <View style={styles.buttonRow}>
           <PrimaryButton title="Générer" onPress={() => void generate()} disabled={!churchId || loading} />
           <PrimaryButton title="Exporter" onPress={() => void exportReport()} disabled={!churchId || loading} />

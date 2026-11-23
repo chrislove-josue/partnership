@@ -215,6 +215,7 @@ export function PartnersScreen() {
           <View style={styles.row}>
             <Text style={styles.name}>{partner.full_name ?? `${partner.first_name} ${partner.last_name}`}</Text>
             <Badge text={partner.church ?? '—'} />
+            {partner.is_user ? <Badge text="Compte" color={colors.blue} /> : null}
           </View>
           <Text style={styles.meta}>{partner.phone ?? 'Téléphone non renseigné'}</Text>
           {partner.handle_kc ? <Text style={styles.meta}>KingsChat : {partner.handle_kc}</Text> : null}

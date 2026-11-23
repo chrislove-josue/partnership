@@ -10,7 +10,24 @@ class CategoryDon extends Model
     protected $fillable = [
         'name',
         'color',
+        'group',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'group' => \App\Enums\CategoryGroup::class,
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $category): void {
+            if (blank($category->group)) {
+                $category->group = \App\Enums\CategoryGroup::fromName((string) $category->name);
+            }
+        });
+    }
 
     public function donations(): HasMany
     {

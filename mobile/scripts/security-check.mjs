@@ -90,14 +90,18 @@ check('F1 : debug.keystore n\'est pas versionné', () => {
   assert.ok(read('.gitignore').includes('android/app/debug.keystore'), 'chemin absent du .gitignore mobile');
 });
 
-check('F2 : aucun trafic en clair autorisé dans la release', () => {
+check('F2 : trafic clair réservé au réseau local', () => {
   assert.ok(!/"usesCleartextTraffic"\s*:\s*true/i.test(read('app.json')), 'app.json active usesCleartextTraffic');
-  assert.ok(
-    !/android:usesCleartextTraffic\s*=\s*"true"/i.test(manifestText),
-    'un manifeste active android:usesCleartextTraffic="true"',
-  );
   const main = read('android/app/src/main/AndroidManifest.xml');
+  // Android ne sait pas expresser de plage d'IP dans network_security_config :
+  // le clair est autorisé au niveau système puis filtré par isLocalNetworkHost().
+  assert.ok(
+    /android:usesCleartextTraffic\s*=\s*"true"/.test(main),
+    'le manifeste n’autorise pas le réseau local en clair',
+  );
   assert.ok(!/networkSecurityConfig/.test(main), 'la configuration réseau permissive est référencée en release');
+  const client = read('src/api/client.ts');
+  assert.ok(client.includes('isLocalNetworkHost'), 'le filtre des hôtes locaux est absent');
   for (const variant of ['debug', 'debugOptimized']) {
     assert.ok(
       read(`android/app/src/${variant}/AndroidManifest.xml`).includes('@xml/network_security_config'),

@@ -20,7 +20,7 @@ class MobileImportApiTest extends TestCase
     {
         $this->seed();
 
-        return User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        return User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
     }
 
     public function test_mobile_can_download_import_templates(): void

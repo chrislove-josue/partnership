@@ -198,7 +198,7 @@ class MobileApiTest extends TestCase
         Notification::query()->create([
             'id' => (string) \Illuminate\Support\Str::uuid(),
             'type' => \App\Enums\NotificationType::NEW_DONATION->value,
-            'title' => 'Notification privÃ©e',
+            'title' => 'Notification privée',
             'message' => 'Test',
             'data' => [],
             'is_read' => false,

@@ -80,12 +80,12 @@ class PartnershipReportTest extends TestCase
         $year = $service->resolvePeriodRange(PeriodType::YEAR, 2025, null);
         $this->assertSame('2025-01-01', $year['from']->toDateString());
         $this->assertSame('2025-12-31', $year['to']->toDateString());
-        $this->assertSame('AnnÃ©e 2025', $year['label']);
+        $this->assertSame('Année 2025', $year['label']);
 
         $month = $service->resolvePeriodRange(PeriodType::MONTH, 2026, 2);
         $this->assertSame('2026-02-01', $month['from']->toDateString());
         $this->assertSame('2026-02-28', $month['to']->toDateString());
-        $this->assertSame('FÃ©vrier 2026', $month['label']);
+        $this->assertSame('Février 2026', $month['label']);
 
         $quarter = $service->resolvePeriodRange(PeriodType::QUARTER, 2026, 1);
         $this->assertSame('2026-01-01', $quarter['from']->toDateString());
@@ -131,8 +131,8 @@ class PartnershipReportTest extends TestCase
         $report = app(PartnershipReportService::class)
             ->buildReport($church->id, PeriodType::MONTH, 2026, 2);
 
-        // Chaque compte utilisateur est aussi un partenaire de son Ã©glise : le
-        // super admin du seed apparaÃ®t donc dans les partenaires sans don.
+        // Chaque compte utilisateur est aussi un partenaire de son église : le
+        // super admin du seed apparaît donc dans les partenaires sans don.
         $accountPartnerIds = Partner::whereNotNull('user_id')
             ->where('church_id', $church->id)
             ->pluck('id')
@@ -184,7 +184,7 @@ class PartnershipReportTest extends TestCase
         $this->assertContains($other->email, $emails);
         $this->assertNotContains($sender->email, $emails);
         $this->assertNotContains($inactive->email, $emails);
-        $this->assertSame('hiÃ©rarchie nationale (super administrateurs)', $result['targetLabel']);
+        $this->assertSame('hiérarchie nationale (super administrateurs)', $result['targetLabel']);
     }
 
     public function test_staff_report_goes_to_own_church_manager(): void
@@ -203,7 +203,7 @@ class PartnershipReportTest extends TestCase
         $this->assertSame([$pastor->email], array_column($result['recipients'], 'email'));
         $this->assertContains($groupPastor->email, $cc);
         $this->assertContains('sounesatchougo@gmail.com', $cc);
-        $this->assertSame('pasteur de votre Ã©glise', $result['targetLabel']);
+        $this->assertSame('pasteur de votre église', $result['targetLabel']);
     }
 
     public function test_staff_report_copies_subgroup_and_group_pastors(): void
@@ -225,7 +225,7 @@ class PartnershipReportTest extends TestCase
         $this->assertContains($subPastor->email, $cc);
         $this->assertContains($groupPastor->email, $cc);
         $this->assertContains('sounesatchougo@gmail.com', $cc);
-        $this->assertSame('pasteur de votre Ã©glise', $result['targetLabel']);
+        $this->assertSame('pasteur de votre église', $result['targetLabel']);
     }
 
     public function test_role_name_uses_the_highest_function(): void
@@ -314,7 +314,7 @@ class PartnershipReportTest extends TestCase
         $this->assertSame([$pastor->email], $emails);
         $this->assertNotContains($otherPastor->email, $emails);
         $this->assertNotContains($inactivePastor->email, $emails);
-        $this->assertSame('pasteur de votre Ã©glise', $result['targetLabel']);
+        $this->assertSame('pasteur de votre église', $result['targetLabel']);
     }
 
     public function test_group_pastor_can_be_the_local_church_manager_recipient(): void
@@ -569,7 +569,7 @@ class PartnershipReportTest extends TestCase
         Mail::assertSent(PartnershipReportMail::class, function (PartnershipReportMail $mail) use ($manager): bool {
             return $mail->hasTo($manager->email)
                 && count($mail->attachments()) === 1
-                && str_contains($mail->envelope()->subject, 'FÃ©vrier 2026');
+                && str_contains($mail->envelope()->subject, 'Février 2026');
         });
     }
 
@@ -594,11 +594,11 @@ class PartnershipReportTest extends TestCase
             $workbook = IOFactory::load($path);
 
             $this->assertSame(
-                ['RÃ©sumÃ©', 'Dons par catÃ©gorie', 'Partenaires', 'Sans don sur la pÃ©riode'],
+                ['Résumé', 'Dons par catégorie', 'Partenaires', 'Sans don sur la période'],
                 $workbook->getSheetNames(),
             );
-            $this->assertSame('4 500 FCFA', $workbook->getSheetByName('RÃ©sumÃ©')->getCell('B6')->getValue());
-            $this->assertSame('TOTAL', $workbook->getSheetByName('Dons par catÃ©gorie')->getCell('A3')->getValue());
+            $this->assertSame('4 500 FCFA', $workbook->getSheetByName('Résumé')->getCell('B6')->getValue());
+            $this->assertSame('TOTAL', $workbook->getSheetByName('Dons par catégorie')->getCell('A3')->getValue());
         } finally {
             @unlink($path);
         }
@@ -617,7 +617,7 @@ class PartnershipReportTest extends TestCase
         $component = \Livewire\Livewire::test(\App\Filament\Pages\PartnershipReport::class)->instance();
         $description = (new \ReflectionMethod($component, 'sendModalDescription'))->invoke($component);
 
-        $this->assertStringContainsString('Ã€ (pasteur de votre groupe) : '.$groupPastor->email, $description);
+        $this->assertStringContainsString('À (pasteur de votre groupe) : '.$groupPastor->email, $description);
         $this->assertStringContainsString('Copie :', $description);
 
         $schema = (new \ReflectionMethod($component, 'sendCcSchema'))->invoke($component);
@@ -687,9 +687,9 @@ class PartnershipReportTest extends TestCase
 
         \Livewire\Livewire::test(\App\Filament\Pages\PartnershipReport::class)
             ->set('data.church_id', null)
-            ->assertSee('Aucune Ã©glise sÃ©lectionnÃ©e')
+            ->assertSee('Aucune église sélectionnée')
             ->set('data.type', null)
-            ->assertSee('Aucune Ã©glise sÃ©lectionnÃ©e');
+            ->assertSee('Aucune église sélectionnée');
     }
 
     public function test_report_page_renders_for_a_super_admin(): void
@@ -703,13 +703,13 @@ class PartnershipReportTest extends TestCase
             ->assertOk()
             ->assertSee('Rapport de partenariat')
             ->assertSee('Total des dons')
-            ->assertSee('Dons par catÃ©gorie');
+            ->assertSee('Dons par catégorie');
     }
 
     public function test_missing_church_raises_a_clear_error(): void
     {
         $this->expectException(RuntimeException::class);
-        $this->expectExceptionMessage('Ã‰glise introuvable');
+        $this->expectExceptionMessage('Église introuvable');
 
         app(PartnershipReportService::class)->buildReport(999999, PeriodType::YEAR, 2026, null);
     }

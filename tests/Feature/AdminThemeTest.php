@@ -76,7 +76,7 @@ class AdminThemeTest extends TestCase
     {
         $this->seed();
 
-        $user = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $user = User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
 
         $this->actingAs($user)
             ->get('/dashboard')

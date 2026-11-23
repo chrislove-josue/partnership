@@ -128,12 +128,12 @@ class LoginMessagesTest extends TestCase
         $this->seed();
 
         $this->assertDatabaseMissing('users', [
-            'email' => 'sounesatchougo@gmail.com',
+            'email' => 'inexistant@example.test',
         ]);
 
         $this->assertLoginError(
             $this->attempt([
-                'email' => 'sounesatchougo@gmail.com',
+                'email' => 'inexistant@example.test',
                 'password' => 'azerty123',
             ]),
             'user_not_found',

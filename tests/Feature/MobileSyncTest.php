@@ -24,7 +24,7 @@ class MobileSyncTest extends TestCase
 
     private function superAdmin(): User
     {
-        return User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        return User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
     }
 
     public function test_sync_deletions_can_be_paged_with_after_id(): void

@@ -17,7 +17,7 @@ class ApiSettingsTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $admin = User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
         Setting::set('api_url', 'http://10.0.0.5:8000/api');
 
         $this->actingAs($admin, 'sanctum')
@@ -37,7 +37,7 @@ class ApiSettingsTest extends TestCase
     {
         $this->seed();
 
-        $admin = User::where('email', 'libertsinzo7@gmail.com')->firstOrFail();
+        $admin = User::where('email', 'sounesatchougo@gmail.com')->firstOrFail();
         $this->actingAs($admin);
         $this->assertTrue(ApiSettings::canAccess());
 

@@ -149,6 +149,6 @@ class DefaultChurchSelectionTest extends TestCase
         $this->actingAs($admin);
 
         Livewire::test(CreateDonation::class)
-            ->assertSchemaStateSet(['church_id' => Church::query()->orderBy('id')->value('id')]);
+            ->assertSchemaStateSet(['worship_church_id' => Church::query()->orderBy('id')->value('id')]);
     }
 }

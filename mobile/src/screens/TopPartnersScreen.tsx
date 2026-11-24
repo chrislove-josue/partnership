@@ -127,6 +127,8 @@ export function TopPartnersScreen() {
     setQuarter(String(Math.floor(now.getMonth() / 3) + 1));
     setYear(String(now.getFullYear()));
     setChurchId(user?.assigned_church_id ? String(user.assigned_church_id) : '');
+    setCategoryGroup('');
+    setCategoryId('');
   };
 
   const medals = ['🥇', '🥈', '🥉'];
@@ -138,7 +140,7 @@ export function TopPartnersScreen() {
         onQueryChange={setSearch}
         placeholder="Nom, église, cellule"
         onReset={resetFilters}
-        active={Boolean(search) || period !== 'month' || Boolean(churchId)}
+        active={Boolean(search) || period !== 'month' || Boolean(churchId) || Boolean(categoryGroup || categoryId)}
       >
         <SelectField
           label="Église"

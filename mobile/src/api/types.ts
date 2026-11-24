@@ -83,6 +83,8 @@ export interface Donation {
   date: string;
   church_id: number;
   church?: string | null;
+  worship_church_id?: number | null;
+  worship_church?: string | null;
   partner_id: number;
   partner?: string | null;
   category_id: number;

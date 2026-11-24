@@ -135,11 +135,7 @@ export function AppNavigator() {
     <NavigationContainer key={user ? 'application' : 'connexion'}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          <>
-            <Stack.Screen name="Application" component={MainTabs} />
-            <Stack.Screen name="HistoriqueConnexion" component={LoginHistoryScreen} />
-            <Stack.Screen name="Anniversaires" component={BirthdaysScreen} />
-          </>
+          <Stack.Screen name="Application" component={MainTabs} />
         ) : (
           <Stack.Screen name="Connexion" component={LoginScreen} />
         )}

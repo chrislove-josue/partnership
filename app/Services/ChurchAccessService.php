@@ -197,6 +197,8 @@ class ChurchAccessService
     {
         return $this->isSuperAdmin($user)
             || $user->roleName() === RoleName::GROUP_PASTOR->value
+            || $user->roleName() === RoleName::SUBGROUP_PASTOR->value
+            || $user->roleName() === RoleName::LOCAL_PASTOR->value
             || $user->hasPermission(PermissionName::MANAGE_CHURCHES);
     }
 
@@ -231,6 +233,9 @@ class ChurchAccessService
         return in_array($user->roleName(), [
             RoleName::SUPER_ADMIN->value,
             RoleName::GROUP_PASTOR->value,
+            RoleName::SUBGROUP_PASTOR->value,
+            RoleName::LOCAL_PASTOR->value,
+            RoleName::STAFF->value,
         ], true);
     }
 

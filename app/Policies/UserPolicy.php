@@ -11,7 +11,8 @@ class UserPolicy
 
     public function viewAny(User $user): bool
     {
-        return $this->access->canManageUsers($user);
+        return $this->access->canManageUsers($user)
+            || $user->roleName() === RoleName::STAFF->value;
     }
 
     public function view(User $user, User $model): bool

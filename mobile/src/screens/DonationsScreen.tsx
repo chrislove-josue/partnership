@@ -57,6 +57,7 @@ export function DonationsScreen() {
     setError('');
     try {
       const query = new URLSearchParams();
+      if (statusFilter) query.set('status', statusFilter);
       if (churchFilter) query.set('church_id', churchFilter);
       if (categoryFilter) query.set('category_id', categoryFilter);
       if (partnerFilter) query.set('partner_id', partnerFilter);
@@ -79,7 +80,7 @@ export function DonationsScreen() {
     } finally {
       setLoading(false);
     }
-  }, [churchFilter, categoryFilter, partnerFilter, user?.assigned_church_id]);
+  }, [statusFilter, churchFilter, categoryFilter, partnerFilter, user?.assigned_church_id]);
 
   useEffect(() => {
     const timer = setTimeout(() => void load(), 250);

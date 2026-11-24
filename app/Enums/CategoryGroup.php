@@ -34,6 +34,7 @@ enum CategoryGroup: string
             'action de grâce', 'action de grace',
             'semences', 'semence',
             'action de grâces', => self::CHURCH_FINANCES,
+            'prémices', 'premices', => self::MINISTRY_PARTNERSHIP,
             'rhapsodie des réalités', 'rhapsodie des realites', 'rhapsodie de réalités', 'rhapsodie de realites',
             'mission innercity', 'mission inner city', 'mission urbaine',
             'école de guérisons', 'ecole de guerisons', 'ecole de guérisons', 'healing streams', => self::MINISTRY_PARTNERSHIP,

@@ -14,6 +14,8 @@ class DonationCategoryNames
         'Rhapsodie des Réalités',
         'Mission InnerCity',
         'École de Guérisons',
+        'Prémices',
+        'Projet de construction',
     ];
 
     /** @var array<string, string> */

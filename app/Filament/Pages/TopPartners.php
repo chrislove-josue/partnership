@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
 use App\Models\CategoryDon;
+use App\Models\Church;
 use App\Services\ChurchAccessService;
 use App\Services\TopPartnerService;
 use Filament\Forms\Components\Select;
@@ -162,7 +163,7 @@ class TopPartners extends Page
 
             [$from, $to] = $service->range($period, $year, $index);
 
-            $churchName = \App\Models\Church::query()
+            $churchName = Church::query()
                 ->whereKey($churchIds[0] ?? 0)
                 ->value('name');
 

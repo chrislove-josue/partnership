@@ -13,6 +13,7 @@ class Donation extends Model
         'date',
         'partner_id',
         'church_id',
+        'worship_church_id',
         'category_id',
     ];
 
@@ -32,6 +33,12 @@ class Donation extends Model
     public function church(): BelongsTo
     {
         return $this->belongsTo(Church::class);
+    }
+
+    /** Église où le culte a eu lieu (peut différer de l'église créditée). */
+    public function worshipChurch(): BelongsTo
+    {
+        return $this->belongsTo(Church::class, 'worship_church_id');
     }
 
     public function partner(): BelongsTo

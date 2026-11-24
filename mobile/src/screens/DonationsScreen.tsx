@@ -120,7 +120,7 @@ export function DonationsScreen() {
     setEditing(donation ?? null);
     setAmount(donation ? String(donation.amount) : '');
     setDate(donation ? donation.date.slice(0, 10) : new Date().toISOString().slice(0, 10));
-    setChurchId(donation ? String(donation.worship_church_id ?? donation.church_id) : (formPartnerOptions.length ? churchId : churchId));
+    setChurchId(donation ? String(donation.worship_church_id ?? donation.church_id) : churchId);
     setPartnerId(donation ? String(donation.partner_id) : (formPartnerOptions[0]?.value ?? ''));
     setCategoryId(donation ? String(donation.category_id) : (categoryData[0]?.id.toString() || ''));
     setFormOpen(true);
@@ -163,16 +163,29 @@ export function DonationsScreen() {
 
     setSaving(true);
     try {
-      await api('/donations', {
-        method: 'POST',
-        body: {
-          amount: parsedAmount,
-          date,
-          church_id: Number(churchId),
-          partner_id: Number(partnerId),
-          category_id: Number(categoryId),
-        },
-      });
+      if (editing) {
+        await api(`/donations/${editing.id}`, {
+          method: 'PATCH',
+          body: {
+            amount: parsedAmount,
+            date,
+            church_id: Number(churchId),
+            partner_id: Number(partnerId),
+            category_id: Number(categoryId),
+          },
+        });
+      } else {
+        await api('/donations', {
+          method: 'POST',
+          body: {
+            amount: parsedAmount,
+            date,
+            church_id: Number(churchId),
+            partner_id: Number(partnerId),
+            category_id: Number(categoryId),
+          },
+        });
+      }
       invalidateCache();
       setFormOpen(false);
       await load();
@@ -210,6 +223,16 @@ export function DonationsScreen() {
               value={search}
               onChangeText={setSearch}
               placeholder="Partenaire, église, catégorie, montant"
+            />
+            <SelectField
+              label="Statut"
+              value={statusFilter}
+              options={[
+                { label: 'Dons actifs', value: '' },
+                { label: 'Dons désactivés', value: 'inactive' },
+                { label: 'Tous les dons', value: 'all' },
+              ]}
+              onChange={setStatusFilter}
             />
             <SelectField
               label="Église"

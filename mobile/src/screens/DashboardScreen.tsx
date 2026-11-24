@@ -61,12 +61,10 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
     setError('');
     try {
       const [churchResponse, donationResponse, partnerResponse, notificationResponse] = await Promise.all([
-        api<{ data: Church[] }>('/churches', { cacheKey: 'churches', refresh }),
-        api<{ data: Donation[] }>('/donations', { cacheKey: 'donations', refresh }),
-        api<{ data: Partner[] }>('/partners', { cacheKey: 'partners', refresh }),
-        api<{ data: AppNotification[]; unread_count: number }>('/notifications', {
-          cacheKey: `notifications:${user?.id ?? 'me'}`,
-          refresh,
+        api<{ data: Church[] }>('/churches'),
+        api<{ data: Donation[] }>('/donations'),
+        api<{ data: Partner[] }>('/partners'),
+        api<{ data: AppNotification[]; unread_count: number }>('/notifications'`,
         }),
       ]);
 

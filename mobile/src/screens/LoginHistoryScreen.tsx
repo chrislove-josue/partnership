@@ -136,6 +136,5 @@ const styles = StyleSheet.create({
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
   source: { fontSize: 13, color: colors.muted, flexShrink: 1, textAlign: 'right' },
   date: { fontSize: 15, fontWeight: '700', color: colors.ink, marginTop: 10 },
-  meta: { fontSize: 12, color: colors.muted, marginTop: 5 },
-  refresh: { marginBottom: 12 },
+  meta: { fontSize: 12, color: colors.muted, marginTop: 5 },: { marginBottom: 12 },
 });

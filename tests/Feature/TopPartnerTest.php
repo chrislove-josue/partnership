@@ -194,6 +194,30 @@ class TopPartnerTest extends TestCase
         $this->assertEquals(7000, $oneCategory->json('data.0.amount'));
     }
 
+    public function test_ranking_shows_the_credited_church_not_the_partners_origin(): void
+    {
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $other = Church::create([
+            'name' => 'Église d origine',
+            'type' => \App\Enums\ChurchType::LOCAL,
+            'parent_id' => $group->id,
+        ]);
+
+        $visitor = Partner::create([
+            'first_name' => 'Visiteur',
+            'last_name' => 'Top',
+            'email' => 'visiteur-origine-top@example.test',
+            'church_id' => $other->id,
+        ]);
+        $this->donation($visitor, 5000, '2026-11-10'); // crédité à $this->church
+
+        $items = app(TopPartnerService::class)->rank([$this->church->id], PeriodType::MONTH, 2026, 11);
+
+        $this->assertCount(1, $items);
+        $this->assertSame($this->church->name, $items->first()['church']);
+        $this->assertSame($other->name, $items->first()['origin_church']);
+    }
+
     public function test_api_rejects_an_invalid_period(): void
     {
         $this->actingAs($this->admin, 'sanctum')

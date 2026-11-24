@@ -135,4 +135,47 @@ class DonationDeactivationTest extends TestCase
         $found = Church::withTotalDonations()->findOrFail($this->church->id);
         $this->assertEquals(25000, (float) $found->total_donations);
     }
+
+    public function test_staff_and_pastor_cannot_delete_a_donation(): void
+    {
+        $this->actingAs($this->pastor, 'sanctum')
+            ->deleteJson("/api/donations/{$this->donation->id}")
+            ->assertForbidden();
+
+        $staff = User::create([
+            'name' => 'Staff suppression',
+            'email' => 'staff-suppression@example.test',
+            'password' => Hash::make('password'),
+            'assigned_church_id' => $this->church->id,
+            'is_active' => true,
+        ]);
+        $staff->syncRoles([RoleName::STAFF->value]);
+
+        $this->actingAs($staff, 'sanctum')
+            ->deleteJson("/api/donations/{$this->donation->id}")
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('donations', ['id' => $this->donation->id]);
+    }
+
+    public function test_pastor_can_modify_and_deactivate_but_not_delete(): void
+    {
+        $this->actingAs($this->pastor, 'sanctum')
+            ->patchJson("/api/donations/{$this->donation->id}", ['amount' => 30000])
+            ->assertOk();
+
+        $this->actingAs($this->pastor, 'sanctum')
+            ->postJson("/api/donations/{$this->donation->id}/deactivate")
+            ->assertOk();
+
+        $this->actingAs($this->pastor, 'sanctum')
+            ->deleteJson("/api/donations/{$this->donation->id}")
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('donations', [
+            'id' => $this->donation->id,
+            'amount' => 30000,
+            'is_active' => false,
+        ]);
+    }
 }

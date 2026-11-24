@@ -5,6 +5,7 @@ import { api, getErrorMessage, invalidateCache } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { defaultChurchId } from '../utils/church';
 import { filterBy } from '../utils/search';
+import { isSuperAdmin } from '../api/types';
 import type { Category, Church, Donation, Partner } from '../api/types';
 import { ImportExportCard } from '../components/ImportExportCard';
 import {
@@ -244,13 +245,18 @@ export function DonationsScreen() {
                 {formatDate(donation.date)}
               </Text>
               {donation.is_active === false ? <Badge text="Désactivé" color={colors.gold} /> : null}
-              <View style={styles.actions}>
-                <Pressable style={styles.toggle} onPress={() => void toggleActive(donation)}>
-                  <Text style={styles.toggleText}>
-                    {donation.is_active === false ? 'Réactiver' : 'Désactiver'}
-                  </Text>
-                </Pressable>
-              </View>
+                <View style={styles.actions}>
+                  <Pressable style={styles.toggle} onPress={() => void toggleActive(donation)}>
+                    <Text style={styles.toggleText}>
+                      {donation.is_active === false ? 'Réactiver' : 'Désactiver'}
+                    </Text>
+                  </Pressable>
+                  {isSuperAdmin(user) ? (
+                    <Pressable style={styles.toggle} onPress={() => setConfirmDelete(donation)}>
+                      <Text style={styles.deleteText}>Supprimer</Text>
+                    </Pressable>
+                  ) : null}
+                </View>
               <Pressable style={styles.delete} onPress={() => setConfirmDelete(donation)}>
                 <Text style={styles.deleteText}>Supprimer</Text>
               </Pressable>

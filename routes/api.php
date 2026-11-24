@@ -79,4 +79,6 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::get('/birthdays', [BirthdayController::class, 'index']);
     Route::get('/birthdays/export', [BirthdayController::class, 'export']);
+
+    Route::get('/top-partners', [TopPartnerController::class, 'index']);
 });

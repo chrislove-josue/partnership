@@ -122,7 +122,7 @@ export function DonationsScreen() {
     setDate(donation ? donation.date.slice(0, 10) : new Date().toISOString().slice(0, 10));
     setChurchId(donation ? String(donation.worship_church_id ?? donation.church_id) : churchId);
     setPartnerId(donation ? String(donation.partner_id) : (formPartnerOptions[0]?.value ?? ''));
-    setCategoryId(donation ? String(donation.category_id) : (categoryData[0]?.id.toString() || ''));
+    setCategoryId(donation ? String(donation.category_id) : (categories[0]?.id.toString() || ''));
     setFormOpen(true);
   };
 

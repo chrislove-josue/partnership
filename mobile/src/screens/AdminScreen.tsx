@@ -26,13 +26,29 @@ import {
 type Section = 'churches' | 'cellules' | 'categories' | 'users' | 'pasteurs';
 type Editable = Church | Cellule | Category | User;
 
-const sections: Array<{ key: Section; label: string }> = [
+const ALL_SECTIONS: Array<{ key: Section; label: string }> = [
   { key: 'churches', label: 'Églises' },
   { key: 'cellules', label: 'Cellules' },
   { key: 'categories', label: 'Catégories' },
   { key: 'users', label: 'Utilisateurs' },
   { key: 'pasteurs', label: 'Pasteurs' },
 ];
+
+function availableSections(user: User | null): Array<{ key: Section; label: string }> {
+  if (!user) return [];
+  const role = user.role ?? '';
+  const roles = user.roles ?? [];
+  const isSuper = role === 'SUPER_ADMIN' || roles.includes('SUPER_ADMIN');
+  const isPastor = ['GROUP_PASTOR', 'SUBGROUP_PASTOR', 'LOCAL_PASTOR'].some(
+    (r) => role === r || roles.includes(r),
+  );
+  const isStaff = role === 'STAFF' || roles.includes('STAFF');
+
+  if (isSuper) return ALL_SECTIONS;
+  if (isPastor) return ALL_SECTIONS;
+  if (isStaff) return ALL_SECTIONS.filter((s) => s.key === 'cellules');
+  return [];
+}
 
 const PASTOR_ROLES = ['GROUP_PASTOR', 'SUBGROUP_PASTOR', 'LOCAL_PASTOR'];
 const CHURCH_STATUS_MANAGERS = ['GROUP_PASTOR', 'SUBGROUP_PASTOR'];
@@ -49,7 +65,7 @@ export function AdminScreen() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [section, setSection] = useState<Section>('churches');
+  const [section, setSection] = useState<Section>('cellules');
   const [churches, setChurches] = useState<Church[]>([]);
   const [cellules, setCellules] = useState<Cellule[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -89,7 +105,7 @@ export function AdminScreen() {
     setLoading(true);
     setError('');
     try {
-      const [churchData, celluleData, categoryData, userData, partnerData, roleData] = await Promise.all([
+      const [churchData, celluleData, categoryData, userData, partnerData, roleData] = await Promise.allSettled([
         api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
         api<{ data: Cellule[] }>('/cellules', { cacheKey: 'cellules' }),
         api<{ data: Category[] }>('/categories', { cacheKey: 'categories' }),
@@ -97,14 +113,17 @@ export function AdminScreen() {
         api<{ data: Partner[] }>('/partners', { cacheKey: 'partners' }),
         api<{ data: RoleOption[] }>('/roles', { cacheKey: 'roles' }),
       ]);
-      setChurches(churchData.data);
-      setCellules(celluleData.data);
-      setCategories(categoryData.data);
-      setUsers(userData.data);
-      setPartners(partnerData.data);
-      setRoles(roleData.data);
-      setChurchId((current) => current || defaultChurchId(churchData.data, user?.assigned_church_id));
-      setAssignedChurchId((current) => current || defaultChurchId(churchData.data, user?.assigned_church_id));
+
+      if (churchData.status === 'fulfilled') {
+        setChurches(churchData.value.data);
+        setChurchId((current) => current || defaultChurchId(churchData.value.data, user?.assigned_church_id));
+        setAssignedChurchId((current) => current || defaultChurchId(churchData.value.data, user?.assigned_church_id));
+      }
+      if (celluleData.status === 'fulfilled') setCellules(celluleData.value.data);
+      if (categoryData.status === 'fulfilled') setCategories(categoryData.value.data);
+      if (userData.status === 'fulfilled') setUsers(userData.value.data);
+      if (partnerData.status === 'fulfilled') setPartners(partnerData.value.data);
+      if (roleData.status === 'fulfilled') setRoles(roleData.value.data);
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger l’administration.'));
     } finally {
@@ -128,6 +147,7 @@ export function AdminScreen() {
     ? Boolean(user.assigned_church_id)
       && CHURCH_STATUS_MANAGERS.some((role) => hasRole(user, role))
     : false;
+  const sections = availableSections(user);
   const churchesById = new Map(churches.map((church) => [church.id, church]));
 
   /** Vrai si l'église cible est l'église assignée ou l'une de ses descendantes. */

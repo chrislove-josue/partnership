@@ -14,6 +14,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use App\Services\ChurchAccessService;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
@@ -38,6 +40,26 @@ class DonationResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return DonationForm::configure($schema);
+    }
+
+    /**
+     * Un don est visible soit parce qu'il est crédité à une église accessible,
+     * soit parce que le culte a eu lieu dans une église accessible (cas d'un
+     * partenaire visiteur dont le don est attribué à son église d'origine).
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+
+        $user = auth()->user();
+
+        if (! $user) {
+            return $query;
+        }
+
+        $ids = app(ChurchAccessService::class)->accessibleChurchIds($user);
+
+        return $query->orWhereIn('worship_church_id', $ids);
     }
 
     public static function table(Table $table): Table

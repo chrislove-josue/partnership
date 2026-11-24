@@ -10,6 +10,7 @@ use App\Models\Church;
 use App\Models\Donation;
 use App\Models\Partner;
 use App\Services\ChurchAccessService;
+use App\Services\DonationAttributionService;
 use App\Services\DonationNotifier;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -21,6 +22,7 @@ class DataController extends Controller
     public function __construct(
         private readonly ChurchAccessService $access,
         private readonly DonationNotifier $notifier,
+        private readonly DonationAttributionService $attribution,
     ) {}
 
     /**

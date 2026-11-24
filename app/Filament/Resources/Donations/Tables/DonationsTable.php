@@ -33,8 +33,12 @@ class DonationsTable
                     ->label('Partenaire')
                     ->searchable(['first_name', 'last_name']),
                 TextColumn::make('church.name')
-                    ->label('Église')
+                    ->label('Église créditée')
                     ->searchable(),
+                TextColumn::make('worshipChurch.name')
+                    ->label('Église du culte')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('category.name')
                     ->label('Catégorie')
                     ->badge()

@@ -51,7 +51,7 @@ export function ReportsScreen() {
   useEffect(() => {
     (async () => {
       try {
-        const response = await api<{ data: Church[] }>('/churches');
+        const response = await api<{ data: Church[] }>('/churches', { cacheKey: 'churches' });
         setChurches(response.data);
         setChurchId((current) => current || defaultChurchId(response.data, user?.assigned_church_id));
       } catch (caught) {

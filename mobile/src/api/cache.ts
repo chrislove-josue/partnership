@@ -68,6 +68,8 @@ export function invalidateCache(prefix?: string): void {
 }
 
 export function clearCache(): void {
+  invalidateCache();
+
   try {
     const cacheDir = new Directory(Paths.cache);
     if (!cacheDir.exists) {

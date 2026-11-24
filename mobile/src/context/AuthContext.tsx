@@ -1,6 +1,15 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import { api, ApiError, clearCache, getApiUrl, notifyServerLogout, setApiUrl, setAuthToken, setUnauthorizedHandler } from '../api/client';
+import {
+  api,
+  ApiError,
+  clearCache,
+  getApiUrl,
+  notifyServerLogout,
+  setApiUrl,
+  setAuthToken,
+  setUnauthorizedHandler,
+} from '../api/client';
 import { clearSession, loadSession, saveSession } from '../api/session';
 import type { SessionInfo } from '../api/session';
 import { isSuperAdmin, type User } from '../api/types';
@@ -22,7 +31,8 @@ interface AuthContextValue {
   configureApiUrl: (url: string) => Promise<void>;
   updateApiUrl: (url: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;User: () => Promise<void>;
+  logout: () => Promise<void>;
+  refreshUser: () => Promise<void>;
   /** Enregistre l'heure d'une synchronisation réellement effectuée. */
   markSynced: () => Promise<void>;
 }
@@ -234,7 +244,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       configureApiUrl,
       updateApiUrl,
       login,
-      logout,User,
+      logout,
+      refreshUser,
       markSynced,
     }),
     [user, session, loading, apiUrl, canConfigureApiUrl, configureApiUrl, updateApiUrl, login, logout, refreshUser, markSynced],

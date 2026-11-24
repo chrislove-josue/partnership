@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { api, getErrorMessage } from '../api/client';
+import { api, getErrorMessage, invalidateCache } from '../api/client';
 import { FilterCard } from '../components/FilterCard';
 import { filterBy } from '../utils/search';
 import type { AppNotification } from '../api/types';
@@ -30,6 +30,7 @@ export function NotificationsScreen() {
     setError('');
     try {
       const response = await api<{ data: AppNotification[]; unread_count: number }>('/notifications', {
+        cacheKey: 'notifications',
       });
       setNotifications(response.data);
       setUnread(response.unread_count);
@@ -62,6 +63,7 @@ export function NotificationsScreen() {
   const markRead = async (id: string) => {
     try {
       await api(`/notifications/${id}/read`, { method: 'POST' });
+      invalidateCache('notifications');
       await load();
     } catch (caught) {
       setError(getErrorMessage(caught, 'Mise à jour impossible.'));

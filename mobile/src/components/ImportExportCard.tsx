@@ -1,7 +1,15 @@
 import * as DocumentPicker from 'expo-document-picker';
 import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import { apiDownload, apiUpload, ApiError, getErrorMessage, MAX_UPLOAD_BYTES, UPLOAD_TOO_LARGE_MESSAGE } from '../api/client';
+import {
+  apiDownload,
+  apiUpload,
+  ApiError,
+  getErrorMessage,
+  invalidateCache,
+  MAX_UPLOAD_BYTES,
+  UPLOAD_TOO_LARGE_MESSAGE,
+} from '../api/client';
 import type { ImportResult } from '../api/types';
 import { Card, colors, SectionTitle } from './ui';
 
@@ -58,6 +66,7 @@ export function ImportExportCard({
         size: asset.size,
       });
 
+      invalidateCache();
       await onImported?.();
 
       const details =

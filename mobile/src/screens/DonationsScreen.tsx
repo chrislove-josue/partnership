@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { api, getErrorMessage } from '../api/client';
+import { api, getErrorMessage, invalidateCache } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { defaultChurchId } from '../utils/church';
 import { filterBy } from '../utils/search';
@@ -64,10 +64,10 @@ export function DonationsScreen() {
       const donationPath = `/donations${query.toString() ? `?${query}` : ''}`;
 
       const [donationData, churchData, partnerData, categoryData] = await Promise.all([
-        api<{ data: Donation[] }>(donationPath),
-        api<{ data: Church[] }>('/churches'),
-        api<{ data: Partner[] }>('/partners'),
-        api<{ data: Category[] }>('/categories'),
+        api<{ data: Donation[] }>(donationPath, { cacheKey: `donations:${query}` }),
+        api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
+        api<{ data: Partner[] }>('/partners', { cacheKey: 'partners' }),
+        api<{ data: Category[] }>('/categories', { cacheKey: 'categories' }),
       ]);
       setDonations(donationData.data);
       setChurches(churchData.data);
@@ -134,6 +134,7 @@ export function DonationsScreen() {
 
     try {
       await api(`/donations/${confirmDelete.id}`, { method: 'DELETE' });
+      invalidateCache();
       setConfirmDelete(null);
       await load();
     } catch (caught) {
@@ -146,6 +147,7 @@ export function DonationsScreen() {
     try {
       const action = donation.is_active === false ? 'activate' : 'deactivate';
       await api(`/donations/${donation.id}/${action}`, { method: 'POST' });
+      invalidateCache();
       await load();
     } catch (caught) {
       setError(getErrorMessage(caught, 'Modification impossible.'));
@@ -185,6 +187,7 @@ export function DonationsScreen() {
           },
         });
       }
+      invalidateCache();
       setFormOpen(false);
       await load();
     } catch (caught) {

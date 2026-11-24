@@ -213,7 +213,9 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
         <Text style={styles.role}>{user?.role ?? 'Utilisateur'}</Text>
         <View style={styles.heroTotal}>
           <View style={styles.heroTotalHeader}>
-            <Text style={styles.heroTotalLabel}>Total général des dons</Text>
+            <Text style={styles.heroTotalLabel}>
+              {summary.showBothTotals ? 'Total de votre église' : 'Total général des dons'}
+            </Text>
             <Pressable
               style={[styles.heroRefresh, (loading || refreshing) && styles.heroRefreshDisabled]}
               onPress={() => void refreshOnline()}
@@ -234,7 +236,7 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
           </Text>
           {summary.showBothTotals ? (
             <View style={styles.heroTotalSecondary}>
-              <Text style={styles.heroTotalSecondaryLabel}>Total sur toutes les églises accessibles</Text>
+              <Text style={styles.heroTotalSecondaryLabel}>Total de toutes les églises accessibles</Text>
               <Text style={styles.heroTotalSecondaryValue}>{formatMoney(summary.total)}</Text>
             </View>
           ) : null}

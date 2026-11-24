@@ -151,6 +151,7 @@ export function TopPartnersScreen() {
           value={churchId}
           options={[
             { label: 'Toutes les églises accessibles', value: '' },
+            { label: 'Toutes les églises de la base', value: 'all' },
             ...[...churches].sort((a, b) => {
               if (a.id === user?.assigned_church_id) return -1;
               if (b.id === user?.assigned_church_id) return 1;

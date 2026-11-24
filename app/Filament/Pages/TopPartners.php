@@ -153,11 +153,13 @@ class TopPartners extends Page
         try {
             $service = app(TopPartnerService::class);
             $accessibleIds = array_map('intval', $actor ? app(ChurchAccessService::class)->accessibleChurchIds($actor) : []);
-            $churchId = (int) ($state['church_id'] ?? 0);
-            // Une église précise, ou toutes celles du périmètre du rôle.
-            $churchIds = in_array($churchId, $accessibleIds, true)
-                ? [$churchId]
-                : $accessibleIds;
+            $churchId = (string) ($state['church_id'] ?? '');
+            // Une église précise, toutes les églises de la base, ou le périmètre.
+            $churchIds = $churchId === 'all'
+                ? Church::query()->pluck('id')->map('intval')->all()
+                : ((int) $churchId && in_array((int) $churchId, $accessibleIds, true)
+                    ? [(int) $churchId]
+                    : $accessibleIds);
 
             $groupValue = (string) ($state['category_group'] ?? '');
             $group = CategoryGroup::tryFrom($groupValue);
@@ -177,9 +179,11 @@ class TopPartners extends Page
 
             // Le libellé reflète TOUJOURS les églises réellement utilisées pour
             // le calcul, jamais uniquement la sélection (évite tout décalage).
-            $churchName = count($churchIds) === 1
-                ? Church::query()->whereKey($churchIds[0])->value('name')
-                : 'Toutes les églises accessibles';
+            $churchName = $churchId === 'all'
+                ? 'Toutes les églises de la base'
+                : (count($churchIds) === 1
+                    ? Church::query()->whereKey($churchIds[0])->value('name')
+                    : 'Toutes les églises accessibles');
 
             return [
                 'items' => $items,

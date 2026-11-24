@@ -109,6 +109,49 @@ class TopPartnerTest extends TestCase
             ->assertJsonPath('data.0.amount', 1500);
     }
 
+    public function test_api_filters_by_the_pastors_own_church_then_by_an_accessible_one(): void
+    {
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $other = Church::create([
+            'name' => 'Autre église top',
+            'type' => \App\Enums\ChurchType::LOCAL,
+            'parent_id' => $group->id,
+        ]);
+
+        $alice = $this->partner('Alice');
+        $bob = Partner::create([
+            'first_name' => 'Bob',
+            'last_name' => 'Top',
+            'email' => 'bob-autre-top@example.test',
+            'church_id' => $other->id,
+        ]);
+
+        $this->donation($alice, 1000, '2026-11-10');
+
+        Donation::create([
+            'amount' => 5000,
+            'date' => '2026-11-10',
+            'partner_id' => $bob->id,
+            'church_id' => $other->id,
+            'worship_church_id' => $other->id,
+            'category_id' => $this->category->id,
+        ]);
+
+        // Sans filtre explicite : l'église assignée est utilisée par défaut.
+        $default = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/top-partners?period=month&month=11&year=2026');
+        $default->assertOk();
+        $this->assertSame(1, $default->json('count'));
+
+        // Filtre sur une autre église accessible.
+        $otherResponse = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/top-partners?period=month&month=11&year=2026&church_id='.$other->id);
+        $otherResponse->assertOk()
+            ->assertJsonPath('church_id', $other->id)
+            ->assertJsonPath('count', 1);
+        $this->assertEquals(5000, $otherResponse->json('data.0.amount'));
+    }
+
     public function test_api_rejects_an_invalid_period(): void
     {
         $this->actingAs($this->admin, 'sanctum')

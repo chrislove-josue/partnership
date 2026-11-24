@@ -116,9 +116,9 @@ export function TopPartnersScreen() {
         name = celluleById.get(celluleId) ?? celluleName ?? 'Sans cellule';
       } else {
         key = `partner:${donation.partner_id}`;
-        name: (partner?.full_name
+        name = (partner?.full_name
           ?? `${partner?.first_name ?? ''} ${partner?.last_name ?? ''}`.trim())
-          || 'Partenaire inconnu',
+          || 'Partenaire inconnu';
       }
 
       const current = buckets.get(key) ?? {

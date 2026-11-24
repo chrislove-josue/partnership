@@ -162,10 +162,15 @@ class TopPartners extends Page
 
             [$from, $to] = $service->range($period, $year, $index);
 
+            $churchName = \App\Models\Church::query()
+                ->whereKey($churchIds[0] ?? 0)
+                ->value('name');
+
             return [
                 'items' => $items,
                 'label' => Str::ucfirst($period->label()),
                 'range' => $from->format('d/m/Y').' – '.$to->format('d/m/Y'),
+                'church' => $churchName,
             ];
         } catch (\Throwable $exception) {
             return ['error' => $exception->getMessage()];

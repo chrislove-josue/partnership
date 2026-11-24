@@ -75,4 +75,5 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::delete('/push-tokens', [PushTokenController::class, 'destroy']);
 
     Route::get('/birthdays', [BirthdayController::class, 'index']);
+    Route::get('/birthdays/export', [BirthdayController::class, 'export']);
 });

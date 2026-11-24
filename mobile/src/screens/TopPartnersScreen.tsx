@@ -47,6 +47,7 @@ interface TopEntry {
   id: number;
   name: string;
   church: string | null;
+  origin_church?: string | null;
   cellule: string | null;
   amount: number;
   count: number;

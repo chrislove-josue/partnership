@@ -43,13 +43,14 @@
                         </td>
                         <td class="rp-strong">{{ $item['name'] }}@if ($item['is_user']) (compte utilisateur)@endif</td>
                         <td>{{ $item['church'] ?? '—' }}</td>
+                        <td>{{ $item['origin_church'] ?? '—' }}</td>
                         <td>{{ $item['cellule'] ?? '—' }}</td>
                         <td class="rp-center">{{ $item['count'] }}</td>
                         <td class="rp-right rp-strong">{{ number_format((float) $item['amount'], 0, ',', ' ') }} FCFA</td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="rp-empty">Aucun don sur cette période pour vos églises.</td>
+                        <td colspan="7" class="rp-empty">Aucun don sur cette période pour cette église.</td>
                     </tr>
                 @endforelse
                 </tbody>

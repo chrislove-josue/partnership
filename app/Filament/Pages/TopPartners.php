@@ -48,8 +48,22 @@ class TopPartners extends Page
             7 => 'Juillet', 8 => 'Août', 9 => 'Septembre', 10 => 'Octobre', 11 => 'Novembre', 12 => 'Décembre',
         ])->all();
 
+        $actor = Auth::user();
+        $churches = $actor
+            ? app(ChurchAccessService::class)->accessibleChurches($actor)
+            : collect();
+
         return $schema
             ->components([
+                Select::make('church_id')->selectablePlaceholder(false)
+                    ->label('Église')
+                    ->options([
+                        '' => 'Toutes les églises accessibles',
+                        ...$churches->pluck('name', 'id')->all(),
+                    ])
+                    ->searchable()
+                    ->live(),
+
                 Select::make('period')->selectablePlaceholder(false)
                     ->label('Période')
                     ->options(collect(PeriodType::cases())->mapWithKeys(
@@ -80,7 +94,7 @@ class TopPartners extends Page
                     ->required()
                     ->live(),
             ])
-            ->columns(4)
+            ->columns(5)
             ->statePath('data')
             ->live();
     }
@@ -102,8 +116,14 @@ class TopPartners extends Page
 
         try {
             $service = app(TopPartnerService::class);
+            $accessibleIds = $actor ? app(ChurchAccessService::class)->accessibleChurchIds($actor) : [];
+            $churchId = (int) ($state['church_id'] ?? 0);
+            $churchIds = $churchId && in_array($churchId, $accessibleIds, true)
+                ? [$churchId]
+                : $accessibleIds;
+
             $items = $service->rank(
-                $actor ? app(ChurchAccessService::class)->accessibleChurchIds($actor) : [],
+                $churchIds,
                 $period,
                 $year,
                 $index,

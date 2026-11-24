@@ -4,6 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage } from '../api/client';
 import { FilterCard } from '../components/FilterCard';
 import { filterBy } from '../utils/search';
+import type { Church } from '../api/types';
 import { colors } from '../components/ui';
 import {
   Badge,

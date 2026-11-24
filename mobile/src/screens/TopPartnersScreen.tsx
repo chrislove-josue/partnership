@@ -124,8 +124,18 @@ export function TopPartnersScreen() {
         onQueryChange={setSearch}
         placeholder="Nom, église, cellule"
         onReset={resetFilters}
-        active={Boolean(search) || period !== 'month'}
+        active={Boolean(search) || period !== 'month' || Boolean(churchId)}
       >
+        <SelectField
+          label="Église"
+          value={churchId}
+          options={[
+            { label: 'Toutes les églises accessibles', value: '' },
+            ...churches.map((c) => ({ label: c.name, value: String(c.id) })),
+          ]}
+          onChange={setChurchId}
+          searchable
+        />
         <SelectField label="Période" value={period} options={PERIODS} onChange={setPeriod} />
         {period === 'month' ? (
           <SelectField label="Mois" value={month} options={MONTHS} onChange={setMonth} />

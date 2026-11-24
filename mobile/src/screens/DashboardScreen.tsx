@@ -425,6 +425,7 @@ const styles = StyleSheet.create({
   heroTotalValue: { fontSize: 26, fontWeight: '800', color: colors.blue, marginTop: 2 },
   heroTotalHint: { fontSize: 11, color: colors.muted, marginTop: 2 },
   heroTotalSecondary: { marginTop: 12, paddingTop: 10, borderTopWidth: 1, borderTopColor: colors.border },
+  toward: { flexDirection: 'row', alignItems: 'center', gap: 6, justifyContent: 'space-between' },
   heroTotalSecondaryLabel: { fontSize: 11, color: colors.muted },
   heroTotalSecondaryValue: { fontSize: 17, fontWeight: '700', color: colors.ink, marginTop: 2 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },

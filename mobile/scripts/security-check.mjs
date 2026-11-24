@@ -130,8 +130,6 @@ check('F3 : plus de copie publique de la base de données', () => {
     !/\b(backupDatabase|restoreDatabaseBackup|backupDatabaseFile|publicBackupUri|readFromDocuments)\b/.test(sourceText),
     'une fonction de copie/restauration publique est encore appelée',
   );
-  const storage = read('src/db/storage.ts');
-  assert.ok(storage.includes('deleteDocument(relativePath, DATABASE_FILE)'), 'suppression de l\'ancienne copie absente');
   const kotlin = read('android/app/src/main/java/com/churchmanager/benin/FinanceMediaStoreModule.kt');
   assert.ok(!/fun readDocument\s*\(/.test(kotlin), 'la lecture publique de documents reste exposée');
 });

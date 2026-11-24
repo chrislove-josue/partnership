@@ -27,6 +27,7 @@ const tabIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
   Accueil: 'home-outline',
   Dons: 'cash-outline',
   Partenaires: 'people-outline',
+  'Top partenaires': 'trophy-outline',
   Rapports: 'document-text-outline',
   Notifications: 'notifications-outline',
   Profil: 'person-outline',

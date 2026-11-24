@@ -5,8 +5,6 @@ import { api, getErrorMessage, normalizeApiUrl } from '../api/client';
 import { formatSessionDate } from '../api/session';
 import type { User } from '../api/types';
 import { useAuth } from '../context/AuthContext';
-import { countPendingChanges, getMeta, initDatabase, listConflicts } from '../db/database';
-import { syncNow } from '../db/sync';
 import {
   Badge,
   Card,
@@ -21,14 +19,12 @@ import {
 } from '../components/ui';
 
 export function ProfileScreen() {
-  const { user, session, refreshUser, logout, apiUrl, canConfigureApiUrl, updateApiUrl, markSynced } = useAuth();
+  const { user, session, refreshUser, logout, apiUrl, canConfigureApiUrl, updateApiUrl } = useAuth();
   const navigation = useNavigation<any>();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  const [syncInfo, setSyncInfo] = useState({ pending: 0, conflicts: 0, lastSync: '' });
-  const [syncing, setSyncing] = useState(false);
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -53,45 +49,6 @@ export function ProfileScreen() {
     }
     setLoading(false);
   }, [user]);
-
-  const loadSyncInfo = useCallback(async () => {
-    try {
-      await initDatabase();
-      const [pending, conflicts, lastSync] = await Promise.all([
-        countPendingChanges(),
-        listConflicts(),
-        getMeta('last_sync'),
-      ]);
-      setSyncInfo({ pending, conflicts: conflicts.length, lastSync: lastSync ?? '' });
-    } catch {
-      setSyncInfo({ pending: 0, conflicts: 0, lastSync: '' });
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadSyncInfo();
-  }, [loadSyncInfo]);
-
-  const synchronize = async () => {
-    setSyncing(true);
-    try {
-      const summary = await syncNow();
-      if (!summary.skipped) {
-        await markSynced();
-      }
-      await loadSyncInfo();
-      Alert.alert(
-        'Synchronisation',
-        summary.skipped
-          ? 'Connectez-vous pour synchroniser les données.'
-          : `${summary.pushed} modification(s) envoyée(s), ${summary.pulled} donnée(s) reçue(s). ${summary.conflicts} conflit(s) résolu(s) en faveur du serveur.`,
-      );
-    } catch (caught) {
-      Alert.alert('Synchronisation impossible', getErrorMessage(caught, 'Réessayez plus tard.'));
-    } finally {
-      setSyncing(false);
-    }
-  };
 
   const save = async () => {
     setError('');
@@ -260,29 +217,12 @@ export function ProfileScreen() {
         {session ? (
           <Text style={styles.help}>
             Session ouverte le {formatSessionDate(session.connectedAt)}{'\n'}
-            Dernière synchronisation : {formatSessionDate(session.lastSyncAt)}
           </Text>
         ) : null}
         <SecondaryButton
           title="Historique de connexion"
           onPress={() => navigation.navigate('HistoriqueConnexion')}
         />
-      </Card>
-
-      <Card>
-        <SectionTitle>Données hors-ligne</SectionTitle>
-        <Text style={styles.help}>
-          Modifications en attente : {syncInfo.pending}
-        </Text>
-        <Text style={styles.help}>
-          Conflits résolus en faveur du serveur : {syncInfo.conflicts}
-        </Text>
-        <Text style={styles.help}>
-          Dernière synchronisation : {syncInfo.lastSync ? formatSessionDate(syncInfo.lastSync) : 'jamais'}
-        </Text>
-        <View style={styles.syncActions}>
-          <SecondaryButton title="Synchroniser maintenant" onPress={() => void synchronize()} disabled={syncing} />
-        </View>
       </Card>
 
       <Card>

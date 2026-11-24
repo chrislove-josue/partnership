@@ -6,6 +6,7 @@ import { FilterCard } from '../components/FilterCard';
 import { filterBy } from '../utils/search';
 import type { Category, Church } from '../api/types';
 import { useAuth } from '../context/AuthContext';
+import { defaultChurchId } from '../utils/church';
 import { colors } from '../components/ui';
 import {
   Badge,
@@ -68,7 +69,7 @@ export function TopPartnersScreen() {
   const [year, setYear] = useState(String(now.getFullYear()));
   const [churches, setChurches] = useState<Church[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [churchId, setChurchId] = useState(user?.assigned_church_id ? String(user.assigned_church_id) : '');
+  const [churchId, setChurchId] = useState('');
   const [categoryGroup, setCategoryGroup] = useState('');
   const [categoryId, setCategoryId] = useState('');
 
@@ -99,12 +100,15 @@ export function TopPartnersScreen() {
       setRange(`${response.from} → ${response.to}`);
       setChurches(churchData.data);
       setCategories(categoryData.data);
+      // Même règle que les autres écrans : église du compte si accessible,
+      // sinon première église de la liste.
+      setChurchId((current) => current || defaultChurchId(churchData.data, user?.assigned_church_id));
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger les top partenaires.'));
     } finally {
       setLoading(false);
     }
-  }, [period, month, quarter, year, churchId, categoryGroup, categoryId]);
+  }, [period, month, quarter, year, churchId, categoryGroup, categoryId, user?.assigned_church_id]);
 
   useEffect(() => {
     void load();

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Partners\Tables;
 
 use App\Filament\Resources\Partners\Actions\PartnerDeleteGuard;
+use App\Services\ChurchAccessService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -18,7 +19,7 @@ class PartnersTable
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->withTotalDonations(
                 auth()->user()
-                    ? app(\App\Services\ChurchAccessService::class)->accessibleChurchIds(auth()->user())
+                    ? app(ChurchAccessService::class)->accessibleChurchIds(auth()->user())
                     : [],
             ))
             ->columns([

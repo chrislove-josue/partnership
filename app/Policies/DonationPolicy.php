@@ -18,7 +18,12 @@ class DonationPolicy
 
     public function view(User $user, Donation $donation): bool
     {
-        return $this->access->canAccessChurchData($user, $donation->church_id);
+        if ($this->access->canAccessChurchData($user, $donation->church_id)) {
+            return true;
+        }
+
+        return $donation->worship_church_id !== null
+            && $this->access->canAccessChurchData($user, $donation->worship_church_id);
     }
 
     public function create(User $user): bool
@@ -28,11 +33,16 @@ class DonationPolicy
 
     public function update(User $user, Donation $donation): bool
     {
-        return $this->access->canModifyChurchData($user, $donation->church_id);
+        if ($this->access->canModifyChurchData($user, $donation->church_id)) {
+            return true;
+        }
+
+        return $donation->worship_church_id !== null
+            && $this->access->canModifyChurchData($user, $donation->worship_church_id);
     }
 
     public function delete(User $user, Donation $donation): bool
     {
-        return $this->access->canModifyChurchData($user, $donation->church_id);
+        return $this->update($user, $donation);
     }
 }

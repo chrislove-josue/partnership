@@ -260,17 +260,36 @@ class DataController extends Controller
     {
         Gate::authorize('update', $donation);
 
+        $churchIds = $this->access->accessibleChurchIds($request->user());
+
         $data = $request->validate([
             'amount' => ['sometimes', 'required', 'numeric', 'min:0.01'],
             'date' => ['sometimes', 'required', 'date'],
-            'church_id' => ['sometimes', 'required', 'integer', Rule::in($this->access->accessibleChurchIds($request->user()))],
-            'partner_id' => ['sometimes', 'required', 'integer', Rule::exists('partners', 'id')->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))],
+            'church_id' => ['sometimes', 'required', 'integer', Rule::in($churchIds)],
+            'worship_church_id' => ['sometimes', 'nullable', 'integer', Rule::in($churchIds)],
+            'partner_id' => ['sometimes', 'required', 'integer', Rule::exists('partners', 'id')],
             'category_id' => ['sometimes', 'required', 'integer', Rule::exists('category_dons', 'id')],
         ]);
 
+        $worshipId = (int) ($data['worship_church_id'] ?? $data['church_id'] ?? $donation->worship_church_id ?? $donation->church_id);
+        $partnerId = (int) ($data['partner_id'] ?? $donation->partner_id);
+        $categoryId = (int) ($data['category_id'] ?? $donation->category_id);
+
+        $worship = Church::findOrFail($worshipId);
+        $partner = Partner::findOrFail($partnerId);
+        $category = CategoryDon::findOrFail($categoryId);
+        $attribution = $this->attribution->churchFor($partner, $category, $worship);
+
+        if (! $this->attribution->canRecord($request->user(), $worship, $attribution, $partner)) {
+            abort(403, 'Vous ne pouvez pas enregistrer ce don pour cette église.');
+        }
+
+        $data['church_id'] = $attribution->id;
+        $data['worship_church_id'] = $worship->id;
+
         $donation->update($data);
 
-        return response()->json(['message' => 'Don mis à jour.', 'donation' => $donation]);
+        return response()->json(['message' => 'Don mis à jour.', 'donation' => $donation->load(['church:id,name', 'worshipChurch:id,name', 'partner:id,first_name,last_name'])]);
     }
 
     public function destroyDonation(Donation $donation): JsonResponse
@@ -292,7 +311,7 @@ class DataController extends Controller
             'amount' => ['required', 'numeric', 'min:0.01'],
             'date' => ['required', 'date'],
             'church_id' => ['required', 'integer', Rule::in($churchIds)],
-            'partner_id' => ['required', 'integer', Rule::exists('partners', 'id')->whereIn('church_id', $churchIds)],
+            'partner_id' => ['required', 'integer', Rule::exists('partners', 'id')],
             'category_id' => ['required', 'integer', Rule::exists('category_dons', 'id')],
         ], [
             'amount.required' => 'Le montant est obligatoire.',
@@ -300,11 +319,11 @@ class DataController extends Controller
             'amount.min' => 'Le montant doit être supérieur à zéro.',
             'date.required' => 'La date est obligatoire.',
             'date.date' => 'La date est invalide.',
-            'church_id.required' => 'L’église est obligatoire.',
+            'church_id.required' => 'L’église du culte est obligatoire.',
             'partner_id.required' => 'Le partenaire est obligatoire.',
             'category_id.required' => 'La catégorie est obligatoire.',
             'church_id.in' => 'Vous n’avez pas accès à cette église.',
-            'partner_id.exists' => 'Ce partenaire est introuvable dans cette église.',
+            'partner_id.exists' => 'Ce partenaire est introuvable.',
             'category_id.exists' => 'Cette catégorie est introuvable.',
         ]);
 
@@ -312,12 +331,23 @@ class DataController extends Controller
             abort(403, 'Accès refusé.');
         }
 
+        $worship = Church::findOrFail($data['church_id']);
+        $partner = Partner::findOrFail($data['partner_id']);
+        $category = CategoryDon::findOrFail($data['category_id']);
+
+        $attribution = $this->attribution->churchFor($partner, $category, $worship);
+
+        if (! $this->attribution->canRecord($user, $worship, $attribution, $partner)) {
+            abort(403, 'Vous ne pouvez pas enregistrer ce don pour cette église.');
+        }
+
         $donation = Donation::query()->create([
             'amount' => $data['amount'],
             'date' => $data['date'],
-            'church_id' => $data['church_id'],
-            'partner_id' => $data['partner_id'],
-            'category_id' => $data['category_id'],
+            'church_id' => $attribution->id,
+            'worship_church_id' => $worship->id,
+            'partner_id' => $partner->id,
+            'category_id' => $category->id,
         ]);
 
         $this->notifier->handle($donation);
@@ -331,6 +361,8 @@ class DataController extends Controller
                 'date' => $donation->date?->toIso8601String(),
                 'church_id' => $donation->church_id,
                 'church' => $donation->church?->name,
+                'worship_church_id' => $donation->worship_church_id,
+                'worship_church' => $donation->worshipChurch?->name,
                 'partner_id' => $donation->partner_id,
                 'partner' => $donation->partner?->full_name,
                 'category_id' => $donation->category_id,

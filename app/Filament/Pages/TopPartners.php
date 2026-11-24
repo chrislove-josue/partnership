@@ -61,11 +61,9 @@ class TopPartners extends Page
             ->components([
                 Select::make('church_id')->selectablePlaceholder(false)
                     ->label('Église')
-                    ->options([
-                        '' => 'Toutes les églises accessibles',
-                        ...$churches->pluck('name', 'id')->all(),
-                    ])
+                    ->options($churches->pluck('name', 'id')->all())
                     ->searchable()
+                    ->required()
                     ->live(),
 
                 Select::make('category_group')->selectablePlaceholder(false)

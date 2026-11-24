@@ -202,15 +202,17 @@ check('F6 : permissions Android minimales', () => {
   assert.ok(!/POST_NOTIFICATIONS/.test(read('src/native/permissions.ts')), 'notification demandée côté JS');
 });
 
-check('F7 : purge locale à la déconnexion et au changement de compte', () => {
-  const database = read('src/db/database.ts');
-  assert.ok(/export async function clearLocalData\(\)/.test(database), 'clearLocalData absent');
-  for (const table of ['entities', 'outbox', 'conflicts', 'meta']) {
-    assert.ok(new RegExp(`DELETE FROM ${table}`).test(database), `table ${table} non purgée`);
+check('F7 : aucune donnée métier stockée dans un fichier', () => {
+  // Toutes les données métier sont dans la base distante : aucun cache fichier,
+  // aucune base SQLite locale, aucune file d'attente hors-ligne.
+  for (const file of ['src/db/database.ts', 'src/db/sync.ts', 'src/api/cache.ts', 'src/db/storage.ts']) {
+    assert.ok(!exists(file), `${file} existe encore : des données seraient stockées hors base`);
   }
+  assert.ok(!/expo-sqlite|openDatabaseAsync/.test(sourceText), 'expo-sqlite est encore utilisé');
+  assert.ok(!/churchmanager-cache|readStaleCache|writeCache/.test(sourceText), 'un cache fichier est encore utilisé');
   const auth = read('src/context/AuthContext.tsx');
-  assert.ok(/clearLocalData\(\)/.test(auth), 'clearLocalData non appelé dans AuthContext');
-  assert.ok(/isSameUser\(/.test(auth), 'changement d\'utilisateur non détecté');
+  assert.ok(/\/me'/.test(auth), 'l utilisateur n est pas rechargé depuis la base');
+  assert.ok(/deleteItemAsync\(TOKEN_KEY\)/.test(auth), 'le jeton n est pas effacé à la déconnexion');
 });
 
 check('F8 : messages d\'erreur génériques côté natif', () => {

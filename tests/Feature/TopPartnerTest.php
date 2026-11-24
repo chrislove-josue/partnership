@@ -281,6 +281,51 @@ class TopPartnerTest extends TestCase
         $this->assertEquals(3000, $response->json('data.0.amount'));
     }
 
+    public function test_all_option_returns_partners_from_every_church(): void
+    {
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $other = Church::create([
+            'name' => 'Église hors périmètre top',
+            'type' => \App\Enums\ChurchType::LOCAL,
+            'parent_id' => $group->id,
+        ]);
+
+        $pastor = User::create([
+            'name' => 'Pasteur périmètre top',
+            'email' => 'pasteur-perimetre-top@example.test',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'assigned_church_id' => $this->church->id,
+            'is_active' => true,
+        ]);
+        $pastor->syncRoles([\App\Enums\RoleName::LOCAL_PASTOR->value]);
+
+        $outsider = Partner::create([
+            'first_name' => 'Hors',
+            'last_name' => 'Périmètre',
+            'email' => 'hors-perimetre-top@example.test',
+            'church_id' => $other->id,
+        ]);
+        Donation::create([
+            'amount' => 9000,
+            'date' => '2026-11-10',
+            'partner_id' => $outsider->id,
+            'church_id' => $other->id,
+            'worship_church_id' => $other->id,
+            'category_id' => $this->category->id,
+        ]);
+
+        $scoped = $this->actingAs($pastor, 'sanctum')
+            ->getJson('/api/top-partners?period=month&month=11&year=2026');
+        $scoped->assertOk();
+        $this->assertFalse(collect($scoped->json('data'))->contains('id', $outsider->id));
+
+        $all = $this->actingAs($pastor, 'sanctum')
+            ->getJson('/api/top-partners?period=month&month=11&year=2026&church_id=all');
+        $all->assertOk()
+            ->assertJsonPath('church_id', null);
+        $this->assertTrue(collect($all->json('data'))->contains('id', $outsider->id));
+    }
+
     public function test_api_rejects_an_invalid_period(): void
     {
         $this->actingAs($this->admin, 'sanctum')

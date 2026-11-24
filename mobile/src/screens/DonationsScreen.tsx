@@ -250,13 +250,10 @@ export function DonationsScreen() {
             <TextField label="Montant (FCFA)" value={amount} onChangeText={setAmount} keyboardType="numeric" placeholder="Ex. 5000" />
             <DateField label="Date du don" value={date} onChange={setDate} />
             <SelectField
-              label="Église"
+              label="Église du culte"
               value={churchId}
               options={churchOptions}
-              onChange={(value) => {
-                setChurchId(value);
-                setPartnerId('');
-              }}
+              onChange={setChurchId}
               searchable
             />
             <SelectField

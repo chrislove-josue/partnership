@@ -139,7 +139,7 @@ export function TopPartnersScreen() {
         onQueryChange={setSearch}
         placeholder="Nom, église, cellule"
         onReset={resetFilters}
-        active={Boolean(search) || period !== 'month' || Boolean(churchId) || Boolean(categoryGroup || categoryId)}
+        active={Boolean(search || categoryGroup || categoryId) || period !== 'month' || Boolean(churchId)}
       >
         <SelectField
           label="Église"

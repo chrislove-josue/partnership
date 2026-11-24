@@ -18,12 +18,7 @@ class DonationPolicy
 
     public function view(User $user, Donation $donation): bool
     {
-        if ($this->access->canAccessChurchData($user, $donation->church_id)) {
-            return true;
-        }
-
-        return $donation->worship_church_id !== null
-            && $this->access->canAccessChurchData($user, $donation->worship_church_id);
+        return $this->access->canAccessChurchData($user, $donation->church_id);
     }
 
     public function create(User $user): bool

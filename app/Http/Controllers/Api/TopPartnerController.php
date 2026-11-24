@@ -45,14 +45,23 @@ class TopPartnerController extends Controller
         $user = $request->user();
         $accessibleIds = array_map('intval', $this->access->accessibleChurchIds($user));
 
-        // Défaut : l'église affectée. Un church_id vide explicitement envoyé
-        // (option « Toutes les églises accessibles ») = tout le périmètre.
+        // Défaut : l'église affectée. `church_id=all` = TOUTES les églises de
+        // la base ; un ID = cette église ; vide = toutes les églises accessibles.
         $requestedId = $request->integer('church_id');
         $defaultId = (int) ($this->access->defaultChurchId($user) ?? 0);
-        $churchId = $request->has('church_id') ? $requestedId : $defaultId;
-        $churchIds = $churchId && in_array($churchId, $accessibleIds, true)
-            ? [$churchId]
-            : $accessibleIds;
+        $rawChurchId = $request->string('church_id')->toString();
+
+        if ($rawChurchId === 'all') {
+            $churchIds = Church::query()->pluck('id')->map('intval')->all();
+        } elseif ($request->has('church_id')) {
+            $churchIds = $requestedId && in_array($requestedId, $accessibleIds, true)
+                ? [$requestedId]
+                : $accessibleIds;
+        } else {
+            $churchIds = $defaultId && in_array($defaultId, $accessibleIds, true)
+                ? [$defaultId]
+                : $accessibleIds;
+        }
 
         $group = CategoryGroup::tryFrom($request->string('category_group')->toString());
 

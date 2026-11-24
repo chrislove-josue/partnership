@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
+use App\Models\Church;
 use App\Http\Controllers\Controller;
 use App\Services\ChurchAccessService;
 use App\Services\TopPartnerService;
@@ -28,7 +29,7 @@ class TopPartnerController extends Controller
             'month' => ['nullable', 'integer', 'min:1', 'max:12'],
             'quarter' => ['nullable', 'integer', 'min:1', 'max:4'],
             'year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
-            'church_id' => ['nullable', 'integer'],
+            'church_id' => ['nullable', 'string'],
             'category_group' => ['nullable', 'string', 'in:church_finances,ministry_partnership,local_partnership'],
             'category_id' => ['nullable', 'integer', 'exists:category_dons,id'],
         ]);

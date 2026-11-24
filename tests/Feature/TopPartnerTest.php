@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\CategoryGroup;
 use App\Enums\ChurchType;
 use App\Enums\PeriodType;
 use App\Enums\RoleName;
@@ -156,8 +157,8 @@ class TopPartnerTest extends TestCase
     public function test_api_filters_by_category_group_and_category(): void
     {
         $alice = $this->partner('Alice');
-        $finances = CategoryDon::create(['name' => 'Dîmes top', 'group' => \App\Enums\CategoryGroup::CHURCH_FINANCES]);
-        $ministry = CategoryDon::create(['name' => 'Rhapsodie top', 'group' => \App\Enums\CategoryGroup::MINISTRY_PARTNERSHIP]);
+        $finances = CategoryDon::create(['name' => 'Dîmes top', 'group' => CategoryGroup::CHURCH_FINANCES]);
+        $ministry = CategoryDon::create(['name' => 'Rhapsodie top', 'group' => CategoryGroup::MINISTRY_PARTNERSHIP]);
 
         Donation::create([
             'amount' => 1000,

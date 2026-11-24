@@ -199,7 +199,7 @@ class TopPartnerTest extends TestCase
         $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
         $other = Church::create([
             'name' => 'Église d origine',
-            'type' => \App\Enums\ChurchType::LOCAL,
+            'type' => ChurchType::LOCAL,
             'parent_id' => $group->id,
         ]);
 

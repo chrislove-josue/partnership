@@ -116,13 +116,14 @@ export function DonationsScreen() {
   ]);
 
   const openForm = (donation?: Donation) => {
+    const editingDonation = donation && 'id' in donation ? donation : null;
     setFormError('');
-    setEditing(donation ?? null);
-    setAmount(donation ? String(donation.amount) : '');
-    setDate(donation ? donation.date.slice(0, 10) : new Date().toISOString().slice(0, 10));
-    setChurchId(donation ? String(donation.worship_church_id ?? donation.church_id) : churchId);
-    setPartnerId(donation ? String(donation.partner_id) : (formPartnerOptions[0]?.value ?? ''));
-    setCategoryId(donation ? String(donation.category_id) : (categories[0]?.id.toString() || ''));
+    setEditing(editingDonation);
+    setAmount(editingDonation ? String(editingDonation.amount) : '');
+    setDate(editingDonation ? editingDonation.date.slice(0, 10) : new Date().toISOString().slice(0, 10));
+    setChurchId(editingDonation ? String(editingDonation.worship_church_id ?? editingDonation.church_id) : churchId);
+    setPartnerId(editingDonation ? String(editingDonation.partner_id) : (formPartnerOptions[0]?.value ?? ''));
+    setCategoryId(editingDonation ? String(editingDonation.category_id) : (categories[0]?.id.toString() || ''));
     setFormOpen(true);
   };
 
@@ -200,7 +201,7 @@ export function DonationsScreen() {
     <Screen
       title="Dons"
       subtitle={`${visibleDonations.length} don(s)`}
-      actions={<PrimaryButton title="Nouveau don" onPress={openForm} />}
+      actions={<PrimaryButton title="Nouveau don" onPress={() => openForm()} />}
     >
       {loading ? <LoadingView /> : null}
       {!loading && error ? <ErrorView message={error} onRetry={() => void load()} /> : null}

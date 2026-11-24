@@ -64,7 +64,7 @@ export function DonationsScreen() {
       const donationPath = `/donations${query.toString() ? `?${query}` : ''}`;
 
       const [donationData, churchData, partnerData, categoryData] = await Promise.all([
-        api<{ data: Donation[] }>(donationPath` }),
+        api<{ data: Donation[] }>(donationPath),
         api<{ data: Church[] }>('/churches'),
         api<{ data: Partner[] }>('/partners'),
         api<{ data: Category[] }>('/categories'),

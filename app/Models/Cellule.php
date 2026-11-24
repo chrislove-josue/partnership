@@ -40,6 +40,7 @@ class Cellule extends Model
             'total_donations' => Donation::query()
                 ->selectRaw('COALESCE(SUM(donations.amount), 0)')
                 ->join('partners', 'partners.id', '=', 'donations.partner_id')
+                ->where('donations.is_active', true)
                 ->where(function (Builder $q) {
                     $q->whereColumn('partners.cellule_id', 'cellules.id')
                         ->orWhereColumn('partners.id', 'cellules.leader_id');

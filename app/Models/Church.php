@@ -70,7 +70,8 @@ class Church extends Model
         return $query->addSelect([
             'total_donations' => Donation::query()
                 ->selectRaw('COALESCE(SUM(donations.amount), 0)')
-                ->whereColumn('donations.church_id', 'churches.id'),
+                ->whereColumn('donations.church_id', 'churches.id')
+                ->where('donations.is_active', true),
         ]);
     }
 

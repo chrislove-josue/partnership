@@ -36,6 +36,7 @@ export function DonationsScreen() {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [churchFilter, setChurchFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [partnerFilter, setPartnerFilter] = useState('');

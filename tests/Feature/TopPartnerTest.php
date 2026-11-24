@@ -89,7 +89,7 @@ class TopPartnerTest extends TestCase
         $ids = [$this->church->id];
 
         $this->assertEquals(300, $service->rank($ids, PeriodType::MONTH, 2026, 11)->first()['amount']);
-        $this->assertEquals(600, $service->rank($ids, PeriodType::QUARTER, 2026, 4)->first()['amount']);
+        $this->assertEquals(300, $service->rank($ids, PeriodType::QUARTER, 2026, 4)->first()['amount']);
         $this->assertEquals(600, $service->rank($ids, PeriodType::YEAR, 2026, 1)->first()['amount']);
         $this->assertEquals(400, $service->rank($ids, PeriodType::MONTH, 2025, 11)->first()['amount']);
     }

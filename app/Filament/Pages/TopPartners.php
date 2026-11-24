@@ -73,7 +73,7 @@ class TopPartners extends Page
                 Select::make('church_id')->selectablePlaceholder(false)
                     ->label('Église')
                     ->options(
-                        ['' => 'Toutes les églises accessibles']
+                        ['' => 'Toutes les églises accessibles', 'all' => 'Toutes les églises de la base']
                         + $orderedChurches->pluck('name', 'id')->all()
                     )
                     ->searchable()

@@ -88,11 +88,11 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
     void load();
   }, [load]));
 
-  /** Force une lecture en ligne : aucun cache ni données locales ne sont utilisés. */
+  /** Recharge toutes les données depuis la base de données distante. */
   const refreshOnline = useCallback(async () => {
     setRefreshing(true);
     try {
-      await load(true);
+      await load();
     } finally {
       setRefreshing(false);
     }

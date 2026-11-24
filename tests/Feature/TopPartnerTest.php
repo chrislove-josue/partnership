@@ -13,6 +13,7 @@ use App\Models\Partner;
 use App\Models\User;
 use App\Services\TopPartnerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class TopPartnerTest extends TestCase
@@ -218,6 +219,59 @@ class TopPartnerTest extends TestCase
         $this->assertCount(1, $items);
         $this->assertSame($this->church->name, $items->first()['church']);
         $this->assertSame($other->name, $items->first()['origin_church']);
+    }
+
+    public function test_subgroup_pastor_only_sees_his_accessible_churches(): void
+    {
+        $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $subGroup = Church::create([
+            'name' => 'Sous-groupe périmètre',
+            'type' => ChurchType::SUB_GROUP,
+            'parent_id' => $group->id,
+        ]);
+        $child = Church::create([
+            'name' => 'Église fille périmètre',
+            'type' => ChurchType::LOCAL,
+            'parent_id' => $subGroup->id,
+        ]);
+        $otherSubGroup = Church::create([
+            'name' => 'Autre sous-groupe périmètre',
+            'type' => ChurchType::SUB_GROUP,
+            'parent_id' => $group->id,
+        ]);
+        $outside = Church::create([
+            'name' => 'Église hors périmètre',
+            'type' => ChurchType::LOCAL,
+            'parent_id' => $otherSubGroup->id,
+        ]);
+
+        $pastor = User::create([
+            'name' => 'Pasteur sous-groupe',
+            'email' => 'pasteur-sg-perimetre@example.test',
+            'password' => Hash::make('password'),
+            'assigned_church_id' => $subGroup->id,
+            'is_active' => true,
+        ]);
+        $pastor->syncRoles([RoleName::SUBGROUP_PASTOR->value]);
+
+        $partner = $this->partner('Alice');
+        foreach ([$child->id, $outside->id] as $churchId) {
+            Donation::create([
+                'amount' => 3000,
+                'date' => '2026-11-10',
+                'partner_id' => $partner->id,
+                'church_id' => $churchId,
+                'worship_church_id' => $churchId,
+                'category_id' => $this->category->id,
+            ]);
+        }
+
+        $response = $this->actingAs($pastor, 'sanctum')
+            ->getJson('/api/top-partners?period=month&month=11&year=2026');
+
+        $response->assertOk();
+        // Seul le don de l'église fille est compté (6000 au lieu de 9000).
+        $this->assertEquals(3000, $response->json('data.0.amount'));
     }
 
     public function test_api_rejects_an_invalid_period(): void

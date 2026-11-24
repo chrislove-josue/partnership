@@ -59,7 +59,10 @@ class DonationResource extends Resource
 
         $ids = app(ChurchAccessService::class)->accessibleChurchIds($user);
 
-        return $query->orWhereIn('worship_church_id', $ids);
+        return $query->where(function (Builder $query) use ($ids): void {
+            $query->whereIn('church_id', $ids)
+                ->orWhereIn('worship_church_id', $ids);
+        });
     }
 
     public static function table(Table $table): Table

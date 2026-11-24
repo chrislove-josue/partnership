@@ -72,6 +72,16 @@ function MainTabs() {
       <Tabs.Screen name="Notifications" component={NotificationsScreen} />
       <Tabs.Screen name="Profil" component={ProfileScreen} />
       <Tabs.Screen name="Administration" component={AdminScreen} />
+      <Tabs.Screen
+        name="HistoriqueConnexion"
+        component={LoginHistoryScreen}
+        options={{ tabBarButton: () => null }}
+      />
+      <Tabs.Screen
+        name="Anniversaires"
+        component={BirthdaysScreen}
+        options={{ tabBarButton: () => null }}
+      />
     </Tabs.Navigator>
   );
 }

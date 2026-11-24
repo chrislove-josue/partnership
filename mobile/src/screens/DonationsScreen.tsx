@@ -301,8 +301,8 @@ export function DonationsScreen() {
 
       <Modal visible={formOpen} animationType="slide" onRequestClose={() => setFormOpen(false)}>
         <Screen
-          title="Nouveau don"
-          subtitle="Renseignez les informations du don"
+          title={editing ? 'Modifier le don' : 'Nouveau don'}
+          subtitle={editing ? 'Modifiez les informations du don' : 'Renseignez les informations du don'}
           actions={<Pressable onPress={() => setFormOpen(false)}><Text style={styles.close}>Fermer</Text></Pressable>}
         >
           <Card>

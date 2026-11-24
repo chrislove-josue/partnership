@@ -20,7 +20,7 @@ class TopPartnerService
     /**
      * @param  array<int, int>  $churchIds
      * @param  CategoryGroup|null  $group  Famille de catégorie (null = toutes)
-     * @return Collection<int, array{id: int, name: string, church: string|null, cellule: string|null, amount: float, count: int, is_user: bool}>
+     * @return Collection<int, array{id: int, name: string, church: string|null, origin_church: string|null, cellule: string|null, amount: float, count: int, is_user: bool}>
      */
     public function rank(
         array $churchIds,
@@ -55,6 +55,12 @@ class TopPartnerService
             ->get()
             ->keyBy('id');
 
+        // L'église affichée est celle à qui le don est crédité (l'église
+        // sélectionnée), pas l'église d'origine du partenaire.
+        $churchNames = Church::query()
+            ->whereIn('id', array_map('intval', $churchIds))
+            ->pluck('name', 'id');
+
         $totals = [];
 
         foreach ($donations as $donation) {
@@ -65,13 +71,16 @@ class TopPartnerService
         }
 
         return collect($totals)
-            ->map(function (array $total, int $id) use ($partners): array {
+            ->map(function (array $total, int $id) use ($partners, $churchNames): array {
                 $partner = $partners->get($id);
 
                 return [
                     'id' => $id,
                     'name' => $partner?->full_name ?? 'Partenaire inconnu',
-                    'church' => $partner?->church?->name,
+                    // Toutes les lignes portent l'église sélectionnée : un seul
+                    // classement, jamais un mélange d'églises.
+                    'church' => $churchNames->first() ?? null,
+                    'origin_church' => $partner?->church?->name,
                     'cellule' => $partner?->cellule?->name,
                     'amount' => $total['amount'],
                     'count' => $total['count'],

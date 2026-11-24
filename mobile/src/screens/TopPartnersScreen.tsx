@@ -58,6 +58,8 @@ export function TopPartnersScreen() {
   const [month, setMonth] = useState(String(now.getMonth() + 1));
   const [quarter, setQuarter] = useState(String(Math.floor(now.getMonth() / 3) + 1));
   const [year, setYear] = useState(String(now.getFullYear()));
+  const [churches, setChurches] = useState<Church[]>([]);
+  const [churchId, setChurchId] = useState(user?.assigned_church_id ? String(user.assigned_church_id) : '');
 
   const load = useCallback(async () => {
     setLoading(true);

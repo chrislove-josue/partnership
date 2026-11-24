@@ -67,13 +67,21 @@ class Partner extends Model
 
     /**
      * Ajoute un attribut calculé `total_donations` = somme des dons du partenaire.
+     * Si des églises sont fournies, seuls les dons crédités à ces églises
+     * sont comptés (un visiteur ne doit pas révéler l'historique d'ailleurs).
+     *
+     * @param  array<int, int> | null  $churchIds
      */
-    public function scopeWithTotalDonations(Builder $query): Builder
+    public function scopeWithTotalDonations(Builder $query, ?array $churchIds = null): Builder
     {
-        return $query->addSelect([
-            'total_donations' => Donation::query()
-                ->selectRaw('COALESCE(SUM(donations.amount), 0)')
-                ->whereColumn('donations.partner_id', 'partners.id'),
-        ]);
+        $donations = Donation::query()
+            ->selectRaw('COALESCE(SUM(donations.amount), 0)')
+            ->whereColumn('donations.partner_id', 'partners.id');
+
+        if ($churchIds !== null) {
+            $donations->whereIn('donations.church_id', $churchIds);
+        }
+
+        return $query->addSelect(['total_donations' => $donations]);
     }
 }

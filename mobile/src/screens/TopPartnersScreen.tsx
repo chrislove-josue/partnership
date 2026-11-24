@@ -68,7 +68,7 @@ export function TopPartnersScreen() {
   const [year, setYear] = useState(String(now.getFullYear()));
   const [churches, setChurches] = useState<Church[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [churchId, setChurchId] = useState(user?.assigned_church_id ? String(user.assigned_church_id) : '');
+  const [churchId, setChurchId] = useState('');
   const [categoryGroup, setCategoryGroup] = useState('');
   const [categoryId, setCategoryId] = useState('');
 
@@ -125,7 +125,7 @@ export function TopPartnersScreen() {
     setMonth(String(now.getMonth() + 1));
     setQuarter(String(Math.floor(now.getMonth() / 3) + 1));
     setYear(String(now.getFullYear()));
-    setChurchId(user?.assigned_church_id ? String(user.assigned_church_id) : '');
+    setChurchId('');
     setCategoryGroup('');
     setCategoryId('');
   };

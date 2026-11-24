@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
+use App\Models\CategoryDon;
 use App\Models\Donation;
 use App\Models\Partner;
 use Illuminate\Support\Carbon;
@@ -17,6 +19,7 @@ class TopPartnerService
 {
     /**
      * @param  array<int, int>  $churchIds
+     * @param  CategoryGroup|null  $group  Famille de catégorie (null = toutes)
      * @return Collection<int, array{id: int, name: string, church: string|null, cellule: string|null, amount: float, count: int, is_user: bool}>
      */
     public function rank(
@@ -25,6 +28,8 @@ class TopPartnerService
         ?int $year = null,
         ?int $index = null,
         int $limit = 20,
+        ?CategoryGroup $group = null,
+        ?int $categoryId = null,
     ): Collection {
         $year = $year ?? (int) now()->year;
         $index = $index ?? (int) now()->month;
@@ -36,6 +41,10 @@ class TopPartnerService
             ->whereIn('church_id', $churchIds)
             ->where('is_active', true)
             ->whereBetween('date', [$from, $to])
+            ->when($categoryId, fn ($query) => $query->where('category_id', $categoryId))
+            ->when($group, function ($query) use ($group): void {
+                $query->whereHas('category', fn ($q) => $q->where('group', $group->value));
+            })
             ->get(['id', 'amount', 'partner_id', 'date']);
 
         $partnerIds = $donations->pluck('partner_id')->unique()->all();

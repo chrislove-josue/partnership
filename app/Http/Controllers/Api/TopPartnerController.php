@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
 use App\Http\Controllers\Controller;
 use App\Services\ChurchAccessService;

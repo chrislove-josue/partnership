@@ -68,23 +68,29 @@ export function TopPartnersScreen() {
       const params = new URLSearchParams({ period, year });
       if (period === 'month') params.set('month', month);
       if (period === 'quarter') params.set('quarter', quarter);
-      const response = await api<{
-        period: string;
-        year: number;
-        from: string;
-        to: string;
-        data: TopEntry[];
-      }>(`/top-partners?${params.toString()}`, {
-        cacheKey: `top-partners:${params.toString()}`,
-      });
+      if (churchId) params.set('church_id', churchId);
+
+      const [response, churchData] = await Promise.all([
+        api<{
+          period: string;
+          year: number;
+          from: string;
+          to: string;
+          data: TopEntry[];
+        }>(`/top-partners?${params.toString()}`, {
+          cacheKey: `top-partners:${params.toString()}`,
+        }),
+        api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
+      ]);
       setItems(response.data);
       setRange(`${response.from} → ${response.to}`);
+      setChurches(churchData.data);
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger les top partenaires.'));
     } finally {
       setLoading(false);
     }
-  }, [period, month, quarter, year]);
+  }, [period, month, quarter, year, churchId]);
 
   useEffect(() => {
     void load();

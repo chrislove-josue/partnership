@@ -97,7 +97,7 @@ export function TopPartnersScreen() {
     const churchById = new Map(churches.map((church) => [church.id, church.name]));
     const celluleById = new Map(cellules.map((cellule) => [cellule.id, cellule.name]));
 
-    const buckets = new Map<string, RankedEntry & { total: number; count: number }>();
+    const buckets = new Map<string, RankedEntry>();
 
     relevant.forEach((donation) => {
       const partner = partnerById.get(donation.partner_id);
@@ -116,7 +116,9 @@ export function TopPartnersScreen() {
         name = celluleById.get(celluleId) ?? celluleName ?? 'Sans cellule';
       } else {
         key = `partner:${donation.partner_id}`;
-        name = partner?.full_name ?? `${partner?.first_name ?? ''} ${partner?.last_name ?? ''}`.trim() || 'Partenaire inconnu';
+        name: (partner?.full_name
+          ?? `${partner?.first_name ?? ''} ${partner?.last_name ?? ''}`.trim())
+          || 'Partenaire inconnu',
       }
 
       const current = buckets.get(key) ?? {

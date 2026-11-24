@@ -139,11 +139,12 @@ class TopPartners extends Page
 
         try {
             $service = app(TopPartnerService::class);
-            $accessibleIds = $actor ? app(ChurchAccessService::class)->accessibleChurchIds($actor) : [];
+            $accessibleIds = array_map('intval', $actor ? app(ChurchAccessService::class)->accessibleChurchIds($actor) : []);
             $churchId = (int) ($state['church_id'] ?? 0);
-            $churchIds = $churchId && in_array($churchId, $accessibleIds, true)
+            // Une seule église : jamais de mélange de rangs entre églises.
+            $churchIds = in_array($churchId, $accessibleIds, true)
                 ? [$churchId]
-                : $accessibleIds;
+                : (($accessibleIds[0] ?? null) ? [$accessibleIds[0]] : []);
 
             $groupValue = (string) ($state['category_group'] ?? '');
             $group = CategoryGroup::tryFrom($groupValue);

@@ -68,22 +68,22 @@ class TopPartners extends Page
                     ->live(),
 
                 Select::make('category_group')->selectablePlaceholder(false)
-                    ->label('Famille de catégorie')
+                    ->label('Famille')
                     ->options(array_merge(
-                        ['' => 'Toutes les familles'],
+                        ['' => 'Toutes'],
                         collect(CategoryGroup::cases())->mapWithKeys(
                             fn (CategoryGroup $group): array => [$group->value => $group->label()],
                         )->all(),
                     ))
                     ->live(),
 
-                Select::make('category_id')->selectablePlaceholder(false)
+                Select::make('category_id')
                     ->label('Catégorie')
+                    ->placeholder('Toutes les catégories')
                     ->options(fn (Get $get): array => CategoryDon::query()
                         ->when($get('category_group'), fn ($query, string $group) => $query->where('group', $group))
                         ->orderBy('name')
                         ->pluck('name', 'id')
-                        ->prepend('Toutes les catégories', '')
                         ->all())
                     ->searchable()
                     ->live(),

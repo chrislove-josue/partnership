@@ -15,6 +15,7 @@ class Donation extends Model
         'church_id',
         'worship_church_id',
         'category_id',
+        'is_active',
     ];
 
     protected function casts(): array
@@ -22,6 +23,7 @@ class Donation extends Model
         return [
             'amount' => 'decimal:2',
             'date' => 'datetime',
+            'is_active' => 'boolean',
         ];
     }
 

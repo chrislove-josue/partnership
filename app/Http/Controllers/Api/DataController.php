@@ -293,6 +293,32 @@ class DataController extends Controller
         return response()->json(['message' => 'Don mis à jour.', 'donation' => $donation->load(['church:id,name', 'worshipChurch:id,name', 'partner:id,first_name,last_name'])]);
     }
 
+    public function deactivateDonation(Donation $donation): JsonResponse
+    {
+        Gate::authorize('toggleActive', $donation);
+
+        if (! $donation->is_active) {
+            return response()->json(['message' => 'Ce don est déjà désactivé.'], 409);
+        }
+
+        $donation->update(['is_active' => false]);
+
+        return response()->json(['message' => 'Don désactivé.', 'donation' => $donation]);
+    }
+
+    public function activateDonation(Donation $donation): JsonResponse
+    {
+        Gate::authorize('toggleActive', $donation);
+
+        if ($donation->is_active) {
+            return response()->json(['message' => 'Ce don est déjà actif.'], 409);
+        }
+
+        $donation->update(['is_active' => true]);
+
+        return response()->json(['message' => 'Don réactivé.', 'donation' => $donation]);
+    }
+
     public function destroyDonation(Donation $donation): JsonResponse
     {
         Gate::authorize('delete', $donation);

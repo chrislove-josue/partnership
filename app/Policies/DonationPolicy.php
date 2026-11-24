@@ -35,4 +35,9 @@ class DonationPolicy
     {
         return $this->access->canModifyChurchData($user, $donation->church_id);
     }
+
+    public function toggleActive(User $user, Donation $donation): bool
+    {
+        return $this->update($user, $donation);
+    }
 }

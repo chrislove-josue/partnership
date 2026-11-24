@@ -51,6 +51,8 @@ Route::middleware('auth:sanctum')->group(function (): void {
     Route::post('/donations/import', [ImportController::class, 'importDonations']);
     Route::get('/donations/template', [ImportController::class, 'donationTemplate']);
     Route::patch('/donations/{donation}', [DataController::class, 'updateDonation']);
+    Route::post('/donations/{donation}/deactivate', [DataController::class, 'deactivateDonation']);
+    Route::post('/donations/{donation}/activate', [DataController::class, 'activateDonation']);
     Route::delete('/donations/{donation}', [DataController::class, 'destroyDonation']);
 
     Route::get('/users', [ManagementController::class, 'users']);

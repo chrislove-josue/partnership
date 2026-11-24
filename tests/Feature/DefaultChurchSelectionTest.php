@@ -59,7 +59,7 @@ class DefaultChurchSelectionTest extends TestCase
         $this->actingAs($this->localPastor);
 
         Livewire::test(CreateDonation::class)
-            ->assertSchemaStateSet(['church_id' => $this->local->id]);
+            ->assertSchemaStateSet(['worship_church_id' => $this->local->id]);
     }
 
     public function test_the_partner_form_preselects_the_assigned_church(): void

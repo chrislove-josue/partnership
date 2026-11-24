@@ -68,7 +68,7 @@ export function TopPartnersScreen() {
   const [year, setYear] = useState(String(now.getFullYear()));
   const [churches, setChurches] = useState<Church[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [churchId, setChurchId] = useState('');
+  const [churchId, setChurchId] = useState(user?.assigned_church_id ? String(user.assigned_church_id) : '');
   const [categoryGroup, setCategoryGroup] = useState('');
   const [categoryId, setCategoryId] = useState('');
 

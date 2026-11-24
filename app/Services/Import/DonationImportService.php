@@ -61,11 +61,7 @@ class DonationImportService extends BaseImportService
 
                 $phone = $this->helpers->normalizePhone($row['phone'] ?? null);
                 $handleKC = $this->helpers->normalizeHandleKC($this->text($row, 'handlekc'));
-                $partner = $this->findPartner($actor, $row, $phone, $handleKC);
-
-                if ($partner) {
-                    $this->assertCanModifyPartner($actor, $partner);
-                }
+                $partner = $this->findPartner($actor, $row, $phone, $handleKC, true);
 
                 if (! $partner) {
                     $firstName = $this->text($row, 'firstname');
@@ -85,9 +81,17 @@ class DonationImportService extends BaseImportService
                     ]);
                 }
 
+                $attribution = app(\App\Services\DonationAttributionService::class)
+                    ->churchFor($partner, $category, $church);
+
+                if (! app(\App\Services\DonationAttributionService::class)
+                    ->canRecord($actor, $church, $attribution, $partner)) {
+                    throw new RuntimeException('Permission refusée pour enregistrer ce don.');
+                }
+
                 $exists = Donation::query()
                     ->where('partner_id', $partner->id)
-                    ->where('church_id', $church->id)
+                    ->where('church_id', $attribution->id)
                     ->where('category_id', $category->id)
                     ->where('amount', $amount)
                     ->where('date', $donationDate)
@@ -102,7 +106,8 @@ class DonationImportService extends BaseImportService
                     'amount' => $amount,
                     'date' => $donationDate,
                     'partner_id' => $partner->id,
-                    'church_id' => $church->id,
+                    'church_id' => $attribution->id,
+                    'worship_church_id' => $church->id,
                     'category_id' => $category->id,
                 ]);
 

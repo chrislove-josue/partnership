@@ -102,6 +102,19 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
 
   const summary = useMemo(() => {
     const total = donations.reduce((sum, donation) => sum + Number(donation.amount), 0);
+
+    // Le pasteur de groupe/sous-groupe voit d'abord le total de SA église,
+    // puis le total de toutes les églises accessibles.
+    const assignedChurchId = user?.assigned_church_id;
+    const ownDonations = assignedChurchId
+      ? donations.filter((donation) => donation.church_id === assignedChurchId)
+      : donations;
+    const ownTotal = ownDonations.reduce((sum, donation) => sum + Number(donation.amount), 0);
+    const ownChurch = churches.find((church) => church.id === assignedChurchId);
+
+    const role = String(user?.role ?? '');
+    const showBothTotals = ['GROUP_PASTOR', 'SUBGROUP_PASTOR'].includes(role)
+      || ['GROUP_PASTOR', 'SUBGROUP_PASTOR'].some((r) => (user?.roles ?? []).includes(r));
     const now = new Date();
     const month = now.getMonth();
     const year = now.getFullYear();
@@ -142,6 +155,9 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
 
     return {
       total,
+      ownTotal,
+      ownChurchName: ownChurch?.name ?? null,
+      showBothTotals,
       monthTotal,
       monthCount: monthDonations.length,
       partnersWithDonation: partnerIdsWithDonation.size,

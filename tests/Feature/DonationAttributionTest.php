@@ -150,7 +150,7 @@ class DonationAttributionTest extends TestCase
             ->contains('id', $this->partnerB->id));
     }
 
-    public function test_a_donation_attributed_elsewhere_is_visible_in_the_worship_church(): void
+    public function test_a_donation_attributed_elsewhere_is_not_visible_even_in_the_worship_church(): void
     {
         $donation = Donation::create([
             'amount' => 10000,
@@ -161,11 +161,44 @@ class DonationAttributionTest extends TestCase
             'category_id' => $this->ministry->id,
         ]);
 
+        // L'église du culte a enregistré le don mais ne voit pas l'historique
+        // du partenaire : le don est crédité à l'église d'origine (B).
         $response = $this->actingAs($this->staffA, 'sanctum')->getJson('/api/donations');
 
         $response->assertOk();
 
-        $this->assertTrue(collect($response->json('data'))->contains('id', $donation->id));
+        $this->assertFalse(collect($response->json('data'))->contains('id', $donation->id));
+    }
+
+    public function test_partner_total_is_scoped_to_the_viewers_churches(): void
+    {
+        Donation::create([
+            'amount' => 10000,
+            'date' => '2026-11-24',
+            'partner_id' => $this->partnerB->id,
+            'church_id' => $this->churchB->id,
+            'worship_church_id' => $this->churchA->id,
+            'category_id' => $this->ministry->id,
+        ]);
+
+        // L'église du culte (A) ne voit pas le total du partenaire.
+        $fromA = $this->actingAs($this->staffA, 'sanctum')->getJson('/api/partners?search=Visiteur');
+        $fromA->assertOk();
+        $this->assertEquals(0, collect($fromA->json('data'))->firstWhere('id', $this->partnerB->id)['total_donations']);
+
+        // L'église créditée (B) voit le total.
+        $staffB = User::create([
+            'name' => 'Staff B',
+            'email' => 'staff-b-total@example.test',
+            'password' => Hash::make('password'),
+            'assigned_church_id' => $this->churchB->id,
+            'is_active' => true,
+        ]);
+        $staffB->syncRoles([RoleName::STAFF->value]);
+
+        $fromB = $this->actingAs($staffB, 'sanctum')->getJson('/api/partners?search=Visiteur');
+        $fromB->assertOk();
+        $this->assertEquals(10000, (float) collect($fromB->json('data'))->firstWhere('id', $this->partnerB->id)['total_donations']);
     }
 
     public function test_a_donation_is_not_visible_to_an_unrelated_church(): void

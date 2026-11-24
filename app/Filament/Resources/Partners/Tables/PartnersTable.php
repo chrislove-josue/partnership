@@ -16,7 +16,11 @@ class PartnersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->withTotalDonations())
+            ->modifyQueryUsing(fn (Builder $query) => $query->withTotalDonations(
+                auth()->user()
+                    ? app(\App\Services\ChurchAccessService::class)->accessibleChurchIds(auth()->user())
+                    : [],
+            ))
             ->columns([
                 TextColumn::make('full_name')
                     ->label('Nom complet')

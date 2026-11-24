@@ -5,6 +5,7 @@ namespace App\Services\Import;
 use App\Models\Donation;
 use App\Models\Partner;
 use App\Models\User;
+use App\Services\DonationAttributionService;
 use RuntimeException;
 use Throwable;
 
@@ -81,10 +82,10 @@ class DonationImportService extends BaseImportService
                     ]);
                 }
 
-                $attribution = app(\App\Services\DonationAttributionService::class)
+                $attribution = app(DonationAttributionService::class)
                     ->churchFor($partner, $category, $church);
 
-                if (! app(\App\Services\DonationAttributionService::class)
+                if (! app(DonationAttributionService::class)
                     ->canRecord($actor, $church, $attribution, $partner)) {
                     throw new RuntimeException('Permission refusée pour enregistrer ce don.');
                 }
@@ -99,6 +100,7 @@ class DonationImportService extends BaseImportService
 
                 if ($exists) {
                     $results['skipped']++;
+
                     continue;
                 }
 

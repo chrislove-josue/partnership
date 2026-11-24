@@ -19,7 +19,9 @@ class ImportTenantSecurityTest extends TestCase
     use UploadsXlsx;
 
     private Church $churchA;
+
     private Church $churchB;
+
     private Partner $partnerB;
 
     protected function setUp(): void

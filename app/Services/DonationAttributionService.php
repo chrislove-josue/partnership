@@ -15,9 +15,7 @@ use App\Models\User;
  */
 class DonationAttributionService
 {
-    public function __construct(private ChurchAccessService $access)
-    {
-    }
+    public function __construct(private ChurchAccessService $access) {}
 
     public function churchFor(Partner $partner, CategoryDon $category, Church $worship): Church
     {

@@ -153,6 +153,46 @@ class TopPartnerTest extends TestCase
         $this->assertEquals(5000, $otherResponse->json('data.0.amount'));
     }
 
+    public function test_api_filters_by_category_group_and_category(): void
+    {
+        $alice = $this->partner('Alice');
+        $finances = CategoryDon::create(['name' => 'Dîmes top', 'group' => \App\Enums\CategoryGroup::CHURCH_FINANCES]);
+        $ministry = CategoryDon::create(['name' => 'Rhapsodie top', 'group' => \App\Enums\CategoryGroup::MINISTRY_PARTNERSHIP]);
+
+        Donation::create([
+            'amount' => 1000,
+            'date' => '2026-11-10',
+            'partner_id' => $alice->id,
+            'church_id' => $this->church->id,
+            'worship_church_id' => $this->church->id,
+            'category_id' => $finances->id,
+        ]);
+        Donation::create([
+            'amount' => 7000,
+            'date' => '2026-11-11',
+            'partner_id' => $alice->id,
+            'church_id' => $this->church->id,
+            'worship_church_id' => $this->church->id,
+            'category_id' => $ministry->id,
+        ]);
+
+        $base = '?period=month&month=11&year=2026&church_id='.$this->church->id;
+
+        $all = $this->actingAs($this->admin, 'sanctum')->getJson('/api/top-partners'.$base);
+        $this->assertEquals(8000, $all->json('data.0.amount'));
+
+        $financesOnly = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/top-partners'.$base.'&category_group=church_finances');
+        $financesOnly->assertOk()
+            ->assertJsonPath('category_group', 'church_finances');
+        $this->assertEquals(1000, $financesOnly->json('data.0.amount'));
+
+        $oneCategory = $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/top-partners'.$base.'&category_id='.$ministry->id);
+        $oneCategory->assertOk();
+        $this->assertEquals(7000, $oneCategory->json('data.0.amount'));
+    }
+
     public function test_api_rejects_an_invalid_period(): void
     {
         $this->actingAs($this->admin, 'sanctum')

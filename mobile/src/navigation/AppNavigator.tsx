@@ -1,11 +1,10 @@
 import React, { useEffect } from 'react';
-import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator, BottomTabBar, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '../context/AuthContext';
-import { syncNow } from '../db/sync';
 import { requestStartupPermissions } from '../native/permissions';
 import { colors } from '../components/ui';
 import { LoginScreen } from '../screens/LoginScreen';
@@ -87,7 +86,7 @@ function MainTabs() {
 }
 
 export function AppNavigator() {
-  const { user, loading, markSynced } = useAuth();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     void requestStartupPermissions();

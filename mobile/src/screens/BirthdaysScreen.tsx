@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { api, getErrorMessage } from '../api/client';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { api, getApiUrl, getAuthToken, getErrorMessage } from '../api/client';
 import { FilterCard } from '../components/FilterCard';
-import { filterBy } from '../utils/search';
+import { saveToDownloads } from '../native/mediaStore';
 import type { BirthdayEntry } from '../api/types';
 import {
   Badge,
@@ -12,6 +12,7 @@ import {
   ErrorView,
   formatDate,
   LoadingView,
+  PrimaryButton,
   Screen,
   SectionTitle,
   SelectField,
@@ -39,7 +40,38 @@ export function BirthdaysScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [birthdays, setBirthdays] = useState<BirthdayEntry[]>([]);
-  const [search, setSearch] = useState('');
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadPdf = async () => {
+    setDownloading(true);
+    try {
+      const token = getAuthToken();
+      const url = `${getApiUrl()}/birthdays/export?month=${month}&year=${year}`;
+      const response = await fetch(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+      if (!response.ok) {
+        throw new Error('Téléchargement impossible.');
+      }
+      const blob = await response.blob();
+      const base64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result);
+          resolve(result.substring(result.indexOf(',') + 1));
+        };
+        reader.onerror = () => reject(new Error('Lecture du fichier impossible.'));
+        reader.readAsDataURL(blob);
+      });
+      const fileName = `anniversaires_${year}-${String(month).padStart(2, '0')}.pdf`;
+      await saveToDownloads(base64, fileName, 'application/pdf');
+      Alert.alert('Téléchargé', `${fileName} enregistré dans Téléchargements.`);
+    } catch (caught) {
+      setError(getErrorMessage(caught, 'Téléchargement impossible.'));
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -87,6 +119,13 @@ export function BirthdaysScreen() {
           onChange={setYear}
         />
       </FilterCard>
+
+      <PrimaryButton
+        title={downloading ? 'Téléchargement…' : 'Télécharger en PDF'}
+        onPress={() => void downloadPdf()}
+        loading={downloading}
+        disabled={downloading}
+      />
 
       {loading ? <LoadingView /> : null}
       {!loading && error ? <ErrorView message={error} onRetry={() => void load()} /> : null}

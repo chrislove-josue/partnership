@@ -43,6 +43,7 @@ export function DonationsScreen() {
   const [formOpen, setFormOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState('');
+  const [editing, setEditing] = useState<Donation | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<Donation | null>(null);
 
   const [amount, setAmount] = useState('');

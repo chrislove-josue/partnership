@@ -205,7 +205,10 @@ export function TopPartnersScreen() {
                   <Text style={styles.name} numberOfLines={1}>
                     {entry.name}{entry.is_user ? ' (compte)' : ''}
                   </Text>
-                  <Text style={styles.meta} numberOfLines={1}>Église : {entry.church ?? '—'}</Text>
+                  <Text style={styles.meta} numberOfLines={1}>Église créditée : {entry.church ?? '—'}</Text>
+                  {entry.origin_church && entry.origin_church !== entry.church ? (
+                    <Text style={styles.meta} numberOfLines={1}>Église d'origine : {entry.origin_church}</Text>
+                  ) : null}
                   <Text style={styles.meta} numberOfLines={1}>Cellule : {entry.cellule ?? '—'}</Text>
                   <Text style={styles.meta}>{entry.count} don(s)</Text>
                 </View>

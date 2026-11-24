@@ -28,3 +28,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 /php.bat
+
+# Firebase (secrets)
+storage/app/firebase-service-account.json
+mobile/android/app/google-services.json

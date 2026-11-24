@@ -104,7 +104,7 @@ export function TopPartnersScreen() {
     } finally {
       setLoading(false);
     }
-  }, [period, month, quarter, year, churchId]);
+  }, [period, month, quarter, year, churchId, categoryGroup, categoryId]);
 
   useEffect(() => {
     void load();

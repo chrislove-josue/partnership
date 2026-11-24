@@ -167,4 +167,45 @@ class DonationAttributionTest extends TestCase
 
         $this->assertTrue(collect($response->json('data'))->contains('id', $donation->id));
     }
+
+    public function test_a_donation_is_not_visible_to_an_unrelated_church(): void
+    {
+        $subGroupC = Church::create([
+            'name' => 'Sous-groupe C',
+            'type' => ChurchType::SUB_GROUP,
+            'parent_id' => $this->group->id,
+        ]);
+        $churchC = Church::create([
+            'name' => 'Église C',
+            'type' => ChurchType::LOCAL,
+            'parent_id' => $subGroupC->id,
+        ]);
+
+        $staffC = User::create([
+            'name' => 'Staff C',
+            'email' => 'staff-c-attribution@example.test',
+            'password' => Hash::make('password'),
+            'assigned_church_id' => $churchC->id,
+            'is_active' => true,
+        ]);
+        $staffC->syncRoles([RoleName::STAFF->value]);
+
+        $donation = Donation::create([
+            'amount' => 10000,
+            'date' => '2026-11-24',
+            'partner_id' => $this->partnerB->id,
+            'church_id' => $this->churchB->id,
+            'worship_church_id' => $this->churchA->id,
+            'category_id' => $this->ministry->id,
+        ]);
+
+        // Le partenaire est visible partout, mais PAS son don.
+        $partners = $this->actingAs($staffC, 'sanctum')->getJson('/api/partners?search=Visiteur');
+        $partners->assertOk();
+        $this->assertTrue(collect($partners->json('data'))->contains('id', $this->partnerB->id));
+
+        $donations = $this->actingAs($staffC, 'sanctum')->getJson('/api/donations');
+        $donations->assertOk();
+        $this->assertFalse(collect($donations->json('data'))->contains('id', $donation->id));
+    }
 }

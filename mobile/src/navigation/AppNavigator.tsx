@@ -93,35 +93,6 @@ export function AppNavigator() {
     void requestStartupPermissions();
   }, []);
 
-  useEffect(() => {
-    if (!user) {
-      return;
-    }
-
-    const run = () => {
-      void (async () => {
-        const summary = await syncNow();
-        if (!summary.skipped) {
-          await markSynced();
-        }
-      })().catch(() => {
-        // La synchronisation reprendra automatiquement au prochain cycle.
-      });
-    };
-
-    run();
-    const timer = setInterval(run, 5 * 60 * 1000);
-    const subscription = AppState.addEventListener('change', (state) => {
-      if (state === 'active') {
-        run();
-      }
-    });
-
-    return () => {
-      clearInterval(timer);
-      subscription.remove();
-    };
-  }, [user, markSynced]);
 
   if (loading) {
     return (

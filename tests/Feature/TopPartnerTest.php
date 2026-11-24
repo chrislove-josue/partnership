@@ -274,10 +274,10 @@ class TopPartnerTest extends TestCase
         }
 
         $response = $this->actingAs($pastor, 'sanctum')
-            ->getJson('/api/top-partners?period=month&month=11&year=2026');
+            ->getJson('/api/top-partners?period=month&month=11&year=2026&church_id=');
 
         $response->assertOk();
-        // Seul le don de l'église fille est compté (6000 au lieu de 9000).
+        // Seul le don de l'église fille est compté (3000 au lieu de 6000).
         $this->assertEquals(3000, $response->json('data.0.amount'));
     }
 

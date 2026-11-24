@@ -155,6 +155,7 @@ class PartnershipReportService
             ->where('church_id', $churchId)
             ->whereDoesntHave('donations', function ($query) use ($churchId, $range): void {
                 $query->where('church_id', $churchId)
+                    ->where('is_active', true)
                     ->whereBetween('date', [$range['from'], $range['to']]);
             })
             ->orderBy('last_name')

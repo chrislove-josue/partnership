@@ -19,6 +19,8 @@ class CategoryDonSeeder extends Seeder
             '#06B6D4',
             '#8B5CF6',
             '#EC4899',
+            '#14B8A6',
+            '#F43F5E',
         ];
 
         $categories = array_map(

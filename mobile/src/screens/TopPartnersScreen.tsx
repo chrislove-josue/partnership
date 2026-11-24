@@ -79,7 +79,8 @@ export function TopPartnersScreen() {
       const params = new URLSearchParams({ period, year });
       if (period === 'month') params.set('month', month);
       if (period === 'quarter') params.set('quarter', quarter);
-      if (churchId) params.set('church_id', churchId);
+      // Toujours envoyer church_id : vide = toutes les églises accessibles.
+      params.set('church_id', churchId);
       if (categoryGroup) params.set('category_group', categoryGroup);
       if (categoryId) params.set('category_id', categoryId);
 

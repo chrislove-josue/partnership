@@ -126,6 +126,7 @@ class DonationTrendService
 
         return Donation::query()
             ->whereIn('church_id', $churchIds)
+            ->where('is_active', true)
             ->with([
                 'partner:id,first_name,last_name,cellule_id',
                 'church:id,name',

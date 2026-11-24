@@ -68,6 +68,7 @@ class DataController extends Controller
         $totals = Donation::query()
             ->selectRaw('church_id, COALESCE(SUM(amount), 0) as total')
             ->whereIn('church_id', $churches->pluck('id'))
+            ->where('is_active', true)
             ->groupBy('church_id')
             ->pluck('total', 'church_id');
 

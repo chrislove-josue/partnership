@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Donations\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
@@ -44,6 +45,9 @@ class DonationsTable
                     ->badge()
                     ->color(fn ($record) => $record->category?->color)
                     ->searchable(),
+                IconColumn::make('is_active')
+                    ->label('Actif')
+                    ->boolean(),
                 TextColumn::make('created_at')
                     ->label('Créé le')
                     ->dateTime('d/m/Y H:i')

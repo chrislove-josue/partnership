@@ -166,7 +166,7 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
       recentDonations,
       recentNotifications,
     };
-  }, [churches, donations, partners, notifications]);
+  }, [churches, donations, partners, notifications, user?.role, user?.roles, user?.assigned_church_id]);
 
   const stats: Stat[] = [
     {
@@ -229,8 +229,18 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
               </Text>
             </Pressable>
           </View>
-          <Text style={styles.heroTotalValue}>{formatMoney(summary.total)}</Text>
-          <Text style={styles.heroTotalHint}>Sur toutes les églises accessibles</Text>
+          <Text style={styles.heroTotalValue}>{formatMoney(summary.showBothTotals ? summary.ownTotal : summary.total)}</Text>
+          <Text style={styles.heroTotalHint}>
+            {summary.showBothTotals
+              ? `Sur ${summary.ownChurchName ?? 'votre église'}`
+              : 'Sur toutes les églises accessibles'}
+          </Text>
+          {summary.showBothTotals ? (
+            <View style={styles.heroTotalSecondary}>
+              <Text style={styles.heroTotalSecondaryLabel}>Total sur toutes les églises accessibles</Text>
+              <Text style={styles.heroTotalSecondaryValue}>{formatMoney(summary.total)}</Text>
+            </View>
+          ) : null}
         </View>
       </Card>
 

@@ -91,7 +91,7 @@ export function AppFooter({ compact = false }: { compact?: boolean }) {
         </Text>
       </Pressable>
       <Text style={styles.appFooterText} numberOfLines={1}>
-        Conçu et Développé par Nestor ATCHOUGO
+        Conçu et Développé par Nestor Josué ATCHOUGO
       </Text>
       <Text style={styles.appFooterVersion} numberOfLines={1}>
         Version {APP_VERSION}

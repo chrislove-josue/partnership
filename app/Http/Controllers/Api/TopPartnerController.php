@@ -43,14 +43,13 @@ class TopPartnerController extends Controller
         };
 
         $user = $request->user();
-        $accessibleIds = $this->access->accessibleChurchIds($user);
+        $accessibleIds = array_map('intval', $this->access->accessibleChurchIds($user));
 
-        // Sans church_id explicite, on part de l'église assignée du pasteur
-        // (groupe/sous-groupe) : il voit d'abord le top de sa propre église.
-        $churchId = $request->integer('church_id') ?: $this->access->defaultChurchId($user);
-        $churchIds = $churchId && in_array($churchId, $accessibleIds, true)
+        // Une seule église créditée : jamais de classement mélangé.
+        $churchId = $request->integer('church_id') ?: (int) ($this->access->defaultChurchId($user) ?? 0);
+        $churchIds = in_array($churchId, $accessibleIds, true)
             ? [$churchId]
-            : $accessibleIds;
+            : (($accessibleIds[0] ?? null) ? [$accessibleIds[0]] : []);
 
         $group = CategoryGroup::tryFrom($request->string('category_group')->toString());
 

@@ -2,7 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
+use App\Models\CategoryDon;
 use App\Services\ChurchAccessService;
 use App\Services\TopPartnerService;
 use Filament\Forms\Components\Select;
@@ -38,6 +40,8 @@ class TopPartners extends Page
             'quarter' => (int) now()->quarter,
             'year' => (int) now()->year,
             'church_id' => (string) (Auth::user()?->assigned_church_id ?? ''),
+            'category_group' => '',
+            'category_id' => '',
         ]);
     }
 

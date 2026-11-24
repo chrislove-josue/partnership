@@ -52,11 +52,16 @@ class TopPartnerController extends Controller
             ? [$churchId]
             : $accessibleIds;
 
+        $group = CategoryGroup::tryFrom($request->string('category_group')->toString());
+
         $items = $this->topPartners->rank(
             $churchIds,
             $period,
             $year,
             $index,
+            20,
+            $group,
+            $request->integer('category_id') ?: null,
         );
 
         [$from, $to] = $this->topPartners->range($period, $year, $index);
@@ -66,6 +71,8 @@ class TopPartnerController extends Controller
             'year' => $year,
             'index' => $index,
             'church_id' => $churchIds === [$churchId] ? $churchId : null,
+            'category_group' => $group?->value,
+            'category_id' => $request->integer('category_id') ?: null,
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
             'count' => $items->count(),

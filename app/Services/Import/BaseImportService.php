@@ -69,7 +69,7 @@ abstract class BaseImportService
      *
      * @param  array<string, mixed>  $row
      */
-    protected function findPartner(User $actor, array $row, ?string $phone = null, ?string $handleKC = null): ?Partner
+    protected function findPartner(User $actor, array $row, ?string $phone = null, ?string $handleKC = null, bool $global = false): ?Partner
     {
         $conditions = [];
 
@@ -87,8 +87,13 @@ abstract class BaseImportService
             return null;
         }
 
-        return Partner::query()
-            ->whereIn('church_id', $this->access->accessibleChurchIds($actor))
+        $query = Partner::query();
+
+        if (! $global) {
+            $query->whereIn('church_id', $this->access->accessibleChurchIds($actor));
+        }
+
+        return $query
             ->where(function ($query) use ($conditions): void {
                 foreach ($conditions as $condition) {
                     $query->orWhereRaw("LOWER({$condition['column']}) = ?", [$condition['value']]);

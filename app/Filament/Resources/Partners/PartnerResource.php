@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Partners;
 
-use App\Filament\Resources\Concerns\ScopesByChurch;
 use App\Filament\Resources\Partners\Pages\CreatePartner;
 use App\Filament\Resources\Partners\Pages\EditPartner;
 use App\Filament\Resources\Partners\Pages\ListPartners;

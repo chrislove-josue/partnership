@@ -147,6 +147,8 @@ class DonationDeactivationTest extends TestCase
         $inactive = $this->actingAs($this->pastor, 'sanctum')->getJson('/api/donations?status=inactive');
         $inactive->assertOk();
         $this->assertTrue(collect($inactive->json('data'))->contains('id', $this->donation->id));
+        // Le champ est indispensable pour que l'APK affiche « Réactiver ».
+        $inactive->assertJsonPath('data.0.is_active', false);
 
         $all = $this->actingAs($this->pastor, 'sanctum')->getJson('/api/donations?status=all');
         $all->assertOk();

@@ -93,7 +93,7 @@ class DataController extends Controller
 
         $query = Partner::query()
             ->with(['church:id,name', 'cellule:id,name'])
-            ->withTotalDonations()
+            ->withTotalDonations($this->access->accessibleChurchIds($request->user()))
             // Tous les partenaires sont consultables : un partenaire peut faire
             // son culte dans une autre église que la sienne.
             ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))

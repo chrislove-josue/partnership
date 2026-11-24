@@ -219,7 +219,14 @@ class DataController extends Controller
                 'worshipChurch:id,name',
                 'category:id,name,color,group',
             ])
-            ->where('is_active', true)
+            // Par défaut, seuls les dons actifs sont listés. Le paramètre
+            // `status=inactive` ou `status=all` permet de voir/réactiver les
+            // dons désactivés (filtrés côté APK).
+            ->when(
+                $request->string('status')->toString() === 'inactive',
+                fn ($query) => $query->where('is_active', false),
+                fn ($query) => $query->where('is_active', true),
+            )
             // Seule l'église créditée peut consulter ses dons. Une église
             // externe peut enregistrer un don pour un partenaire visiteur,
             // mais elle n'a pas accès à son historique de dons.

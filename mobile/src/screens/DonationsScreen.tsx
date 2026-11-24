@@ -133,6 +133,17 @@ export function DonationsScreen() {
     }
   };
 
+  const toggleActive = async (donation: Donation) => {
+    try {
+      const action = donation.is_active === false ? 'activate' : 'deactivate';
+      await api(`/donations/${donation.id}/${action}`, { method: 'POST' });
+      invalidateCache();
+      await load();
+    } catch (caught) {
+      setError(getErrorMessage(caught, 'Modification impossible.'));
+    }
+  };
+
   const save = async () => {
     setFormError('');
     const parsedAmount = Number(amount);
@@ -232,6 +243,14 @@ export function DonationsScreen() {
                 {' · '}
                 {formatDate(donation.date)}
               </Text>
+              {donation.is_active === false ? <Badge text="Désactivé" color={colors.gold} /> : null}
+              <View style={styles.actions}>
+                <Pressable style={styles.toggle} onPress={() => void toggleActive(donation)}>
+                  <Text style={styles.toggleText}>
+                    {donation.is_active === false ? 'Réactiver' : 'Désactiver'}
+                  </Text>
+                </Pressable>
+              </View>
               <Pressable style={styles.delete} onPress={() => setConfirmDelete(donation)}>
                 <Text style={styles.deleteText}>Supprimer</Text>
               </Pressable>
@@ -297,4 +316,7 @@ const styles = StyleSheet.create({
   error: { color: colors.red, marginBottom: 12 },
   delete: { alignSelf: 'flex-start', marginTop: 10 },
   deleteText: { color: colors.red, fontSize: 13, fontWeight: '600' },
+  actions: { flexDirection: 'row', gap: 18, marginTop: 8 },
+  toggle: { alignSelf: 'flex-start' },
+  toggleText: { color: colors.blue, fontWeight: '700', fontSize: 13 },
 });

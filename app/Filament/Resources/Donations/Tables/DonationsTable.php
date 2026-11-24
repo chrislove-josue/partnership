@@ -68,6 +68,13 @@ class DonationsTable
                     ->query(fn (Builder $query, array $data) => $query
                         ->when($data['date_from'] ?? null, fn (Builder $q, $date) => $q->whereDate('date', '>=', $date))
                         ->when($data['date_to'] ?? null, fn (Builder $q, $date) => $q->whereDate('date', '<=', $date))),
+                SelectFilter::make('is_active')
+                    ->label('Statut')
+                    ->options([
+                        '1' => 'Actif',
+                        '0' => 'Désactivé',
+                    ])
+                    ->default('1'),
                 SelectFilter::make('church_id')
                     ->label('Église')
                     ->relationship('church', 'name')

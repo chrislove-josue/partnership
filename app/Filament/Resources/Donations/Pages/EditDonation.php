@@ -6,8 +6,10 @@ use App\Filament\Resources\Concerns\RedirectsToListAfterSave;
 use App\Filament\Resources\Donations\DonationResource;
 use App\Models\CategoryDon;
 use App\Models\Church;
+use App\Models\Donation;
 use App\Models\Partner;
 use App\Services\DonationAttributionService;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
@@ -49,6 +51,11 @@ class EditDonation extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('toggleActive')
+                ->label(fn (Donation $record): string => $record->is_active ? 'Désactiver' : 'Réactiver')
+                ->color(fn (Donation $record): string => $record->is_active ? 'danger' : 'success')
+                ->requiresConfirmation()
+                ->action(fn () => $this->record->update(['is_active' => ! $this->record->is_active])),
             DeleteAction::make(),
         ];
     }

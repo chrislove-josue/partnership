@@ -90,6 +90,7 @@ export interface Donation {
   category_id: number;
   category?: string | null;
   color?: string | null;
+  is_active?: boolean;
 }
 
 export interface ImportResult {

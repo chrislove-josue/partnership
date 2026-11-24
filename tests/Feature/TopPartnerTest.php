@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\ChurchType;
 use App\Enums\PeriodType;
 use App\Enums\RoleName;
 use App\Models\CategoryDon;
@@ -114,7 +115,7 @@ class TopPartnerTest extends TestCase
         $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
         $other = Church::create([
             'name' => 'Autre église top',
-            'type' => \App\Enums\ChurchType::LOCAL,
+            'type' => ChurchType::LOCAL,
             'parent_id' => $group->id,
         ]);
 

@@ -109,6 +109,7 @@ class PartnerImportService extends BaseImportService
                         'date' => $donationDate,
                         'partner_id' => $partner->id,
                         'church_id' => $church->id,
+                        'worship_church_id' => $church->id,
                         'category_id' => $category->id,
                     ]);
                 }

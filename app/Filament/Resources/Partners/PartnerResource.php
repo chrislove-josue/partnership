@@ -18,7 +18,6 @@ use UnitEnum;
 
 class PartnerResource extends Resource
 {
-    use ScopesByChurch;
 
     protected static ?string $model = Partner::class;
 

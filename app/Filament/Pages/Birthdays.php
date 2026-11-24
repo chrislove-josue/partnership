@@ -18,13 +18,13 @@ class Birthdays extends Page
 {
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
 
-    protected static ?string $navigationLabel = 'Anniversaires';
+    protected static ?string $navigationLabel = 'Anniversaires des partenaires';
 
-    protected static string|\UnitEnum|null $navigationGroup = 'Structure';
+    protected static string|\UnitEnum|null $navigationGroup = null;
 
-    protected static ?int $navigationSort = 40;
+    protected static ?int $navigationSort = 5;
 
-    protected static ?string $title = 'Anniversaires du mois';
+    protected static ?string $title = 'Anniversaires des partenaires';
 
     protected string $view = 'filament.pages.birthdays';
 

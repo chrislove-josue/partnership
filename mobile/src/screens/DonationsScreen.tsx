@@ -89,6 +89,7 @@ export function DonationsScreen() {
 
   const resetFilters = () => {
     setSearch('');
+    setStatusFilter('');
     setChurchFilter('');
     setCategoryFilter('');
     setPartnerFilter('');
@@ -114,10 +115,14 @@ export function DonationsScreen() {
     (donation) => donation.date,
   ]);
 
-  const openForm = () => {
+  const openForm = (donation?: Donation) => {
     setFormError('');
-    setAmount('');
-    setPartnerId(formPartnerOptions[0]?.value ?? '');
+    setEditing(donation ?? null);
+    setAmount(donation ? String(donation.amount) : '');
+    setDate(donation ? donation.date.slice(0, 10) : new Date().toISOString().slice(0, 10));
+    setChurchId(donation ? String(donation.worship_church_id ?? donation.church_id) : (formPartnerOptions.length ? churchId : churchId));
+    setPartnerId(donation ? String(donation.partner_id) : (formPartnerOptions[0]?.value ?? ''));
+    setCategoryId(donation ? String(donation.category_id) : (categoryData[0]?.id.toString() || ''));
     setFormOpen(true);
   };
 

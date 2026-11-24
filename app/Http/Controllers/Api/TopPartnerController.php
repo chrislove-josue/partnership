@@ -45,13 +45,11 @@ class TopPartnerController extends Controller
         $user = $request->user();
         $accessibleIds = array_map('intval', $this->access->accessibleChurchIds($user));
 
-        // Par défaut : l'église assignée de l'utilisateur. Un church_id vide
-        // explicitement envoyé = toutes les églises de son périmètre (rôle).
+        // Par défaut : toutes les églises du périmètre du rôle. Un church_id
+        // explicite (ID) filtre sur une seule église ; vide = toutes aussi.
         $requestedId = $request->integer('church_id');
-        $defaultId = (int) ($this->access->defaultChurchId($user) ?? 0);
-        $churchId = $request->has('church_id') ? $requestedId : $defaultId;
-        $churchIds = $churchId && in_array($churchId, $accessibleIds, true)
-            ? [$churchId]
+        $churchIds = $requestedId && in_array($requestedId, $accessibleIds, true)
+            ? [$requestedId]
             : $accessibleIds;
 
         $group = CategoryGroup::tryFrom($request->string('category_group')->toString());

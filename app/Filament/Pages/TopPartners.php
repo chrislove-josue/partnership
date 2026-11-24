@@ -60,13 +60,19 @@ class TopPartners extends Page
             ? app(ChurchAccessService::class)->accessibleChurches($actor)
             : collect();
 
+        // L'église affectée au pasteur est proposée en premier.
+        $assignedId = (int) (Auth::user()?->assigned_church_id ?? 0);
+        $orderedChurches = $assignedId
+            ? $churches->sortByDesc(fn (Church $church): bool => $church->id === $assignedId)
+            : $churches;
+
         return $schema
             ->components([
                 Select::make('church_id')->selectablePlaceholder(false)
                     ->label('Église')
                     ->options([
                         '' => 'Toutes les églises accessibles',
-                        ...$churches->pluck('name', 'id')->all(),
+                        ...$orderedChurches->pluck('name', 'id')->all(),
                     ])
                     ->searchable()
                     ->live(),

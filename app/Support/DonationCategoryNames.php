@@ -40,6 +40,9 @@ class DonationCategoryNames
         'école de guérisons' => 'École de Guérisons',
         'ecole de guérisons' => 'École de Guérisons',
         'ecole de guerisons' => 'École de Guérisons',
+        'prémices' => 'Prémices',
+        'premices' => 'Prémices',
+        'projet de construction' => 'Projet de construction',
     ];
 
     /** Ramène un libellé connu (anglais ou ancien) vers sa forme canonique. */

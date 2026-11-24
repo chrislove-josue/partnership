@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Sauvegardes et transferts Android >= 12 : exclusions identiques à full-backup-content. -->
+<data-extraction-rules>
+  <cloud-backup>
+    <exclude domain="database" path="finance.sqlite" />
+    <exclude domain="sharedpref" path="SecureStore.xml" />
+    <exclude domain="root" path="SecureStore.xml" />
+  </cloud-backup>
+  <device-transfer>
+    <exclude domain="database" path="finance.sqlite" />
+    <exclude domain="sharedpref" path="SecureStore.xml" />
+    <exclude domain="root" path="SecureStore.xml" />
+  </device-transfer>
+</data-extraction-rules>

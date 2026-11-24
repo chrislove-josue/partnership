@@ -277,6 +277,9 @@ export function DonationsScreen() {
               </Text>
               {donation.is_active === false ? <Badge text="Désactivé" color={colors.gold} /> : null}
                 <View style={styles.actions}>
+                  <Pressable style={styles.toggle} onPress={() => openForm(donation)}>
+                    <Text style={styles.toggleText}>Modifier</Text>
+                  </Pressable>
                   <Pressable style={styles.toggle} onPress={() => void toggleActive(donation)}>
                     <Text style={styles.toggleText}>
                       {donation.is_active === false ? 'Réactiver' : 'Désactiver'}

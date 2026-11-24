@@ -5,6 +5,7 @@ import { api, getErrorMessage } from '../api/client';
 import { FilterCard } from '../components/FilterCard';
 import { filterBy } from '../utils/search';
 import type { Church } from '../api/types';
+import { useAuth } from '../context/AuthContext';
 import { colors } from '../components/ui';
 import {
   Badge,
@@ -47,6 +48,7 @@ interface TopEntry {
 
 export function TopPartnersScreen() {
   const now = new Date();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [items, setItems] = useState<TopEntry[]>([]);

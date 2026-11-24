@@ -35,12 +35,27 @@ class TopPartners extends Page
 
     public function mount(): void
     {
+        // Pour un pasteur de groupe/sous-groupe, l'église assignée est le
+        // groupe/sous-groupe : on prend sa première église locale fille.
+        $assigned = Auth::user()?->assignedChurch;
+        $defaultChurchId = null;
+
+        if ($assigned) {
+            $defaultChurchId = $assigned->type === \App\Enums\ChurchType::LOCAL
+                ? $assigned->id
+                : (Church::query()
+                    ->where('parent_id', $assigned->id)
+                    ->where('type', \App\Enums\ChurchType::LOCAL)
+                    ->orderBy('id')
+                    ->value('id') ?? $assigned->id);
+        }
+
         $this->form->fill([
             'period' => PeriodType::MONTH->value,
             'month' => (int) now()->month,
             'quarter' => (int) now()->quarter,
             'year' => (int) now()->year,
-            'church_id' => (string) (Auth::user()?->assigned_church_id ?? ''),
+            'church_id' => (string) ($defaultChurchId ?? ''),
             'category_group' => '',
             'category_id' => '',
         ]);
@@ -165,8 +180,10 @@ class TopPartners extends Page
 
             [$from, $to] = $service->range($period, $year, $index);
 
-            $churchName = $churchId && count($churchIds) === 1
-                ? Church::query()->whereKey($churchId)->value('name')
+            // Le libellé reflète TOUJOURS les églises réellement utilisées pour
+            // le calcul, jamais uniquement la sélection (évite tout décalage).
+            $churchName = count($churchIds) === 1
+                ? Church::query()->whereKey($churchIds[0])->value('name')
                 : 'Toutes les églises accessibles';
 
             return [

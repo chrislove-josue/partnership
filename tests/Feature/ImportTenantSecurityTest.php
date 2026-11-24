@@ -77,7 +77,7 @@ class ImportTenantSecurityTest extends TestCase
         $this->assertDatabaseMissing('partners', ['email' => $this->partnerB->email, 'church_id' => $this->churchA->id]);
     }
 
-    public function test_staff_cannot_attach_a_donation_to_a_partner_from_another_church(): void
+    public function test_staff_can_record_a_donation_for_a_partner_from_another_church(): void
     {
         $staffA = $this->staff($this->churchA, 'staff-a-donation@example.test');
 
@@ -89,10 +89,13 @@ class ImportTenantSecurityTest extends TestCase
                 ),
             ])
             ->assertOk()
-            ->assertJsonPath('imported', 0)
-            ->assertJsonPath('error_count', 1);
+            ->assertJsonPath('imported', 1)
+            ->assertJsonPath('error_count', 0);
 
-        $this->assertSame(0, Donation::where('partner_id', $this->partnerB->id)->count());
+        $donation = Donation::where('partner_id', $this->partnerB->id)->firstOrFail();
+        // "Offrandes" = finances de l'église → créditée à l'église du culte (A).
+        $this->assertSame($this->churchA->id, $donation->church_id);
+        $this->assertSame($this->churchA->id, $donation->worship_church_id);
         $this->assertDatabaseHas('partners', [
             'id' => $this->partnerB->id,
             'church_id' => $this->churchB->id,

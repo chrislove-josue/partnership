@@ -27,6 +27,7 @@ class TopPartnerController extends Controller
             'month' => ['nullable', 'integer', 'min:1', 'max:12'],
             'quarter' => ['nullable', 'integer', 'min:1', 'max:4'],
             'year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
+            'church_id' => ['nullable', 'integer'],
         ]);
 
         $period = PeriodType::tryFrom($request->string('period')->toString()) ?? PeriodType::MONTH;
@@ -38,8 +39,18 @@ class TopPartnerController extends Controller
             PeriodType::YEAR => 1,
         };
 
+        $user = $request->user();
+        $accessibleIds = $this->access->accessibleChurchIds($user);
+
+        // Sans church_id explicite, on part de l'église assignée du pasteur
+        // (groupe/sous-groupe) : il voit d'abord le top de sa propre église.
+        $churchId = $request->integer('church_id') ?: $this->access->defaultChurchId($user);
+        $churchIds = $churchId && in_array($churchId, $accessibleIds, true)
+            ? [$churchId]
+            : $accessibleIds;
+
         $items = $this->topPartners->rank(
-            $this->access->accessibleChurchIds($request->user()),
+            $churchIds,
             $period,
             $year,
             $index,

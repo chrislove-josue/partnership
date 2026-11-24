@@ -17,6 +17,7 @@ import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { AdminScreen } from '../screens/AdminScreen';
 import { BirthdaysScreen } from '../screens/BirthdaysScreen';
+import { TopPartnersScreen } from '../screens/TopPartnersScreen';
 import { LoginHistoryScreen } from '../screens/LoginHistoryScreen';
 
 const Stack = createNativeStackNavigator();

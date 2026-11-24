@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { ActivityIndicator, AppState, StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator, BottomTabBar, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '../context/AuthContext';
@@ -34,9 +34,26 @@ const tabIcons: Record<string, keyof typeof Ionicons.glyphMap> = {
   Administration: 'settings-outline',
 };
 
+/**
+ * Barre d'onglets qui masque les écrans secondaires (historique, anniversaires)
+ * sans laisser d'espace vide : on retire ces routes du state avant rendu.
+ */
+function FilteredTabBar(props: BottomTabBarProps) {
+  const hidden = ['HistoriqueConnexion', 'Anniversaires'];
+  const routes = props.state.routes.filter((route) => !hidden.includes(route.name));
+  const state = {
+    ...props.state,
+    routes,
+    index: Math.min(props.state.index, routes.length - 1),
+  };
+
+  return <BottomTabBar {...props} state={state} />;
+}
+
 function MainTabs() {
   return (
     <Tabs.Navigator
+      tabBar={FilteredTabBar}
       screenOptions={({ route }) => ({
         tabBarIcon: ({ color, size }) => (
           <Ionicons name={tabIcons[route.name] ?? 'ellipse-outline'} size={size} color={color} />

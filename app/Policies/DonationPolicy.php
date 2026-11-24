@@ -33,7 +33,10 @@ class DonationPolicy
 
     public function delete(User $user, Donation $donation): bool
     {
-        return $this->access->canModifyChurchData($user, $donation->church_id);
+        // La suppression définitive est réservée au super administrateur :
+        // les pasteurs et le staff peuvent modifier ou désactiver un don,
+        // mais jamais effacer l'historique.
+        return $user->isSuperAdmin();
     }
 
     public function toggleActive(User $user, Donation $donation): bool

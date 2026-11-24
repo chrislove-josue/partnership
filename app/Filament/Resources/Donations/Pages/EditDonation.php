@@ -56,7 +56,8 @@ class EditDonation extends EditRecord
                 ->color(fn (Donation $record): string => $record->is_active ? 'danger' : 'success')
                 ->requiresConfirmation()
                 ->action(fn () => $this->record->update(['is_active' => ! $this->record->is_active])),
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->visible(fn (): bool => Auth::user()?->isSuperAdmin() ?? false),
         ];
     }
 }

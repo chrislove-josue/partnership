@@ -99,12 +99,8 @@ export function DonationsScreen() {
     label: partner.full_name ?? `${partner.first_name} ${partner.last_name}`,
     value: String(partner.id),
   }));
-  const formPartnerOptions = partners
-    .filter((partner) => !churchId || partner.church_id === Number(churchId))
-    .map((partner) => ({
-      label: partner.full_name ?? `${partner.first_name} ${partner.last_name}`,
-      value: String(partner.id),
-    }));
+  // Tous les partenaires sont disponibles, même s'ils appartiennent à une autre église.
+  const formPartnerOptions = partnerOptions;
   const categoryOptions = categories.map((category) => ({ label: category.name, value: String(category.id) }));
   const visibleDonations = filterBy(donations, search, [
     (donation) => donation.partner,
@@ -228,7 +224,14 @@ export function DonationsScreen() {
                 <Badge text={donation.category ?? '—'} color={donation.color ?? colors.blue} />
               </View>
               <Text style={styles.partner}>{donation.partner ?? 'Partenaire inconnu'}</Text>
-              <Text style={styles.meta}>{donation.church ?? '—'} · {formatDate(donation.date)}</Text>
+              <Text style={styles.meta}>
+                {donation.church ?? '—'}
+                {donation.worship_church && donation.worship_church !== donation.church
+                  ? ` · culte : ${donation.worship_church}`
+                  : ''}
+                {' · '}
+                {formatDate(donation.date)}
+              </Text>
               <Pressable style={styles.delete} onPress={() => setConfirmDelete(donation)}>
                 <Text style={styles.deleteText}>Supprimer</Text>
               </Pressable>

@@ -11,7 +11,6 @@ import {
   colors,
   EmptyState,
   ErrorView,
-  formatDate,
   LoadingView,
   PrimaryButton,
   Screen,
@@ -37,18 +36,36 @@ const MONTHS = [
 export function BirthdaysScreen() {
   const now = new Date();
   const [month, setMonth] = useState(String(now.getMonth() + 1));
-  const [year, setYear] = useState(String(now.getFullYear()));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [birthdays, setBirthdays] = useState<BirthdayEntry[]>([]);
   const [search, setSearch] = useState('');
   const [downloading, setDownloading] = useState(false);
 
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await api<{ month: number; year: number; count: number; data: BirthdayEntry[] }>(
+        `/birthdays?month=${month}`,
+      );
+      setBirthdays(response.data);
+    } catch (caught) {
+      setError(getErrorMessage(caught, 'Impossible de charger les anniversaires.'));
+    } finally {
+      setLoading(false);
+    }
+  }, [month]);
+
+  useEffect(() => {
+    void load();
+  }, [load]);
+
   const downloadPdf = async () => {
     setDownloading(true);
     try {
       const token = getAuthToken();
-      const url = `${getApiUrl()}/birthdays/export?month=${month}&year=${year}`;
+      const url = `${getApiUrl()}/birthdays/export?month=${month}`;
       const response = await fetch(url, {
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
@@ -65,7 +82,7 @@ export function BirthdaysScreen() {
         reader.onerror = () => reject(new Error('Lecture du fichier impossible.'));
         reader.readAsDataURL(blob);
       });
-      const fileName = `anniversaires_${year}-${String(month).padStart(2, '0')}.pdf`;
+      const fileName = `anniversaires_${String(month).padStart(2, '0')}.pdf`;
       await saveToDownloads(base64, fileName, 'application/pdf');
       Alert.alert('Téléchargé', `${fileName} enregistré dans Téléchargements.`);
     } catch (caught) {
@@ -74,25 +91,6 @@ export function BirthdaysScreen() {
       setDownloading(false);
     }
   };
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await api<{ month: number; year: number; count: number; data: BirthdayEntry[] }>(
-        `/birthdays?month=${month}&year=${year}`,
-      );
-      setBirthdays(response.data);
-    } catch (caught) {
-      setError(getErrorMessage(caught, 'Impossible de charger les anniversaires.'));
-    } finally {
-      setLoading(false);
-    }
-  }, [month, year]);
-
-  useEffect(() => {
-    void load();
-  }, [load]);
 
   const today = now.toISOString().slice(0, 10);
   const filtered = filterBy(birthdays, search, [
@@ -110,16 +108,6 @@ export function BirthdaysScreen() {
     <Screen title="Anniversaires du mois" subtitle="Partenaires dont l'anniversaire tombe dans le mois">
       <FilterCard query={search} onQueryChange={setSearch} placeholder="Nom, église, cellule" onReset={() => setSearch('')} active={Boolean(search)}>
         <SelectField label="Mois" value={month} options={MONTHS} onChange={setMonth} />
-        <SelectField
-          label="Année"
-          value={year}
-          options={[
-            { label: String(now.getFullYear() - 1), value: String(now.getFullYear() - 1) },
-            { label: String(now.getFullYear()), value: String(now.getFullYear()) },
-            { label: String(now.getFullYear() + 1), value: String(now.getFullYear() + 1) },
-          ]}
-          onChange={setYear}
-        />
       </FilterCard>
 
       <PrimaryButton
@@ -141,7 +129,7 @@ export function BirthdaysScreen() {
           .map((day) => (
             <Card key={day}>
               <SectionTitle>
-                {Number(day) === now.getDate() && Number(month) === now.getMonth() + 1 && Number(year) === now.getFullYear()
+                {Number(day) === now.getDate() && Number(month) === now.getMonth() + 1
                   ? '🎂 Aujourd’hui — '
                   : ''}
                 {Number(day)} {MONTHS[Number(month) - 1]?.label ?? ''}

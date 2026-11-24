@@ -35,46 +35,7 @@ class Birthdays extends Page
     {
         $this->form->fill([
             'month' => (int) now()->month,
-            'year' => (int) now()->year,
         ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Action::make('exportPdf')
-                ->label('Télécharger en PDF')
-                ->icon('heroicon-o-arrow-down-tray')
-                ->color('primary')
-                ->action(function () {
-                    $state = is_array($this->data) ? $this->data : [];
-                    $month = (int) ($state['month'] ?? now()->month);
-                    $year = (int) ($state['year'] ?? now()->year);
-
-                    $user = Auth::user();
-                    $items = app(BirthdayService::class)->monthBirthdays(
-                        $month,
-                        $year,
-                        $user ? app(ChurchAccessService::class)->accessibleChurchIds($user) : [],
-                    );
-
-                    $label = Str::ucfirst(Carbon::create($year, $month, 1)->locale('fr')->isoFormat('MMMM YYYY'));
-
-                    $pdf = Pdf::loadView('pdf.birthdays', [
-                        'items' => $items,
-                        'label' => $label,
-                        'count' => $items->count(),
-                    ])->setPaper('a4', 'portrait');
-
-                    $filename = sprintf('anniversaires_%04d-%02d.pdf', $year, $month);
-
-                    return response()->streamDownload(
-                        fn () => print $pdf->output(),
-                        $filename,
-                        ['Content-Type' => 'application/pdf'],
-                    );
-                }),
-        ];
     }
 
     public function form(Schema $schema): Schema
@@ -91,16 +52,8 @@ class Birthdays extends Page
                     ->options($months)
                     ->required()
                     ->live(),
-
-                Select::make('year')->selectablePlaceholder(false)
-                    ->label('Année')
-                    ->options(collect(range((int) now()->year - 3, (int) now()->year + 1))
-                        ->mapWithKeys(fn (int $year): array => [$year => (string) $year])
-                        ->all())
-                    ->required()
-                    ->live(),
             ])
-            ->columns(2)
+            ->columns(1)
             ->statePath('data')
             ->live();
     }
@@ -115,7 +68,7 @@ class Birthdays extends Page
         $state = is_array($this->data) ? $this->data : [];
 
         $month = (int) ($state['month'] ?? now()->month);
-        $year = (int) ($state['year'] ?? now()->year);
+        $year = (int) now()->year;
 
         $user = Auth::user();
 
@@ -126,17 +79,53 @@ class Birthdays extends Page
                 $user ? app(ChurchAccessService::class)->accessibleChurchIds($user) : [],
             );
 
-            $label = Carbon::create($year, $month, 1)
-                ->locale('fr')
-                ->isoFormat('MMMM YYYY');
+            $label = Str::ucfirst(Carbon::create($year, $month, 1)->locale('fr')->isoFormat('MMMM'));
 
             return [
-                'label' => Str::ucfirst($label),
+                'label' => $label,
                 'count' => $items->count(),
                 'items' => $items,
             ];
         } catch (\Throwable $exception) {
             return ['error' => $exception->getMessage()];
         }
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('exportPdf')
+                ->label('Télécharger en PDF')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('primary')
+                ->action(function () {
+                    $state = is_array($this->data) ? $this->data : [];
+                    $month = (int) ($state['month'] ?? now()->month);
+                    $year = (int) now()->year;
+
+                    $user = Auth::user();
+                    $items = app(BirthdayService::class)->monthBirthdays(
+                        $month,
+                        $year,
+                        $user ? app(ChurchAccessService::class)->accessibleChurchIds($user) : [],
+                    );
+
+                    $label = Str::ucfirst(Carbon::create($year, $month, 1)->locale('fr')->isoFormat('MMMM'));
+
+                    $pdf = Pdf::loadView('pdf.birthdays', [
+                        'items' => $items,
+                        'label' => $label,
+                        'count' => $items->count(),
+                    ])->setPaper('a4', 'portrait');
+
+                    $filename = sprintf('anniversaires_%02d.pdf', $month);
+
+                    return response()->streamDownload(
+                        fn () => print $pdf->output(),
+                        $filename,
+                        ['Content-Type' => 'application/pdf'],
+                    );
+                }),
+        ];
     }
 }

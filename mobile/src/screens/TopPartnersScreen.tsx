@@ -90,8 +90,7 @@ export function TopPartnersScreen() {
           from: string;
           to: string;
           data: TopEntry[];
-        }>(`/top-partners?${params.toString()}``,
-        }),
+        }>(`/top-partners?${params.toString()}`),
         api<{ data: Church[] }>('/churches'),
         api<{ data: Category[] }>('/categories'),
       ]);

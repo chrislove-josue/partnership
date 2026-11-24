@@ -68,6 +68,27 @@ class TopPartners extends Page
                     ->searchable()
                     ->live(),
 
+                Select::make('category_group')->selectablePlaceholder(false)
+                    ->label('Famille de catégorie')
+                    ->options(array_merge(
+                        ['' => 'Toutes les familles'],
+                        collect(CategoryGroup::cases())->mapWithKeys(
+                            fn (CategoryGroup $group): array => [$group->value => $group->label()],
+                        )->all(),
+                    ))
+                    ->live(),
+
+                Select::make('category_id')->selectablePlaceholder(false)
+                    ->label('Catégorie')
+                    ->options(fn (Get $get): array => CategoryDon::query()
+                        ->when($get('category_group'), fn ($query, string $group) => $query->where('group', $group))
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->prepend('Toutes les catégories', '')
+                        ->all())
+                    ->searchable()
+                    ->live(),
+
                 Select::make('period')->selectablePlaceholder(false)
                     ->label('Période')
                     ->options(collect(PeriodType::cases())->mapWithKeys(
@@ -98,7 +119,7 @@ class TopPartners extends Page
                     ->required()
                     ->live(),
             ])
-            ->columns(5)
+            ->columns(6)
             ->statePath('data')
             ->live();
     }
@@ -126,11 +147,18 @@ class TopPartners extends Page
                 ? [$churchId]
                 : $accessibleIds;
 
+            $groupValue = (string) ($state['category_group'] ?? '');
+            $group = CategoryGroup::tryFrom($groupValue);
+            $categoryId = (int) ($state['category_id'] ?? 0);
+
             $items = $service->rank(
                 $churchIds,
                 $period,
                 $year,
                 $index,
+                20,
+                $group,
+                $categoryId ?: null,
             );
 
             [$from, $to] = $service->range($period, $year, $index);

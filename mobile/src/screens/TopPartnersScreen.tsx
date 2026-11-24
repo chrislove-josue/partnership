@@ -4,7 +4,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage } from '../api/client';
 import { FilterCard } from '../components/FilterCard';
 import { filterBy } from '../utils/search';
-import type { Church } from '../api/types';
+import type { Category, Church } from '../api/types';
 import { useAuth } from '../context/AuthContext';
 import { colors } from '../components/ui';
 import {
@@ -36,6 +36,13 @@ const QUARTERS = [
   { label: 'T1', value: '1' }, { label: 'T2', value: '2' }, { label: 'T3', value: '3' }, { label: 'T4', value: '4' },
 ];
 
+const CATEGORY_GROUPS = [
+  { label: 'Toutes les familles', value: '' },
+  { label: 'Finances de l’église', value: 'church_finances' },
+  { label: 'Partenariat du ministère', value: 'ministry_partnership' },
+  { label: 'Partenariat local', value: 'local_partnership' },
+];
+
 interface TopEntry {
   id: number;
   name: string;
@@ -59,7 +66,10 @@ export function TopPartnersScreen() {
   const [quarter, setQuarter] = useState(String(Math.floor(now.getMonth() / 3) + 1));
   const [year, setYear] = useState(String(now.getFullYear()));
   const [churches, setChurches] = useState<Church[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [churchId, setChurchId] = useState(user?.assigned_church_id ? String(user.assigned_church_id) : '');
+  const [categoryGroup, setCategoryGroup] = useState('');
+  const [categoryId, setCategoryId] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -69,8 +79,10 @@ export function TopPartnersScreen() {
       if (period === 'month') params.set('month', month);
       if (period === 'quarter') params.set('quarter', quarter);
       if (churchId) params.set('church_id', churchId);
+      if (categoryGroup) params.set('category_group', categoryGroup);
+      if (categoryId) params.set('category_id', categoryId);
 
-      const [response, churchData] = await Promise.all([
+      const [response, churchData, categoryData] = await Promise.all([
         api<{
           period: string;
           year: number;
@@ -81,10 +93,12 @@ export function TopPartnersScreen() {
           cacheKey: `top-partners:${params.toString()}`,
         }),
         api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
+        api<{ data: Category[] }>('/categories', { cacheKey: 'categories' }),
       ]);
       setItems(response.data);
       setRange(`${response.from} → ${response.to}`);
       setChurches(churchData.data);
+      setCategories(categoryData.data);
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger les top partenaires.'));
     } finally {

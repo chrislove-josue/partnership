@@ -42,27 +42,9 @@ class DonationResource extends Resource
         return DonationForm::configure($schema);
     }
 
-    /**
-     * Un don est visible soit parce qu'il est crédité à une église accessible,
-     * soit parce que le culte a eu lieu dans une église accessible (cas d'un
-     * partenaire visiteur dont le don est attribué à son église d'origine).
-     */
-    public static function getEloquentQuery(): Builder
+    public static function form(Schema $schema): Schema
     {
-        $query = parent::getEloquentQuery();
-
-        $user = auth()->user();
-
-        if (! $user) {
-            return $query;
-        }
-
-        $ids = app(ChurchAccessService::class)->accessibleChurchIds($user);
-
-        return $query->where(function (Builder $query) use ($ids): void {
-            $query->whereIn('church_id', $ids)
-                ->orWhereIn('worship_church_id', $ids);
-        });
+        return DonationForm::configure($schema);
     }
 
     public static function table(Table $table): Table

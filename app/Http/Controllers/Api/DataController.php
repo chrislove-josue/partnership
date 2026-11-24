@@ -218,10 +218,10 @@ class DataController extends Controller
                 'worshipChurch:id,name',
                 'category:id,name,color,group',
             ])
-            ->where(function ($query) use ($churchIds): void {
-                $query->whereIn('church_id', $churchIds)
-                    ->orWhereIn('worship_church_id', $churchIds);
-            })
+            // Seule l'église créditée peut consulter ses dons. Une église
+            // externe peut enregistrer un don pour un partenaire visiteur,
+            // mais elle n'a pas accès à son historique de dons.
+            ->whereIn('church_id', $churchIds)
             ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
             ->when($afterId > 0, fn ($query) => $query->where('id', '>', $afterId))
             ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))

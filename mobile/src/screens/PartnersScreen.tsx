@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { api, getErrorMessage, invalidateCache } from '../api/client';
+import { api, getErrorMessage } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { defaultChurchId } from '../utils/church';
 import { FilterCard } from '../components/FilterCard';
@@ -67,10 +67,9 @@ export function PartnersScreen() {
       }
       const [partnerData, churchData, celluleData] = await Promise.all([
         api<{ data: Partner[] }>(`/partners${query.toString() ? `?${query}` : ''}`, {
-          cacheKey: `partners:${search}:${churchFilter}:${celluleFilter}`,
         }),
-        api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
-        api<{ data: Cellule[] }>('/cellules', { cacheKey: 'cellules' }),
+        api<{ data: Church[] }>('/churches', ),
+        api<{ data: Cellule[] }>('/cellules', ),
       ]);
       setPartners(partnerData.data);
       setChurches(churchData.data);
@@ -140,7 +139,6 @@ export function PartnersScreen() {
       } else {
         await api('/partners', { method: 'POST', body });
       }
-      invalidateCache();
       setFormOpen(false);
       await load();
     } catch (caught) {
@@ -156,7 +154,6 @@ export function PartnersScreen() {
     }
     try {
       await api(`/partners/${toDelete.id}`, { method: 'DELETE' });
-      invalidateCache();
       setToDelete(null);
       await load();
     } catch (caught) {

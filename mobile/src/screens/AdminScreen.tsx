@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { api, getErrorMessage, invalidateCache } from '../api/client';
+import { api, getErrorMessage } from '../api/client';
 import { useAuth } from '../context/AuthContext';
 import { defaultChurchId } from '../utils/church';
 import { filterBy } from '../utils/search';
@@ -106,12 +106,12 @@ export function AdminScreen() {
     setError('');
     try {
       const [churchData, celluleData, categoryData, userData, partnerData, roleData] = await Promise.allSettled([
-        api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
-        api<{ data: Cellule[] }>('/cellules', { cacheKey: 'cellules' }),
-        api<{ data: Category[] }>('/categories', { cacheKey: 'categories' }),
-        api<{ data: User[] }>('/users', { cacheKey: 'users' }),
-        api<{ data: Partner[] }>('/partners', { cacheKey: 'partners' }),
-        api<{ data: RoleOption[] }>('/roles', { cacheKey: 'roles' }),
+        api<{ data: Church[] }>('/churches', ),
+        api<{ data: Cellule[] }>('/cellules', ),
+        api<{ data: Category[] }>('/categories', ),
+        api<{ data: User[] }>('/users', ),
+        api<{ data: Partner[] }>('/partners', ),
+        api<{ data: RoleOption[] }>('/roles', ),
       ]);
 
       if (churchData.status === 'fulfilled') {
@@ -274,7 +274,6 @@ export function AdminScreen() {
       const endpoint = endpointFor(section);
       const uri = editing ? `${endpoint}/${editing.id}` : endpoint;
       await api(uri, { method: editing ? 'PATCH' : 'POST', body: payloadFor() });
-      invalidateCache();
       setFormOpen(false);
       await load();
     } catch (caught) {
@@ -290,7 +289,6 @@ export function AdminScreen() {
     }
     try {
       await api(`${endpointFor(section)}/${toDelete.id}`, { method: 'DELETE' });
-      invalidateCache();
       setToDelete(null);
       await load();
     } catch (caught) {
@@ -319,7 +317,6 @@ export function AdminScreen() {
       setChurches((current) => current.map((church) =>
         church.id === response.data.id ? response.data : church,
       ));
-      invalidateCache();
       setToToggleStatus(null);
       await load();
     } catch (caught) {

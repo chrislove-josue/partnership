@@ -1,15 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import * as SecureStore from 'expo-secure-store';
-import {
-  api,
-  ApiError,
-  clearCache,
-  getApiUrl,
-  notifyServerLogout,
-  setApiUrl,
-  setAuthToken,
-  setUnauthorizedHandler,
-} from '../api/client';
+import { api, ApiError, getApiUrl, notifyServerLogout, setApiUrl, setAuthToken, setUnauthorizedHandler } from '../api/client';
 import { clearSession, loadSession, saveSession } from '../api/session';
 import type { SessionInfo } from '../api/session';
 import { isSuperAdmin, type User } from '../api/types';
@@ -73,7 +64,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [canConfigureApiUrl, configureApiUrl]);
 
   const forget = useCallback(async () => {
-    clearCache();
     // La purge locale et la suppression de l'ancienne copie publique ne doivent
     // jamais empêcher la déconnexion si le stockage est indisponible.
     await Promise.allSettled([

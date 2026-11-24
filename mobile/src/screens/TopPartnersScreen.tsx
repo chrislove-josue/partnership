@@ -91,10 +91,9 @@ export function TopPartnersScreen() {
           to: string;
           data: TopEntry[];
         }>(`/top-partners?${params.toString()}`, {
-          cacheKey: `top-partners:${params.toString()}`,
         }),
-        api<{ data: Church[] }>('/churches', { cacheKey: 'churches' }),
-        api<{ data: Category[] }>('/categories', { cacheKey: 'categories' }),
+        api<{ data: Church[] }>('/churches', ),
+        api<{ data: Category[] }>('/categories', ),
       ]);
       setItems(response.data);
       setRange(`${response.from} → ${response.to}`);

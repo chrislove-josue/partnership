@@ -339,7 +339,7 @@ export function AdminScreen() {
       subtitle="Églises, cellules, catégories, comptes et pasteurs"
       actions={<PrimaryButton title="Ajouter" onPress={() => openForm()} />}
     >
-      <ScrollView horizontal style={styles.tabs}>
+      <ScrollView horizontal style={styles.tabs} contentContainerStyle={{ alignItems: 'center' }}>
         {sections.map((item) => (
           <Pressable
             key={item.key}

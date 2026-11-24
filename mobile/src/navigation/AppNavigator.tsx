@@ -52,16 +52,6 @@ function MainTabs() {
       <Tabs.Screen name="Notifications" component={NotificationsScreen} />
       <Tabs.Screen name="Profil" component={ProfileScreen} />
       <Tabs.Screen name="Administration" component={AdminScreen} />
-      <Tabs.Screen
-        name="HistoriqueConnexion"
-        component={LoginHistoryScreen}
-        options={{ tabBarButton: () => null }}
-      />
-      <Tabs.Screen
-        name="Anniversaires"
-        component={BirthdaysScreen}
-        options={{ tabBarButton: () => null }}
-      />
     </Tabs.Navigator>
   );
 }
@@ -115,7 +105,11 @@ export function AppNavigator() {
     <NavigationContainer key={user ? 'application' : 'connexion'}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          <Stack.Screen name="Application" component={MainTabs} />
+          <>
+            <Stack.Screen name="Application" component={MainTabs} />
+            <Stack.Screen name="HistoriqueConnexion" component={LoginHistoryScreen} />
+            <Stack.Screen name="Anniversaires" component={BirthdaysScreen} />
+          </>
         ) : (
           <Stack.Screen name="Connexion" component={LoginScreen} />
         )}

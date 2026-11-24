@@ -50,6 +50,7 @@ function MainTabs() {
       <Tabs.Screen name="Accueil" component={DashboardScreen} />
       <Tabs.Screen name="Dons" component={DonationsScreen} />
       <Tabs.Screen name="Partenaires" component={PartnersScreen} />
+      <Tabs.Screen name="Top partenaires" component={TopPartnersScreen} />
       <Tabs.Screen name="Rapports" component={ReportsScreen} />
       <Tabs.Screen name="Notifications" component={NotificationsScreen} />
       <Tabs.Screen name="Profil" component={ProfileScreen} />

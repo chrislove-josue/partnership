@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { api, getApiUrl, getAuthToken, getErrorMessage } from '../api/client';
 import { FilterCard } from '../components/FilterCard';
+import { filterBy } from '../utils/search';
 import { saveToDownloads } from '../native/mediaStore';
 import type { BirthdayEntry } from '../api/types';
 import {
@@ -40,6 +41,7 @@ export function BirthdaysScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [birthdays, setBirthdays] = useState<BirthdayEntry[]>([]);
+  const [search, setSearch] = useState('');
   const [downloading, setDownloading] = useState(false);
 
   const downloadPdf = async () => {

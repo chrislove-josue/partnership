@@ -3,12 +3,11 @@
 namespace App\Filament\Pages;
 
 use App\Enums\PeriodType;
-use App\Filament\Resources\Donations\Tables\DonationsTable;
 use App\Services\ChurchAccessService;
 use App\Services\TopPartnerService;
-use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -61,14 +60,14 @@ class TopPartners extends Page
                 Select::make('month')->selectablePlaceholder(false)
                     ->label('Mois')
                     ->options($months)
-                    ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('period') === PeriodType::MONTH->value)
+                    ->visible(fn (Get $get): bool => $get('period') === PeriodType::MONTH->value)
                     ->required()
                     ->live(),
 
                 Select::make('quarter')->selectablePlaceholder(false)
                     ->label('Trimestre')
                     ->options([1 => 'T1', 2 => 'T2', 3 => 'T3', 4 => 'T4'])
-                    ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('period') === PeriodType::QUARTER->value)
+                    ->visible(fn (Get $get): bool => $get('period') === PeriodType::QUARTER->value)
                     ->required()
                     ->live(),
 

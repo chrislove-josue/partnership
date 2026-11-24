@@ -11,7 +11,6 @@ use App\Models\Partner;
 use App\Models\User;
 use App\Services\TopPartnerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class TopPartnerTest extends TestCase

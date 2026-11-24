@@ -14,8 +14,7 @@ class TopPartnerController extends Controller
     public function __construct(
         private ChurchAccessService $access,
         private TopPartnerService $topPartners,
-    ) {
-    }
+    ) {}
 
     /**
      * Classement des partenaires par montant donné sur une période.

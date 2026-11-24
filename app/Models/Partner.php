@@ -76,7 +76,8 @@ class Partner extends Model
     {
         $donations = Donation::query()
             ->selectRaw('COALESCE(SUM(donations.amount), 0)')
-            ->whereColumn('donations.partner_id', 'partners.id');
+            ->whereColumn('donations.partner_id', 'partners.id')
+            ->where('donations.is_active', true);
 
         if ($churchIds !== null) {
             $donations->whereIn('donations.church_id', $churchIds);

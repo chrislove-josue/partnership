@@ -218,6 +218,7 @@ class DataController extends Controller
                 'worshipChurch:id,name',
                 'category:id,name,color,group',
             ])
+            ->where('is_active', true)
             // Seule l'église créditée peut consulter ses dons. Une église
             // externe peut enregistrer un don pour un partenaire visiteur,
             // mais elle n'a pas accès à son historique de dons.

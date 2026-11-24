@@ -48,6 +48,11 @@ class Donation extends Model
         return $this->belongsTo(Partner::class);
     }
 
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('donations.is_active', true);
+    }
+
     public function scopeForChurches(Builder $query, array $churchIds): Builder
     {
         return $query->whereIn('church_id', $churchIds);

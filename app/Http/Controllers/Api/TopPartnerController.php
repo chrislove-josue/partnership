@@ -45,11 +45,12 @@ class TopPartnerController extends Controller
         $user = $request->user();
         $accessibleIds = array_map('intval', $this->access->accessibleChurchIds($user));
 
-        // Une seule église créditée : jamais de classement mélangé.
-        $churchId = $request->integer('church_id') ?: (int) ($this->access->defaultChurchId($user) ?? 0);
-        $churchIds = in_array($churchId, $accessibleIds, true)
-            ? [$churchId]
-            : (($accessibleIds[0] ?? null) ? [$accessibleIds[0]] : []);
+        // church_id vide/absent = toutes les églises accessibles (périmètre
+        // défini par le rôle), un ID = cette église uniquement.
+        $requestedId = $request->integer('church_id');
+        $churchIds = $requestedId && in_array($requestedId, $accessibleIds, true)
+            ? [$requestedId]
+            : $accessibleIds;
 
         $group = CategoryGroup::tryFrom($request->string('category_group')->toString());
 
@@ -69,7 +70,8 @@ class TopPartnerController extends Controller
             'period' => $period->value,
             'year' => $year,
             'index' => $index,
-            'church_id' => $churchIds[0] ?? null,
+            'church_id' => count($churchIds) === 1 ? $churchIds[0] : null,
+            'churches' => count($churchIds),
             'category_group' => $group?->value,
             'category_id' => $request->integer('category_id') ?: null,
             'from' => $from->toDateString(),

@@ -45,7 +45,7 @@ class TopPartnerService
             ->when($group, function ($query) use ($group): void {
                 $query->whereHas('category', fn ($q) => $q->where('group', $group->value));
             })
-            ->get(['id', 'amount', 'partner_id', 'date']);
+            ->get(['id', 'amount', 'partner_id', 'date', 'church_id']);
 
         $partnerIds = $donations->pluck('partner_id')->unique()->all();
 

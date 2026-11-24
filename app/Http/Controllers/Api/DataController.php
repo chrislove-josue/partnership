@@ -208,13 +208,19 @@ class DataController extends Controller
 
         [$isSync, $afterId, $limit] = $this->syncOptions($request);
 
+        $churchIds = $this->access->accessibleChurchIds($request->user());
+
         $query = Donation::query()
             ->with([
                 'partner:id,first_name,last_name,email,phone,handle_kc',
                 'church:id,name',
+                'worshipChurch:id,name',
                 'category:id,name,color,group',
             ])
-            ->whereIn('church_id', $this->access->accessibleChurchIds($request->user()))
+            ->where(function ($query) use ($churchIds): void {
+                $query->whereIn('church_id', $churchIds)
+                    ->orWhereIn('worship_church_id', $churchIds);
+            })
             ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
             ->when($afterId > 0, fn ($query) => $query->where('id', '>', $afterId))
             ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))
@@ -237,6 +243,8 @@ class DataController extends Controller
             'date' => $donation->date?->toIso8601String(),
             'church_id' => $donation->church_id,
             'church' => $donation->church?->name,
+            'worship_church_id' => $donation->worship_church_id,
+            'worship_church' => $donation->worshipChurch?->name,
             'partner_id' => $donation->partner_id,
             'partner' => $donation->partner?->full_name,
             'category_id' => $donation->category_id,

@@ -65,21 +65,30 @@ class TopPartnerService
 
         foreach ($donations as $donation) {
             $id = $donation->partner_id;
-            $totals[$id] ??= ['amount' => 0.0, 'count' => 0];
+            $totals[$id] ??= ['amount' => 0.0, 'count' => 0, 'churchIds' => []];
             $totals[$id]['amount'] += (float) $donation->amount;
             $totals[$id]['count'] += 1;
+            $totals[$id]['churchIds'][$donation->church_id] = $donation->church_id;
         }
 
         return collect($totals)
             ->map(function (array $total, int $id) use ($partners, $churchNames): array {
                 $partner = $partners->get($id);
 
+                // Une seule église : son nom. Plusieurs : l'église de culte
+                // majoritalement créditée est affichée avec le nombre d'églises.
+                $churchIds = array_values($total['churchIds']);
+                $mainChurchId = $churchIds[0] ?? 0;
+                $churchLabel = $churchNames->get($mainChurchId);
+
+                if (count($churchIds) > 1) {
+                    $churchLabel = ($churchLabel ?? '').' +'.(count($churchIds) - 1);
+                }
+
                 return [
                     'id' => $id,
                     'name' => $partner?->full_name ?? 'Partenaire inconnu',
-                    // Toutes les lignes portent l'église sélectionnée : un seul
-                    // classement, jamais un mélange d'églises.
-                    'church' => $churchNames->first() ?? null,
+                    'church' => $churchLabel,
                     'origin_church' => $partner?->church?->name,
                     'cellule' => $partner?->cellule?->name,
                     'amount' => $total['amount'],

@@ -40,7 +40,7 @@ class TopPartners extends Page
             'month' => (int) now()->month,
             'quarter' => (int) now()->quarter,
             'year' => (int) now()->year,
-            'church_id' => (string) (Auth::user()?->assigned_church_id ?? ''),
+            'church_id' => '',
             'category_group' => '',
             'category_id' => '',
         ]);
@@ -62,9 +62,11 @@ class TopPartners extends Page
             ->components([
                 Select::make('church_id')->selectablePlaceholder(false)
                     ->label('Église')
-                    ->options($churches->pluck('name', 'id')->all())
+                    ->options([
+                        '' => 'Toutes les églises accessibles',
+                        ...$churches->pluck('name', 'id')->all(),
+                    ])
                     ->searchable()
-                    ->required()
                     ->live(),
 
                 Select::make('category_group')->selectablePlaceholder(false)
@@ -142,10 +144,10 @@ class TopPartners extends Page
             $service = app(TopPartnerService::class);
             $accessibleIds = array_map('intval', $actor ? app(ChurchAccessService::class)->accessibleChurchIds($actor) : []);
             $churchId = (int) ($state['church_id'] ?? 0);
-            // Une seule église : jamais de mélange de rangs entre églises.
+            // Une église précise, ou toutes celles du périmètre du rôle.
             $churchIds = in_array($churchId, $accessibleIds, true)
                 ? [$churchId]
-                : (($accessibleIds[0] ?? null) ? [$accessibleIds[0]] : []);
+                : $accessibleIds;
 
             $groupValue = (string) ($state['category_group'] ?? '');
             $group = CategoryGroup::tryFrom($groupValue);
@@ -163,9 +165,9 @@ class TopPartners extends Page
 
             [$from, $to] = $service->range($period, $year, $index);
 
-            $churchName = Church::query()
-                ->whereKey($churchIds[0] ?? 0)
-                ->value('name');
+            $churchName = $churchId && count($churchIds) === 1
+                ? Church::query()->whereKey($churchId)->value('name')
+                : 'Toutes les églises accessibles';
 
             return [
                 'items' => $items,

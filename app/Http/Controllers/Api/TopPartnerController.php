@@ -62,6 +62,7 @@ class TopPartnerController extends Controller
             'period' => $period->value,
             'year' => $year,
             'index' => $index,
+            'church_id' => $churchIds === [$churchId] ? $churchId : null,
             'from' => $from->toDateString(),
             'to' => $to->toDateString(),
             'count' => $items->count(),

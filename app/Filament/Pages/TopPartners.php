@@ -118,7 +118,7 @@ class TopPartners extends Page
                     ->required()
                     ->live(),
             ])
-            ->columns(6)
+            ->columns(3)
             ->statePath('data')
             ->live();
     }

@@ -2,11 +2,13 @@
 
 namespace App\Filament\Resources\Donations\Tables;
 
+use App\Models\Donation;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -85,6 +87,16 @@ class DonationsTable
             ])
             ->recordActions([
                 EditAction::make(),
+                Action::make('toggleActive')
+                    ->label(fn (Donation $record): string => $record->is_active ? 'Désactiver' : 'Réactiver')
+                    ->icon(fn (Donation $record): string => $record->is_active ? 'heroicon-o-x-circle' : 'heroicon-o-check-circle')
+                    ->color(fn (Donation $record): string => $record->is_active ? 'danger' : 'success')
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (Donation $record): string => $record->is_active ? 'Désactiver ce don ?' : 'Réactiver ce don ?')
+                    ->modalDescription(fn (Donation $record): string => $record->is_active
+                        ? 'Le don sera conservé mais exclu des rapports et des totaux.'
+                        : 'Le don sera de nouveau pris en compte dans les rapports.')
+                    ->action(fn (Donation $record) => $record->update(['is_active' => ! $record->is_active])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

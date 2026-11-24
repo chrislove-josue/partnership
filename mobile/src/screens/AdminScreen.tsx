@@ -634,7 +634,7 @@ export function AdminScreen() {
 
 const styles = StyleSheet.create({
   tabs: { marginBottom: 12 },
-  tab: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 999, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, marginRight: 8 },
+  tab: { paddingVertical: 10, paddingHorizontal: 16, borderRadius: 999, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, marginRight: 8, alignSelf: 'flex-start' },
   tabActive: { backgroundColor: colors.blue, borderColor: colors.blue },
   tabText: { color: colors.blue, fontWeight: '600' },
   tabTextActive: { color: '#FFFFFF', fontWeight: '700' },

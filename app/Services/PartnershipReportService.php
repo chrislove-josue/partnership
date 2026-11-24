@@ -95,6 +95,7 @@ class PartnershipReportService
 
         $donations = Donation::with(['category:id,name,color,group', 'partner.cellule:id,name'])
             ->where('church_id', $churchId)
+            ->where('is_active', true)
             ->whereBetween('date', [$range['from'], $range['to']])
             ->orderBy('date')
             ->orderBy('id')

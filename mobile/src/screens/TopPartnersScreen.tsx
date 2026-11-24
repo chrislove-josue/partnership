@@ -144,7 +144,10 @@ export function TopPartnersScreen() {
         <SelectField
           label="Église"
           value={churchId}
-          options={churches.map((c) => ({ label: c.name, value: String(c.id) }))}
+          options={[
+            { label: 'Toutes les églises accessibles', value: '' },
+            ...churches.map((c) => ({ label: c.name, value: String(c.id) })),
+          ]}
           onChange={setChurchId}
           searchable
         />

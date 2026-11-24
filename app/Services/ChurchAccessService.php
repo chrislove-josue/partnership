@@ -211,6 +211,9 @@ class ChurchAccessService
         return in_array($user->roleName(), [
             RoleName::SUPER_ADMIN->value,
             RoleName::GROUP_PASTOR->value,
+            RoleName::SUBGROUP_PASTOR->value,
+            RoleName::LOCAL_PASTOR->value,
+            RoleName::STAFF->value,
         ], true);
     }
 

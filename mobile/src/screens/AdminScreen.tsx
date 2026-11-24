@@ -46,7 +46,7 @@ function availableSections(user: User | null): Array<{ key: Section; label: stri
 
   if (isSuper) return ALL_SECTIONS;
   if (isPastor) return ALL_SECTIONS;
-  if (isStaff) return ALL_SECTIONS.filter((s) => s.key === 'cellules');
+  if (isStaff) return ALL_SECTIONS.filter((s) => s.key === 'cellules' || s.key === 'categories');
   return [];
 }
 

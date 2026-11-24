@@ -145,14 +145,29 @@ export function TopPartnersScreen() {
         <SelectField
           label="Église"
           value={churchId}
-          options={[
-            { label: 'Toutes les églises accessibles', value: '' },
-            ...churches.map((c) => ({ label: c.name, value: String(c.id) })),
-          ]}
+          options={churches.map((c) => ({ label: c.name, value: String(c.id) }))}
           onChange={setChurchId}
           searchable
         />
         <SelectField label="Période" value={period} options={PERIODS} onChange={setPeriod} />
+        <SelectField
+          label="Famille de catégorie"
+          value={categoryGroup}
+          options={CATEGORY_GROUPS}
+          onChange={(value) => { setCategoryGroup(value); setCategoryId(''); }}
+        />
+        <SelectField
+          label="Catégorie"
+          value={categoryId}
+          options={[
+            { label: 'Toutes les catégories', value: '' },
+            ...categories
+              .filter((category) => !categoryGroup || category.group === categoryGroup)
+              .map((category) => ({ label: category.name, value: String(category.id) })),
+          ]}
+          onChange={setCategoryId}
+          searchable
+        />
         {period === 'month' ? (
           <SelectField label="Mois" value={month} options={MONTHS} onChange={setMonth} />
         ) : null}

@@ -37,6 +37,7 @@ class TopPartners extends Page
             'month' => (int) now()->month,
             'quarter' => (int) now()->quarter,
             'year' => (int) now()->year,
+            'church_id' => (string) (Auth::user()?->assigned_church_id ?? ''),
         ]);
     }
 

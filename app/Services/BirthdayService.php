@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Enums\NotificationType;
-use App\Models\Partner;
 use App\Models\Notification;
+use App\Models\Partner;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -19,9 +19,7 @@ class BirthdayService
     /** Délais d'alerte, en jours avant l'anniversaire. */
     public const array DELAYS = [7, 3, 0];
 
-    public function __construct(private NotificationService $notifications)
-    {
-    }
+    public function __construct(private NotificationService $notifications) {}
 
     /**
      * Envoie les alertes dues aujourd'hui (J-7, J-3, jour J).

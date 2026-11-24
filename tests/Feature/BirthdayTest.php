@@ -106,7 +106,7 @@ class BirthdayTest extends TestCase
 
         // Une alerte par partenaire, envoyée à chaque membre de la hiérarchie.
         $this->assertSame([0, 3, 7], $notifications->pluck('data.delay')->unique()->sort()->values()->all());
-        $this->assertSame(3, $notifications->pluck('data.partnerId')->unique()->count());
+        $this->assertSame(3, $notifications->pluck('data')->map(fn ($d) => $d['partnerId'] ?? null)->unique()->count());
         $this->assertTrue($notifications->contains('user_id', $pastor->id));
         $this->assertTrue($notifications->contains(
             fn (Notification $n): bool => str_contains($n->title, 'aujourd'),
@@ -128,7 +128,9 @@ class BirthdayTest extends TestCase
         $this->assertSame(
             1,
             Notification::where('type', NotificationType::BIRTHDAY->value)
-                ->pluck('data.partnerId')
+                ->get()
+                ->pluck('data')
+                ->map(fn ($d) => $d['partnerId'] ?? null)
                 ->unique()
                 ->count(),
         );

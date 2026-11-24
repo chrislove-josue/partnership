@@ -73,6 +73,18 @@ class NotificationService
                 }
             }
         }
+
+        // Push (FCM) — meilleure effort, ne doit jamais casser la création.
+        try {
+            app(PushNotificationService::class)->sendToUsers(
+                $userIds,
+                (string) $title,
+                (string) $message,
+                $data,
+            );
+        } catch (\Throwable $e) {
+            Log::warning('Échec envoi push : '.$e->getMessage());
+        }
     }
 
     /**

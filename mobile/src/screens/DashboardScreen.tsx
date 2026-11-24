@@ -361,6 +361,10 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
               <Text style={styles.actionIcon}>◷</Text>
               <Text style={styles.actionText}>Historique de connexion</Text>
             </Pressable>
+            <Pressable style={styles.action} onPress={() => navigation.navigate('Anniversaires')}>
+              <Text style={styles.actionIcon}>🎂</Text>
+              <Text style={styles.actionText}>Anniversaires du mois</Text>
+            </Pressable>
             <Pressable style={styles.action} onPress={() => navigation.navigate('Administration')}>
               <Text style={styles.actionIcon}>⚙</Text>
               <Text style={styles.actionText}>Administration</Text>

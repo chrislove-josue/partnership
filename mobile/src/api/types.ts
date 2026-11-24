@@ -120,6 +120,18 @@ export interface AppNotification {
   created_at: string;
 }
 
+export interface BirthdayEntry {
+  day: number;
+  date: string;
+  name: string;
+  age: number | null;
+  church: string | null;
+  cellule: string | null;
+  phone: string | null;
+  email: string | null;
+  is_user: boolean;
+}
+
 export interface Recipient {
   name: string;
   email: string;

@@ -7,14 +7,14 @@ use App\Services\BirthdayService;
 use App\Services\ChurchAccessService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class BirthdayController extends Controller
 {
     public function __construct(
         private ChurchAccessService $access,
         private BirthdayService $birthdays,
-    ) {
-    }
+    ) {}
 
     /**
      * Liste des anniversaires d'un mois pour les églises accessibles.
@@ -39,7 +39,7 @@ class BirthdayController extends Controller
         return response()->json([
             'month' => $month,
             'year' => $year,
-            'label' => \Illuminate\Support\Carbon::create($year, $month, 1)->locale('fr')->isoFormat('MMMM YYYY'),
+            'label' => Carbon::create($year, $month, 1)->locale('fr')->isoFormat('MMMM YYYY'),
             'count' => $items->count(),
             'data' => $items,
         ]);

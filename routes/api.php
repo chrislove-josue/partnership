@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ImportController;
 use App\Http\Controllers\Api\ManagementController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\PushTokenController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\SettingsController;
 use App\Http\Controllers\Api\SyncController;
@@ -69,6 +70,9 @@ Route::middleware('auth:sanctum')->group(function (): void {
 
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
+
+    Route::post('/push-tokens', [PushTokenController::class, 'store']);
+    Route::delete('/push-tokens', [PushTokenController::class, 'destroy']);
 
     Route::get('/birthdays', [BirthdayController::class, 'index']);
 });

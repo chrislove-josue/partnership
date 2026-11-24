@@ -16,6 +16,7 @@ import { ReportsScreen } from '../screens/ReportsScreen';
 import { NotificationsScreen } from '../screens/NotificationsScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { AdminScreen } from '../screens/AdminScreen';
+import { BirthdaysScreen } from '../screens/BirthdaysScreen';
 import { LoginHistoryScreen } from '../screens/LoginHistoryScreen';
 
 const Stack = createNativeStackNavigator();
@@ -54,6 +55,11 @@ function MainTabs() {
       <Tabs.Screen
         name="HistoriqueConnexion"
         component={LoginHistoryScreen}
+        options={{ tabBarButton: () => null }}
+      />
+      <Tabs.Screen
+        name="Anniversaires"
+        component={BirthdaysScreen}
         options={{ tabBarButton: () => null }}
       />
     </Tabs.Navigator>

@@ -6,14 +6,15 @@ use App\Services\BirthdayService;
 use App\Services\ChurchAccessService;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 /** Liste des anniversaires du mois pour les églises accessibles. */
 class Birthdays extends Page
 {
-    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-gift';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-calendar-days';
 
     protected static ?string $navigationLabel = 'Anniversaires';
 
@@ -85,12 +86,12 @@ class Birthdays extends Page
                 $user ? app(ChurchAccessService::class)->accessibleChurchIds($user) : [],
             );
 
-            $label = \Illuminate\Support\Carbon::create($year, $month, 1)
+            $label = Carbon::create($year, $month, 1)
                 ->locale('fr')
                 ->isoFormat('MMMM YYYY');
 
             return [
-                'label' => \Illuminate\Support\Str::ucfirst($label),
+                'label' => Str::ucfirst($label),
                 'count' => $items->count(),
                 'items' => $items,
             ];

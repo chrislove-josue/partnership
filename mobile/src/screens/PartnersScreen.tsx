@@ -66,8 +66,7 @@ export function PartnersScreen() {
         query.set('cellule_id', celluleFilter);
       }
       const [partnerData, churchData, celluleData] = await Promise.all([
-        api<{ data: Partner[] }>(`/partners${query.toString() ? `?${query}` : ''}`:${churchFilter}:${celluleFilter}`,
-        }),
+        api<{ data: Partner[] }>(`/partners${query.toString() ? `?${query}` : ''}`),
         api<{ data: Church[] }>('/churches'),
         api<{ data: Cellule[] }>('/cellules'),
       ]);

@@ -33,6 +33,5 @@ export function filterBy<T>(
       fields.map((field) =>
         typeof field === 'function' ? field(item) : item[field],
       ),
-    ),
-  );
+    ));
 }

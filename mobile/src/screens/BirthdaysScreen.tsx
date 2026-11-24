@@ -47,8 +47,7 @@ export function BirthdaysScreen() {
     setError('');
     try {
       const response = await api<{ month: number; year: number; count: number; data: BirthdayEntry[] }>(
-        `/birthdays?month=${month}`,
-      );
+        `/birthdays?month=${month}`);
       setBirthdays(response.data);
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger les anniversaires.'));

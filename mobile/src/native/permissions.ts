@@ -22,8 +22,7 @@ export async function requestStartupPermissions(): Promise<void> {
 
   try {
     await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-    );
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
   } catch {
     // L'application reste utilisable si l'utilisateur refuse la permission.
   }

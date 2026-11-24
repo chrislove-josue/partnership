@@ -41,8 +41,7 @@ export function ImportExportCard({
       if (!/\.xlsx$/i.test(asset.name ?? '')) {
         Alert.alert(
           'Format invalide',
-          'Choisissez un fichier Excel au format .xlsx.',
-        );
+          'Choisissez un fichier Excel au format .xlsx.');
         return;
       }
       if (typeof asset.size === 'number' && asset.size > MAX_UPLOAD_BYTES) {
@@ -71,8 +70,7 @@ export function ImportExportCard({
         : '';
       Alert.alert(
         'Import impossible',
-        details || getErrorMessage(caught, "L'import a échoué."),
-      );
+        details || getErrorMessage(caught, "L'import a échoué."));
     } finally {
       setUploading(false);
     }
@@ -86,8 +84,7 @@ export function ImportExportCard({
     } catch (caught) {
       Alert.alert(
         'Téléchargement impossible',
-        getErrorMessage(caught, "Le modèle n'a pas pu être téléchargé."),
-      );
+        getErrorMessage(caught, "Le modèle n'a pas pu être téléchargé."));
     } finally {
       setDownloading(false);
     }

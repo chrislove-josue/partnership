@@ -195,8 +195,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout,
       refreshUser,
     }),
-    [user, session, loading, apiUrl, canConfigureApiUrl, configureApiUrl, updateApiUrl, login, logout, refreshUser],
-  );
+    [user, session, loading, apiUrl, canConfigureApiUrl, configureApiUrl, updateApiUrl, login, logout, refreshUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -64,8 +64,7 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
         api<{ data: Church[] }>('/churches', ),
         api<{ data: Donation[] }>('/donations', ),
         api<{ data: Partner[] }>('/partners', ),
-        api<{ data: AppNotification[]; unread_count: number }>('/notifications', {
-        }),
+        api<{ data: AppNotification[]; unread_count: number }>('/notifications'),
       ]);
 
       setChurches(churchResponse.data);

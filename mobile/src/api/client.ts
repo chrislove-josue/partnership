@@ -276,8 +276,7 @@ async function performRequest<T>(
     throw new ApiError(
       messageFromData(data, response.status, 'Une erreur est survenue. Veuillez réessayer.'),
       response.status,
-      errors,
-    );
+      errors);
   }
 
   return data as T;
@@ -339,8 +338,7 @@ export async function apiUpload<T>(
     throw new ApiError(
       messageFromData(data, response.status, "L'envoi du fichier a échoué."),
       response.status,
-      errors,
-    );
+      errors);
   }
 
   return data as T;

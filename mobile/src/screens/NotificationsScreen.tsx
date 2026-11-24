@@ -29,8 +29,7 @@ export function NotificationsScreen() {
     setLoading(true);
     setError('');
     try {
-      const response = await api<{ data: AppNotification[]; unread_count: number }>('/notifications', {
-      });
+      const response = await api<{ data: AppNotification[]; unread_count: number }>('/notifications');
       setNotifications(response.data);
       setUnread(response.unread_count);
     } catch (caught) {

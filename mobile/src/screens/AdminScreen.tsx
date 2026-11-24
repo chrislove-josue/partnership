@@ -40,8 +40,7 @@ function availableSections(user: User | null): Array<{ key: Section; label: stri
   const roles = user.roles ?? [];
   const isSuper = role === 'SUPER_ADMIN' || roles.includes('SUPER_ADMIN');
   const isPastor = ['GROUP_PASTOR', 'SUBGROUP_PASTOR', 'LOCAL_PASTOR'].some(
-    (r) => role === r || roles.includes(r),
-  );
+    (r) => role === r || roles.includes(r));
   const isStaff = role === 'STAFF' || roles.includes('STAFF');
 
   if (isSuper) return ALL_SECTIONS;

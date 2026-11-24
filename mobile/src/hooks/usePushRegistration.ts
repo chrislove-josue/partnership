@@ -62,7 +62,9 @@ export function usePushRegistration(): void {
         });
       } catch (error) {
         // L'enregistrement du push est optionnel : on ne bloque jamais l'app.
-        console.warn('Enregistrement push impossible :', error);
+        if (__DEV__) {
+          console.warn('Enregistrement push impossible :', error);
+        }
       }
     })();
 

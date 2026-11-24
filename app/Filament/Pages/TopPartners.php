@@ -35,14 +35,16 @@ class TopPartners extends Page
 
     public function mount(): void
     {
-        // Défaut : l'église affectée au pasteur. L'option « Toutes les églises
-        // accessibles » reste disponible dans la liste.
+        // Même règle que les autres pages (dons, partenaires, cellules, rapport) :
+        // l'église par défaut est celle du compte, sinon la première accessible.
+        $actor = Auth::user();
+
         $this->form->fill([
             'period' => PeriodType::MONTH->value,
             'month' => (int) now()->month,
             'quarter' => (int) now()->quarter,
             'year' => (int) now()->year,
-            'church_id' => (string) (Auth::user()?->assigned_church_id ?? ''),
+            'church_id' => (string) (app(ChurchAccessService::class)->defaultChurchId($actor) ?? ''),
             'category_group' => '',
             'category_id' => '',
         ]);

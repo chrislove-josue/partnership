@@ -41,11 +41,6 @@ class DonationResource extends Resource
         return DonationForm::configure($schema);
     }
 
-    public static function form(Schema $schema): Schema
-    {
-        return DonationForm::configure($schema);
-    }
-
     public static function table(Table $table): Table
     {
         return DonationsTable::configure($table);

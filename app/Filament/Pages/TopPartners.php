@@ -35,14 +35,14 @@ class TopPartners extends Page
 
     public function mount(): void
     {
-        // Sélection par défaut : toutes les églises accessibles. L'église
-        // affectée est simplement proposée en premier dans la liste.
+        // Défaut : l'église affectée au pasteur. L'option « Toutes les églises
+        // accessibles » reste disponible dans la liste.
         $this->form->fill([
             'period' => PeriodType::MONTH->value,
             'month' => (int) now()->month,
             'quarter' => (int) now()->quarter,
             'year' => (int) now()->year,
-            'church_id' => '',
+            'church_id' => (string) (Auth::user()?->assigned_church_id ?? ''),
             'category_group' => '',
             'category_id' => '',
         ]);

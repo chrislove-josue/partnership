@@ -126,7 +126,7 @@ export function TopPartnersScreen() {
     setMonth(String(now.getMonth() + 1));
     setQuarter(String(Math.floor(now.getMonth() / 3) + 1));
     setYear(String(now.getFullYear()));
-    setChurchId('');
+    setChurchId(user?.assigned_church_id ? String(user.assigned_church_id) : '');
     setCategoryGroup('');
     setCategoryId('');
   };

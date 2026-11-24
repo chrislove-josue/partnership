@@ -29,6 +29,8 @@ class TopPartnerController extends Controller
             'quarter' => ['nullable', 'integer', 'min:1', 'max:4'],
             'year' => ['nullable', 'integer', 'min:2000', 'max:2100'],
             'church_id' => ['nullable', 'integer'],
+            'category_group' => ['nullable', 'string', 'in:church_finances,ministry_partnership,local_partnership'],
+            'category_id' => ['nullable', 'integer', 'exists:category_dons,id'],
         ]);
 
         $period = PeriodType::tryFrom($request->string('period')->toString()) ?? PeriodType::MONTH;

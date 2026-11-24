@@ -28,7 +28,8 @@
                 <tr>
                     <th class="rp-center">#</th>
                     <th>Partenaire</th>
-                    <th>Église</th>
+                    <th>Église créditée</th>
+                    <th>Église d'origine</th>
                     <th>Cellule</th>
                     <th class="rp-center">Dons</th>
                     <th class="rp-right">Montant</th>

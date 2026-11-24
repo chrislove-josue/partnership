@@ -139,13 +139,15 @@ class TopPartnerTest extends TestCase
             'category_id' => $this->category->id,
         ]);
 
-        // Sans filtre explicite : l'église assignée est utilisée par défaut.
+        // Sans filtre : toutes les églises accessibles (le périmètre du rôle).
         $default = $this->actingAs($this->admin, 'sanctum')
             ->getJson('/api/top-partners?period=month&month=11&year=2026');
-        $default->assertOk();
-        $this->assertSame(1, $default->json('count'));
+        $default->assertOk()
+            ->assertJsonPath('church_id', null)
+            ->assertJsonPath('count', 2);
+        $this->assertEquals(5000, $default->json('data.0.amount'));
 
-        // Filtre sur une autre église accessible.
+        // Filtre sur une seule église accessible.
         $otherResponse = $this->actingAs($this->admin, 'sanctum')
             ->getJson('/api/top-partners?period=month&month=11&year=2026&church_id='.$other->id);
         $otherResponse->assertOk()

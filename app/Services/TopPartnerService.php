@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
+use App\Models\Church;
 use App\Models\Donation;
 use App\Models\Partner;
 use Illuminate\Support\Carbon;

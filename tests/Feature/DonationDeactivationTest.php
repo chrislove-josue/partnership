@@ -136,6 +136,38 @@ class DonationDeactivationTest extends TestCase
         $this->assertEquals(25000, (float) $found->total_donations);
     }
 
+    public function test_status_filter_can_list_and_find_inactive_donations(): void
+    {
+        $this->donation->update(['is_active' => false]);
+
+        $active = $this->actingAs($this->pastor, 'sanctum')->getJson('/api/donations');
+        $active->assertOk();
+        $this->assertFalse(collect($active->json('data'))->contains('id', $this->donation->id));
+
+        $inactive = $this->actingAs($this->pastor, 'sanctum')->getJson('/api/donations?status=inactive');
+        $inactive->assertOk();
+        $this->assertTrue(collect($inactive->json('data'))->contains('id', $this->donation->id));
+
+        $all = $this->actingAs($this->pastor, 'sanctum')->getJson('/api/donations?status=all');
+        $all->assertOk();
+        $this->assertTrue(collect($all->json('data'))->contains('id', $this->donation->id));
+    }
+
+    public function test_pastor_can_modify_an_inactive_donation_without_reactivating_it(): void
+    {
+        $this->donation->update(['is_active' => false]);
+
+        $this->actingAs($this->pastor, 'sanctum')
+            ->patchJson("/api/donations/{$this->donation->id}", ['amount' => 30000])
+            ->assertOk();
+
+        $this->assertDatabaseHas('donations', [
+            'id' => $this->donation->id,
+            'amount' => 30000,
+            'is_active' => false,
+        ]);
+    }
+
     public function test_staff_and_pastor_cannot_delete_a_donation(): void
     {
         $this->actingAs($this->pastor, 'sanctum')

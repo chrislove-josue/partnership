@@ -13,6 +13,7 @@ use App\Models\Partner;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\ChurchAccessService;
+use App\Services\ChurchHierarchyService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -40,7 +41,7 @@ class ManagementController extends Controller
             ? Church::query()->find((int) $data['parent_id'])
             : null;
 
-        $hierarchy = app(\App\Services\ChurchHierarchyService::class);
+        $hierarchy = app(ChurchHierarchyService::class);
 
         if (! $hierarchy->isAllowedParent($type, $parent)) {
             return response()->json(['message' => $hierarchy->parentErrorMessage($type, $parent)], 422);
@@ -67,7 +68,7 @@ class ManagementController extends Controller
             $data['type'] = $type;
         }
 
-        $hierarchy = app(\App\Services\ChurchHierarchyService::class);
+        $hierarchy = app(ChurchHierarchyService::class);
 
         if ($hierarchy->wouldCreateCycle($church, isset($data['parent_id']) ? (int) $data['parent_id'] : null)) {
             return response()->json(['message' => 'Une église ne peut pas avoir une de ses descendantes comme parente.'], 422);

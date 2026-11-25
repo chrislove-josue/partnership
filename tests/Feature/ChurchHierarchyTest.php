@@ -6,6 +6,7 @@ use App\Enums\ChurchType;
 use App\Enums\RoleName;
 use App\Models\Church;
 use App\Models\User;
+use App\Services\ChurchAccessService;
 use App\Services\ChurchHierarchyService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -46,7 +47,7 @@ class ChurchHierarchyTest extends TestCase
         $access = app(ChurchHierarchyService::class);
 
         $this->assertTrue($access->accessibleChurches($pastor)->contains('id', $deep->id));
-        $this->assertTrue(app(\App\Services\ChurchAccessService::class)->canAccessChurchData($pastor, $deep->id));
+        $this->assertTrue(app(ChurchAccessService::class)->canAccessChurchData($pastor, $deep->id));
     }
 
     public function test_parent_types_and_cycles_are_validated(): void

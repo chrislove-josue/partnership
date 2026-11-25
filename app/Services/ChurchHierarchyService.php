@@ -3,7 +3,10 @@
 namespace App\Services;
 
 use App\Enums\ChurchType;
+use App\Enums\PermissionName;
+use App\Enums\RoleName;
 use App\Models\Church;
+use App\Models\User;
 use Illuminate\Support\Collection;
 
 /**
@@ -68,7 +71,7 @@ class ChurchHierarchyService
     }
 
     /** Toutes les églises accessibles, à PROFONDEUR ILLIMITÉE (plus de 2 niveaux). */
-    public function accessibleChurches(\App\Models\User $user): Collection
+    public function accessibleChurches(User $user): Collection
     {
         $access = app(ChurchAccessService::class);
 
@@ -83,9 +86,9 @@ class ChurchHierarchyService
         }
 
         $canReadHierarchy = in_array($user->roleName(), [
-            \App\Enums\RoleName::GROUP_PASTOR->value,
-            \App\Enums\RoleName::SUBGROUP_PASTOR->value,
-        ], true) || $user->hasPermission(\App\Enums\PermissionName::READ_CHILD_CHURCHES_DATA);
+            RoleName::GROUP_PASTOR->value,
+            RoleName::SUBGROUP_PASTOR->value,
+        ], true) || $user->hasPermission(PermissionName::READ_CHILD_CHURCHES_DATA);
 
         if (! $canReadHierarchy) {
             return collect([$base]);

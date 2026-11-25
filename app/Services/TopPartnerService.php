@@ -38,14 +38,7 @@ class TopPartnerService
 
         // Une église de groupe/sous-groupe ne reçoit pas de dons directement :
         // on réunit chaque église sélectionnée à toute sa descendance.
-        $allChurchIds = $churchIds;
-        foreach ($churchIds as $id) {
-            $church = Church::query()->find($id);
-            if ($church) {
-                $allChurchIds = array_merge($allChurchIds, $church->descendantIds());
-            }
-        }
-        $allChurchIds = array_values(array_unique(array_map('intval', $allChurchIds)));
+        $allChurchIds = app(ChurchDescendantService::class)->expand($churchIds);
 
         $donations = Donation::query()
             ->with('partner:id,first_name,last_name,church_id,cellule_id,user_id')

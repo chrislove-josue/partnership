@@ -76,18 +76,14 @@ class ChurchAccessService
             return false;
         }
 
-        $targetChurch = Church::with('parent.parent')->find($targetChurchId);
+        $targetChurch = Church::query()->find($targetChurchId);
 
         if (! $targetChurch) {
             return false;
         }
 
-        if ($role === RoleName::GROUP_PASTOR->value) {
-            return $targetChurch->parent_id === $user->assigned_church_id
-                || $targetChurch->parent?->parent_id === $user->assigned_church_id;
-        }
-
-        return $targetChurch->parent_id === $user->assigned_church_id;
+        // GROUP_PASTOR et SUBGROUP_PASTOR gèrent toute leur descendance.
+        return in_array($user->assigned_church_id, $targetChurch->ancestorIds(), true);
     }
 
     /**

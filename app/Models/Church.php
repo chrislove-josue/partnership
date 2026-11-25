@@ -69,28 +69,34 @@ class Church extends Model
      */
     public function scopeWithTotalDonations(Builder $query): Builder
     {
+        // Sous-requête : pour chaque don, trouver l'église "réceptrice" (le
+        // parent GROUP/SUB_GROUP le plus proche si l'église créditée est une
+        // locale, sinon l'église elle-même), puis additionner.
+        $localIds = Church::query()
+            ->where('type', ChurchType::LOCAL)
+            ->pluck('id')
+            ->all();
+
         $totals = [];
 
-        foreach (Church::query()->get(['id', 'type']) as $church) {
-            $ids = $church->type === ChurchType::LOCAL
-                ? [(int) $church->id]
-                : app(ChurchDescendantService::class)->forChurch((int) $church->id);
+        foreach (Church::query()->select('id', 'type')->get() as $item) {
+            $ids = $item->type === ChurchType::LOCAL
+                ? [(int) $item->id]
+                : app(ChurchDescendantService::class)->forChurch((int) $item->id);
 
-            $totals[(int) $church->id] = (float) Donation::query()
+            $totals[(int) $item->id] = (float) Donation::query()
                 ->whereIn('church_id', $ids)
                 ->where('is_active', true)
                 ->sum('amount');
         }
 
-        $sql = 'CASE churches.id ';
+        $cases = '';
         foreach ($totals as $id => $total) {
-            $sql .= 'WHEN '.(int) $id.' THEN '.(float) $total.' ';
+            $cases .= 'WHEN '.(int) $id.' THEN '.(float) $total.' ';
         }
-        $sql .= 'ELSE 0 END';
+        $expression = 'CASE churches.id '.$cases.'ELSE 0 END';
 
-        return $query->addSelect([
-            'total_donations' => DB::raw($sql.' as total_donations'),
-        ]);
+        return $query->addSelect(DB::raw($expression.' as total_donations'));
     }
 
     /**

@@ -244,33 +244,7 @@ class ChurchAccessService
      */
     public function accessibleChurches(User $user): Collection
     {
-        if ($this->isSuperAdmin($user)) {
-            return Church::all();
-        }
-
-        $baseChurch = Church::with('children.children')->find($user->assigned_church_id);
-
-        if (! $baseChurch) {
-            return collect();
-        }
-
-        $canReadHierarchy = $user->roleName() === RoleName::GROUP_PASTOR->value
-            || $user->hasPermission(PermissionName::READ_CHILD_CHURCHES_DATA);
-
-        if ($canReadHierarchy) {
-            if ($baseChurch->type === ChurchType::GROUP) {
-                $subgroups = $baseChurch->children;
-                $locals = $subgroups->flatMap(fn (Church $sg) => $sg->children);
-
-                return collect([$baseChurch])->merge($subgroups)->merge($locals);
-            }
-
-            if ($baseChurch->type === ChurchType::SUB_GROUP) {
-                return collect([$baseChurch])->merge($baseChurch->children);
-            }
-        }
-
-        return collect([$baseChurch]);
+        return app(ChurchHierarchyService::class)->accessibleChurches($user);
     }
 
     /**

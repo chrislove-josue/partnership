@@ -44,15 +44,13 @@ const CATEGORY_GROUPS = [
   { label: 'Partenariat local', value: 'local_partnership' },
 ];
 
-interface TopEntry {
+interface TopChurchEntry {
   id: number;
   name: string;
-  church: string | null;
-  origin_church?: string | null;
-  cellule: string | null;
+  type: string;
   amount: number;
   count: number;
-  is_user: boolean;
+  partners: number;
 }
 
 export function TopPartnersScreen() {

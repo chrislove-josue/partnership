@@ -303,7 +303,7 @@ export function ReportsScreen() {
                     <View key={`${donation.date}-${donation.partner}-${donation.amount}`} style={styles.listRow}>
                       <Text style={styles.listLabel}>{donation.partner} · {donation.category}</Text>
                       <Text style={styles.listValue}>{formatMoney(donation.amount)}</Text>
-                      <Text style={styles.meta}>{formatDate(donation.date)}</Text>
+                      <Text style={styles.meta}>{formatDate(donation.date)}{donation.church ? ` · ${donation.church}` : ''}</Text>
                     </View>
                   ))}
                 </View>

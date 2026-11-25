@@ -101,11 +101,11 @@ class PartnershipReportService
             ->pluck('name', 'id');
 
         $donations = Donation::with([
-                'category:id,name,color,group',
-                'partner.cellule:id,name',
-                'partner.church:id,name',
-                'church:id,name',
-            ])
+            'category:id,name,color,group',
+            'partner.cellule:id,name',
+            'partner.church:id,name',
+            'church:id,name',
+        ])
             ->whereIn('church_id', $churchIds)
             ->where('is_active', true)
             ->whereBetween('date', [$range['from'], $range['to']])

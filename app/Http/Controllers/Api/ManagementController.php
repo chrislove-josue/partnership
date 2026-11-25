@@ -461,6 +461,7 @@ class ManagementController extends Controller
             'name' => $church->name,
             'type' => $church->type?->value ?? (string) $church->type,
             'parent_id' => $church->parent_id,
+            'parent_name' => $church->parent?->name,
             'manager_id' => $church->manager_id,
             'is_active' => $church->is_active,
             'updated_at' => $church->updated_at?->toIso8601String(),

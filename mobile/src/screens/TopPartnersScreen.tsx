@@ -133,7 +133,7 @@ export function TopPartnersScreen() {
     } finally {
       setLoading(false);
     }
-  }, [period, month, quarter, year, churchId, churchChosen, categoryGroup, categoryId, user?.assigned_church_id]);
+  }, [period, month, quarter, year, churchId, churchChosen, categoryGroup, categoryId, user?.assigned_church_id, canSeeAllChurches]);
 
   useEffect(() => {
     void load();

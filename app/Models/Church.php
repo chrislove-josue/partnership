@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ChurchType;
+use App\Services\ChurchDescendantService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -73,7 +74,7 @@ class Church extends Model
         foreach (Church::query()->get(['id', 'type']) as $church) {
             $ids = $church->type === ChurchType::LOCAL
                 ? [(int) $church->id]
-                : app(\App\Services\ChurchDescendantService::class)->forChurch((int) $church->id);
+                : app(ChurchDescendantService::class)->forChurch((int) $church->id);
 
             $totals[(int) $church->id] = (float) Donation::query()
                 ->whereIn('church_id', $ids)

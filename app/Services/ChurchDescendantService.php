@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ChurchType;
 use App\Models\Church;
 
 /** Résout un église + toute sa descendance pour les filtres et totaux hiérarchiques. */
@@ -42,7 +43,7 @@ class ChurchDescendantService
     {
         $church = Church::query()->find($churchId);
 
-        if (! $church || $church->type === \App\Enums\ChurchType::LOCAL) {
+        if (! $church || $church->type === ChurchType::LOCAL) {
             return [$churchId];
         }
 

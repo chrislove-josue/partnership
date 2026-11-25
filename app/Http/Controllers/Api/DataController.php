@@ -64,13 +64,13 @@ class DataController extends Controller
             $churches = $churches->take($limit);
         }
 
-        // Chaque église affiche le total de ses dons ET de ceux de toute sa
-        // descendance (groupes et sous-groupes n'ont pas de dons directs).
+        // Une église locale = ses dons directs ; un groupe/sous-groupe =
+        // la somme des dons de sa descendance.
         $descendants = app(ChurchDescendantService::class);
         $totals = [];
 
         foreach ($churches as $church) {
-            $ids = $descendants->forChurch($church->id);
+            $ids = $descendants->forFilter($church->id);
             $totals[$church->id] = (float) Donation::query()
                 ->whereIn('church_id', $ids)
                 ->where('is_active', true)
@@ -118,7 +118,7 @@ class DataController extends Controller
                 });
             })
             ->when($request->filled('church_id'), function ($query) use ($request): void {
-                $ids = app(ChurchDescendantService::class)->forChurch($request->integer('church_id'));
+                $ids = app(ChurchDescendantService::class)->forFilter($request->integer('church_id'));
                 $query->whereIn('church_id', $ids);
             })
             ->when($request->filled('cellule_id'), fn ($query) => $query->where('cellule_id', $request->integer('cellule_id')));
@@ -167,7 +167,7 @@ class DataController extends Controller
                 $query->where('name', 'like', "%{$search}%");
             })
             ->when($request->filled('church_id'), function ($query) use ($request): void {
-                $ids = app(ChurchDescendantService::class)->forChurch($request->integer('church_id'));
+                $ids = app(ChurchDescendantService::class)->forFilter($request->integer('church_id'));
                 $query->whereIn('church_id', $ids);
             });
 
@@ -247,7 +247,7 @@ class DataController extends Controller
             ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
             ->when($afterId > 0, fn ($query) => $query->where('id', '>', $afterId))
             ->when($request->filled('church_id'), function ($query) use ($request): void {
-                $ids = app(ChurchDescendantService::class)->forChurch($request->integer('church_id'));
+                $ids = app(ChurchDescendantService::class)->forFilter($request->integer('church_id'));
                 $query->whereIn('church_id', $ids);
             })
             ->when($request->filled('category_id'), fn ($query) => $query->where('category_id', $request->integer('category_id')))

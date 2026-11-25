@@ -26,8 +26,17 @@ class TopChurchService
 
         [$from, $to] = app(TopPartnerService::class)->range($period, $year, $index);
 
+        $allChurchIds = $churchIds;
+        foreach ($churchIds as $id) {
+            $church = Church::query()->find($id);
+            if ($church) {
+                $allChurchIds = array_merge($allChurchIds, $church->descendantIds());
+            }
+        }
+        $allChurchIds = array_values(array_unique(array_map('intval', $allChurchIds)));
+
         $donations = Donation::query()
-            ->whereIn('church_id', $churchIds)
+            ->whereIn('church_id', $allChurchIds)
             ->where('is_active', true)
             ->whereBetween('date', [$from, $to])
             ->get(['id', 'amount', 'partner_id', 'church_id']);

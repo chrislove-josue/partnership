@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
 use App\Enums\RoleName;
 use App\Http\Controllers\Controller;
-use App\Models\Church;
 use App\Services\ChurchAccessService;
 use App\Services\TopChurchService;
 use Illuminate\Http\JsonResponse;

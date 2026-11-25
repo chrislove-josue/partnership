@@ -36,9 +36,20 @@ class TopPartnerService
 
         [$from, $to] = $this->range($period, $year, $index);
 
+        // Une église de groupe/sous-groupe ne reçoit pas de dons directement :
+        // on réunit chaque église sélectionnée à toute sa descendance.
+        $allChurchIds = $churchIds;
+        foreach ($churchIds as $id) {
+            $church = Church::query()->find($id);
+            if ($church) {
+                $allChurchIds = array_merge($allChurchIds, $church->descendantIds());
+            }
+        }
+        $allChurchIds = array_values(array_unique(array_map('intval', $allChurchIds)));
+
         $donations = Donation::query()
             ->with('partner:id,first_name,last_name,church_id,cellule_id,user_id')
-            ->whereIn('church_id', $churchIds)
+            ->whereIn('church_id', $allChurchIds)
             ->where('is_active', true)
             ->whereBetween('date', [$from, $to])
             ->when($categoryId, fn ($query) => $query->where('category_id', $categoryId))

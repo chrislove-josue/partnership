@@ -77,7 +77,8 @@ class TopPartners extends Page
                 Select::make('church_id')->selectablePlaceholder(false)
                     ->label('Église')
                     ->options(
-                        ['' => 'Toutes les églises accessibles', 'all' => 'Toutes les églises de la base']
+                        ['' => 'Toutes les églises accessibles']
+                        + ($canSeeAllChurches ? ['all' => 'Toutes les églises de la base'] : [])
                         + $orderedChurches->pluck('name', 'id')->all()
                     )
                     ->searchable()
@@ -158,8 +159,11 @@ class TopPartners extends Page
             $service = app(TopPartnerService::class);
             $accessibleIds = array_map('intval', $actor ? app(ChurchAccessService::class)->accessibleChurchIds($actor) : []);
             $churchId = (string) ($state['church_id'] ?? '');
-            // Une église précise, toutes les églises de la base, ou le périmètre.
-            $churchIds = $churchId === 'all'
+            $actorIsAdmin = $actor && ($actor->isSuperAdmin()
+                || $actor->roleName() === \App\Enums\RoleName::GROUP_PASTOR->value);
+            // Une église précise, toutes les églises de la base (admin/pasteur de
+            // groupe), ou le périmètre du rôle.
+            $churchIds = $churchId === 'all' && $actorIsAdmin
                 ? Church::query()->pluck('id')->map('intval')->all()
                 : ((int) $churchId && in_array((int) $churchId, $accessibleIds, true)
                     ? [(int) $churchId]

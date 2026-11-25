@@ -70,6 +70,7 @@ export function TopPartnersScreen() {
   const [churches, setChurches] = useState<Church[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [churchId, setChurchId] = useState('');
+  const [churchChosen, setChurchChosen] = useState(false);
   const [categoryGroup, setCategoryGroup] = useState('');
   const [categoryId, setCategoryId] = useState('');
 

@@ -36,6 +36,16 @@ class ManagementController extends Controller
             abort(403, 'Vous ne pouvez pas créer ce type d’église.');
         }
 
+        $parent = isset($data['parent_id'])
+            ? Church::query()->find((int) $data['parent_id'])
+            : null;
+
+        $hierarchy = app(\App\Services\ChurchHierarchyService::class);
+
+        if (! $hierarchy->isAllowedParent($type, $parent)) {
+            return response()->json(['message' => $hierarchy->parentErrorMessage($type, $parent)], 422);
+        }
+
         $church = Church::query()->create($data + ['type' => $type]);
 
         return response()->json(['message' => 'Église créée.', 'church' => $this->churchPayload($church)], 201);

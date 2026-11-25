@@ -326,6 +326,43 @@ class TopPartnerTest extends TestCase
         $this->assertTrue(collect($all->json('data'))->contains('id', $outsider->id));
     }
 
+    public function test_non_group_pastors_cannot_see_all_churches(): void
+    {
+        $pastor = User::create([
+            'name' => 'Pasteur sous-groupe droits',
+            'email' => 'pasteur-sg-droits@example.test',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'assigned_church_id' => $this->church->id,
+            'is_active' => true,
+        ]);
+        $pastor->syncRoles([\App\Enums\RoleName::SUBGROUP_PASTOR->value]);
+
+        $this->actingAs($pastor, 'sanctum')
+            ->getJson('/api/top-partners?period=month&month=11&year=2026&church_id=all')
+            ->assertForbidden();
+
+        $staff = User::create([
+            'name' => 'Staff droits',
+            'email' => 'staff-droits@example.test',
+            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'assigned_church_id' => $this->church->id,
+            'is_active' => true,
+        ]);
+        $staff->syncRoles([\App\Enums\RoleName::STAFF->value]);
+
+        $this->actingAs($staff, 'sanctum')
+            ->getJson('/api/top-partners?period=month&month=11&year=2026&church_id=all')
+            ->assertForbidden();
+    }
+
+    public function test_super_admin_can_see_all_churches(): void
+    {
+        $this->actingAs($this->admin, 'sanctum')
+            ->getJson('/api/top-partners?period=month&month=11&year=2026&church_id=all')
+            ->assertOk()
+            ->assertJsonPath('can_see_all', true);
+    }
+
     public function test_api_rejects_an_invalid_period(): void
     {
         $this->actingAs($this->admin, 'sanctum')

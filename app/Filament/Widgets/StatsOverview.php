@@ -77,6 +77,23 @@ class StatsOverview extends BaseWidget
                 ->description($donationsCount.' don(s) sur toutes les églises accessibles')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('success');
+
+            // L'église dont le pasteur est responsable (église mère) : ses
+            // propres dons, sans ceux de ses filles.
+            $managedChurch = Church::query()->where('manager_id', $actor->id)->first();
+
+            if ($managedChurch) {
+                $managedQuery = Donation::query()
+                    ->where('church_id', $managedChurch->id)
+                    ->where('is_active', true);
+                $managedAmount = $managedQuery->sum('amount');
+                $managedCount = $managedQuery->count();
+
+                $stats[] = Stat::make('Dons de votre église — '.$managedChurch->name, $formatted($managedAmount))
+                    ->description($managedCount.' don(s) dans cette église')
+                    ->descriptionIcon('heroicon-o-church')
+                    ->color('warning');
+            }
         } else {
             $stats[] = Stat::make('Dons totaux', $formatted($totalAmount))
                 ->description($donationsCount.' don(s) enregistré(s)')

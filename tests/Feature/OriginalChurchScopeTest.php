@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\ChurchType;
+use App\Enums\PeriodType;
 use App\Enums\RoleName;
 use App\Models\CategoryDon;
 use App\Models\Church;
@@ -11,7 +12,6 @@ use App\Models\Partner;
 use App\Models\User;
 use App\Services\TopPartnerService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class OriginalChurchScopeTest extends TestCase
@@ -53,15 +53,15 @@ class OriginalChurchScopeTest extends TestCase
         $this->addDonation($child, 2000);
 
         // Église d'origine sélectionnée = ses dons directs uniquement.
-        $items = app(TopPartnerService::class)->rank([$original->id], period: \App\Enums\PeriodType::MONTH, year: (int) now()->year, index: (int) now()->month);
+        $items = app(TopPartnerService::class)->rank([$original->id], period: PeriodType::MONTH, year: (int) now()->year, index: (int) now()->month);
         $this->assertEquals(1000, $items->sum('amount'));
 
         // Sous-groupe sélectionné = somme de sa descendance.
-        $items = app(TopPartnerService::class)->rank([$sub->id], period: \App\Enums\PeriodType::MONTH, year: (int) now()->year, index: (int) now()->month);
+        $items = app(TopPartnerService::class)->rank([$sub->id], period: PeriodType::MONTH, year: (int) now()->year, index: (int) now()->month);
         $this->assertEquals(3000, $items->sum('amount'));
 
         // Groupe sélectionné = somme de sa descendance.
-        $items = app(TopPartnerService::class)->rank([$group->id], period: \App\Enums\PeriodType::MONTH, year: (int) now()->year, index: (int) now()->month);
+        $items = app(TopPartnerService::class)->rank([$group->id], period: PeriodType::MONTH, year: (int) now()->year, index: (int) now()->month);
         $this->assertEquals(3000, $items->sum('amount'));
     }
 

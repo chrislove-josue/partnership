@@ -149,6 +149,8 @@ class PartnershipReportService
                     'phone' => $partner->phone,
                     'handleKC' => $partner->handle_kc,
                     'cellule' => $partner->cellule?->name,
+                    'church' => $partner->church?->name,
+                    'originChurch' => $partner->church?->name,
                     'amount' => 0.0,
                     'count' => 0,
                 ];

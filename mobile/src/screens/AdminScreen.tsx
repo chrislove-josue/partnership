@@ -413,6 +413,7 @@ export function AdminScreen() {
               </View>
             </View>
             <Text style={styles.meta}>Total dons : {formatMoney(church.total_donations ?? 0)}</Text>
+            {church.parent_name ? <Text style={styles.meta}>Parente : {church.parent_name}</Text> : null}
             <View style={styles.actions}>
               <Pressable onPress={() => openForm(church)}><Text style={styles.edit}>Modifier</Text></Pressable>
               {canDeleteChurches ? (
@@ -526,15 +527,26 @@ export function AdminScreen() {
                     { label: 'Sous-groupe', value: 'SUB_GROUP' },
                     { label: 'Locale', value: 'LOCAL' },
                   ]}
-                  onChange={setType}
+                  onChange={(value) => {
+                    setType(value);
+                    if (value === 'GROUP') setParentId('');
+                  }}
                 />
-                <SelectField
-                  label="Église parente"
-                  value={parentId}
-                  options={[{ label: 'Aucune', value: '' }, ...churchOptions]}
-                  onChange={setParentId}
-                  searchable
-                />
+                {type !== 'GROUP' ? (
+                  <SelectField
+                    label="Église parente (groupe ou sous-groupe)"
+                    value={parentId}
+                    options={[
+                      { label: 'Aucune', value: '' },
+                      ...churches
+                        .filter((church) => church.type === 'GROUP' || church.type === 'SUB_GROUP')
+                        .filter((church) => !editing || church.id !== editing.id)
+                        .map((church) => ({ label: church.name, value: String(church.id) })),
+                    ]}
+                    onChange={setParentId}
+                    searchable
+                  />
+                ) : null}
                 <SelectField
                   label="Responsable"
                   value={leaderId}

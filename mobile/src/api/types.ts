@@ -35,6 +35,7 @@ export interface Church {
   name: string;
   type: string;
   parent_id?: number | null;
+  parent_name?: string | null;
   parent?: string | null;
   manager_id?: number | null;
   total_donations?: number;

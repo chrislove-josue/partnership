@@ -3,7 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { defaultChurchId } from '../utils/church';
+import { defaultLocalChurchId } from '../utils/church';
 import { filterBy } from '../utils/search';
 import { isSuperAdmin } from '../api/types';
 import type { Category, Church, Donation, Partner } from '../api/types';
@@ -73,7 +73,7 @@ export function DonationsScreen() {
       setChurches(churchData.data);
       setPartners(partnerData.data);
       setCategories(categoryData.data);
-      setChurchId((current) => current || defaultChurchId(churchData.data, user?.assigned_church_id));
+      setChurchId((current) => current || defaultLocalChurchId(churchData.data, user?.assigned_church_id));
       setCategoryId((current) => current || categoryData.data[0]?.id.toString() || '');
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger les dons.'));

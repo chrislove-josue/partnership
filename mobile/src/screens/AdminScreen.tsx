@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { api, getErrorMessage } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { defaultChurchId } from '../utils/church';
+import { defaultLocalChurchId } from '../utils/church';
 import { filterBy } from '../utils/search';
 import type { Category, Cellule, Church, Partner, RoleOption, User } from '../api/types';
 import {
@@ -115,8 +115,11 @@ export function AdminScreen() {
 
       if (churchData.status === 'fulfilled') {
         setChurches(churchData.value.data);
-        setChurchId((current) => current || defaultChurchId(churchData.value.data, user?.assigned_church_id));
-        setAssignedChurchId((current) => current || defaultChurchId(churchData.value.data, user?.assigned_church_id));
+        setChurchId((current) => current || defaultLocalChurchId(churchData.value.data, user?.assigned_church_id));
+        // L'utilisateur créé est assigné à l'église du compte (peut être un groupe).
+        setAssignedChurchId((current) => current || (user?.assigned_church_id
+          ? String(user.assigned_church_id)
+          : defaultLocalChurchId(churchData.value.data, user?.assigned_church_id)));
       }
       if (celluleData.status === 'fulfilled') setCellules(celluleData.value.data);
       if (categoryData.status === 'fulfilled') setCategories(categoryData.value.data);
@@ -215,7 +218,7 @@ export function AdminScreen() {
     setName(record ? ('name' in record ? record.name : '') : '');
     setType(record && 'type' in record ? String(record.type) : user?.role === 'GROUP_PASTOR' ? 'SUB_GROUP' : user?.role === 'SUBGROUP_PASTOR' ? 'LOCAL' : 'GROUP');
     setParentId(record && 'parent_id' in record && record.parent_id ? String(record.parent_id) : user?.role === 'SUPER_ADMIN' ? '' : user?.assigned_church_id ? String(user.assigned_church_id) : '');
-    setChurchId(record && 'church_id' in record ? String(record.church_id) : defaultChurchId(churches, user?.assigned_church_id));
+    setChurchId(record && 'church_id' in record ? String(record.church_id) : defaultLocalChurchId(churches, user?.assigned_church_id));
     setLeaderId(record && 'leader_id' in record && record.leader_id
       ? String(record.leader_id)
       : record && 'manager_id' in record && record.manager_id ? String(record.manager_id) : '');

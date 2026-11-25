@@ -3,7 +3,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { api, getErrorMessage } from '../api/client';
 import { useAuth } from '../context/AuthContext';
-import { defaultChurchId } from '../utils/church';
+import { defaultLocalChurchId } from '../utils/church';
 import { FilterCard } from '../components/FilterCard';
 import { SecondaryButton } from '../components/ui';
 import type { Cellule, Church, Partner } from '../api/types';
@@ -73,7 +73,7 @@ export function PartnersScreen() {
       setPartners(partnerData.data);
       setChurches(churchData.data);
       setCellules(celluleData.data);
-      setChurchId((current) => current || defaultChurchId(churchData.data, user?.assigned_church_id));
+      setChurchId((current) => current || defaultLocalChurchId(churchData.data, user?.assigned_church_id));
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger les partenaires.'));
     } finally {

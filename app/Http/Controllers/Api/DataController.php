@@ -10,6 +10,7 @@ use App\Models\Church;
 use App\Models\Donation;
 use App\Models\Partner;
 use App\Services\ChurchAccessService;
+use App\Services\ChurchDescendantService;
 use App\Services\DonationAttributionService;
 use App\Services\DonationNotifier;
 use Illuminate\Http\JsonResponse;
@@ -65,7 +66,7 @@ class DataController extends Controller
 
         // Chaque église affiche le total de ses dons ET de ceux de toute sa
         // descendance (groupes et sous-groupes n'ont pas de dons directs).
-        $descendants = app(\App\Services\ChurchDescendantService::class);
+        $descendants = app(ChurchDescendantService::class);
         $totals = [];
 
         foreach ($churches as $church) {
@@ -116,7 +117,10 @@ class DataController extends Controller
                         ->orWhere('handle_kc', 'like', "%{$search}%");
                 });
             })
-            ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))
+            ->when($request->filled('church_id'), function ($query) use ($request): void {
+                $ids = app(ChurchDescendantService::class)->forChurch($request->integer('church_id'));
+                $query->whereIn('church_id', $ids);
+            })
             ->when($request->filled('cellule_id'), fn ($query) => $query->where('cellule_id', $request->integer('cellule_id')));
 
         if ($isSync) {
@@ -162,7 +166,10 @@ class DataController extends Controller
             ->when($request->string('search')->toString(), function ($query, string $search): void {
                 $query->where('name', 'like', "%{$search}%");
             })
-            ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')));
+            ->when($request->filled('church_id'), function ($query) use ($request): void {
+                $ids = app(ChurchDescendantService::class)->forChurch($request->integer('church_id'));
+                $query->whereIn('church_id', $ids);
+            });
 
         if ($isSync) {
             $query->orderBy('id');
@@ -239,7 +246,10 @@ class DataController extends Controller
             ->whereIn('church_id', $churchIds)
             ->when($request->filled('updated_after'), fn ($query) => $query->where('updated_at', '>', $request->string('updated_after')->toString()))
             ->when($afterId > 0, fn ($query) => $query->where('id', '>', $afterId))
-            ->when($request->filled('church_id'), fn ($query) => $query->where('church_id', $request->integer('church_id')))
+            ->when($request->filled('church_id'), function ($query) use ($request): void {
+                $ids = app(ChurchDescendantService::class)->forChurch($request->integer('church_id'));
+                $query->whereIn('church_id', $ids);
+            })
             ->when($request->filled('category_id'), fn ($query) => $query->where('category_id', $request->integer('category_id')))
             ->when($request->filled('partner_id'), fn ($query) => $query->where('partner_id', $request->integer('partner_id')))
             ->when($request->filled('date_from'), fn ($query) => $query->whereDate('date', '>=', $request->string('date_from')->toString()))

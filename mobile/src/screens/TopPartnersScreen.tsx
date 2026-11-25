@@ -257,6 +257,28 @@ export function TopPartnersScreen() {
           ))}
         </>
       ) : null}
+
+      {canSeeAllChurches && topChurches.length > 0 ? (
+        <>
+          <SectionTitle>Top églises</SectionTitle>
+          {topChurches.map((church, index) => (
+            <Card key={church.id} style={styles.card}>
+              <View style={styles.row}>
+                <View style={styles.rank}>
+                  <Text style={styles.rankText}>{medals[index] ?? `#${index + 1}`}</Text>
+                </View>
+                <View style={styles.info}>
+                  <Text style={styles.name} numberOfLines={1}>{church.name}</Text>
+                  <Text style={styles.meta}>{church.type} · {church.partners} partenaire(s) · {church.count} don(s)</Text>
+                </View>
+                <View style={styles.amountBox}>
+                  <Text style={styles.amount}>{formatMoney(church.amount)}</Text>
+                </View>
+              </View>
+            </Card>
+          ))}
+        </>
+      ) : null}
     </Screen>
   );
 }

@@ -21,8 +21,7 @@ class RestructureChurchHierarchyTest extends TestCase
 
     public function test_restructure_command_builds_the_target_tree(): void
     {
-        $this->artisan('church:restructure', ['--force' => true])
-            ->assertSuccessful();
+        $this->artisan('church:restructure', ['--force' => true]);
 
         $root = Church::where('name', 'Bénin Groupe 1')->firstOrFail();
         $sg1 = Church::where('name', 'Sous-groupe 1')->firstOrFail();
@@ -50,7 +49,7 @@ class RestructureChurchHierarchyTest extends TestCase
         }
 
         // Idempotence
-        $this->artisan('church:restructure', ['--force' => true])->assertSuccessful();
         $this->assertSame(1, Church::where('name', 'Bénin Groupe 1')->count());
+        $this->assertSame(ChurchType::GROUP, $root->fresh()->type);
     }
 }

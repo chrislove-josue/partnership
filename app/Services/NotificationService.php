@@ -105,24 +105,27 @@ class NotificationService
 
         $userIds = array_merge($userIds, $superAdmins);
 
+        // Responsables de l'église et de ses ancêtres + agents de toute la
+        // descendance (les pasteurs de groupe/sous-groupe sont assignés à la
+        // racine et doivent recevoir les alertes des églises filles).
         $current = $church;
 
         while ($current) {
             if ($current->manager_id) {
                 $userIds[] = $current->manager_id;
             }
-
-            if ($current->id === $church->id) {
-                $agents = $current->agents()
-                    ->where('is_active', true)
-                    ->pluck('id')
-                    ->all();
-
-                $userIds = array_merge($userIds, $agents);
-            }
-
             $current = $current->parent;
         }
+
+        $churchIds = app(\App\Services\ChurchDescendantService::class)->forChurch($church->id);
+
+        $agents = User::query()
+            ->whereIn('assigned_church_id', $churchIds)
+            ->where('is_active', true)
+            ->pluck('id')
+            ->all();
+
+        $userIds = array_merge($userIds, $agents);
 
         return array_values(array_unique($userIds));
     }

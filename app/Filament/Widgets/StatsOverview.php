@@ -42,8 +42,8 @@ class StatsOverview extends BaseWidget
         $currency = ' FCFA';
         $formatted = fn ($amount): string => number_format((float) $amount, 0, ',', ' ').$currency;
 
-        // Les pasteurs de groupe/sous-groupe voient d'abord le total de leur
-        // église affectée, puis le total de toutes les églises accessibles.
+        // Les pasteurs de groupe/sous-groupe voient le total de leur église
+        // affectée et celui de l'église dont ils sont responsables.
         $role = $actor->roleName();
         $showBothTotals = in_array($role, [
             RoleName::GROUP_PASTOR->value,
@@ -73,11 +73,6 @@ class StatsOverview extends BaseWidget
                 ->description($ownCount.' don(s) dans votre église et ses filles')
                 ->descriptionIcon('heroicon-m-building-office')
                 ->color('primary');
-
-            $stats[] = Stat::make('Dons sur toutes les églises accessibles', $formatted($totalAmount))
-                ->description($donationsCount.' don(s) sur toutes les églises accessibles')
-                ->descriptionIcon('heroicon-m-banknotes')
-                ->color('success');
 
             // L'église dont le pasteur est responsable (église mère) : ses
             // propres dons, sans ceux de ses filles.

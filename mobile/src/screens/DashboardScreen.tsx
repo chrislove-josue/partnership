@@ -259,14 +259,8 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
           <Text style={styles.heroTotalHint}>
             {summary.showBothTotals
               ? `Sur ${summary.ownChurchName ?? 'votre église'}`
-              : 'Sur toutes les églises accessibles'}
+              : 'Sur votre périmètre'}
           </Text>
-          {summary.showBothTotals ? (
-            <View style={styles.heroTotalSecondary}>
-              <Text style={styles.heroTotalSecondaryLabel}>Total de toutes les églises accessibles</Text>
-              <Text style={styles.heroTotalSecondaryValue}>{formatMoney(summary.total)}</Text>
-            </View>
-          ) : null}
           {summary.managerChurch ? (
             <View style={styles.heroTotalSecondary}>
               <Text style={styles.heroTotalSecondaryLabel}>

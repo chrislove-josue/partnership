@@ -90,7 +90,7 @@ class PartnersTable
                         }
 
                         $ids = app(ChurchDescendantService::class)
-                            ->forChurch((int) $state['value']);
+                            ->forFilter((int) $state['value']);
                         $query->whereIn('church_id', $ids);
                     })
                     ->searchable()

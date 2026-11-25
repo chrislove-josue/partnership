@@ -93,8 +93,20 @@ class PartnershipReportService
 
         $range = $this->resolvePeriodRange($type, $year, $index);
 
-        $donations = Donation::with(['category:id,name,color,group', 'partner.cellule:id,name'])
-            ->where('church_id', $churchId)
+        // Le rapport d'une église régroupe les dons de TOUTE sa descendance
+        // (elle-même + ses églises filles, petites-filles, etc.).
+        $churchIds = array_merge([$churchId], $church->descendantIds());
+        $churchNames = Church::query()
+            ->whereIn('id', $churchIds)
+            ->pluck('name', 'id');
+
+        $donations = Donation::with([
+                'category:id,name,color,group',
+                'partner.cellule:id,name',
+                'partner.church:id,name',
+                'church:id,name',
+            ])
+            ->whereIn('church_id', $churchIds)
             ->where('is_active', true)
             ->whereBetween('date', [$range['from'], $range['to']])
             ->orderBy('date')
@@ -152,9 +164,9 @@ class PartnershipReportService
         usort($partners, fn (array $a, array $b): int => $b['amount'] <=> $a['amount']);
 
         $partnersWithout = Partner::with('cellule:id,name')
-            ->where('church_id', $churchId)
-            ->whereDoesntHave('donations', function ($query) use ($churchId, $range): void {
-                $query->where('church_id', $churchId)
+            ->whereIn('church_id', $churchIds)
+            ->whereDoesntHave('donations', function ($query) use ($churchIds, $range): void {
+                $query->whereIn('church_id', $churchIds)
                     ->where('is_active', true)
                     ->whereBetween('date', [$range['from'], $range['to']]);
             })

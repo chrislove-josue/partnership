@@ -211,7 +211,7 @@ class TopPartners extends Page
                 $period,
                 $year,
                 $index,
-                20,
+                10,
                 $group,
                 $categoryId ?: null,
             );

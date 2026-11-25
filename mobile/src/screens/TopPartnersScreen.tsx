@@ -86,6 +86,7 @@ export function TopPartnersScreen() {
   const [churchChosen, setChurchChosen] = useState(false);
   const [categoryGroup, setCategoryGroup] = useState('');
   const [categoryId, setCategoryId] = useState('');
+  const [topChurches, setTopChurches] = useState<TopChurchEntry[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);

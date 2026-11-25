@@ -62,6 +62,10 @@ class TopPartners extends Page
             ? app(ChurchAccessService::class)->accessibleChurches($actor)
             : collect();
 
+        // « Toutes les églises de la base » : super admin et pasteur de groupe uniquement.
+        $canSeeAllChurches = $actor && ($actor->isSuperAdmin()
+            || $actor->roleName() === \App\Enums\RoleName::GROUP_PASTOR->value);
+
         // L'église affectée au pasteur est proposée en premier.
         $assignedId = (int) (Auth::user()?->assigned_church_id ?? 0);
         $orderedChurches = $assignedId

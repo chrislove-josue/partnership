@@ -122,6 +122,7 @@ export function TopPartnersScreen() {
       setRange(`${response.from} → ${response.to}`);
       setChurches(churchData.data);
       setCategories(categoryData.data);
+      setTopChurches(churchRanking.data);
       // N'appliquer le défaut qu'au premier chargement : un choix explicite
       // (y compris « toutes les églises accessibles » = '') doit être conservé.
       if (!churchChosen) {

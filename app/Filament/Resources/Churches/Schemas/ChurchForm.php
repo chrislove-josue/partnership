@@ -68,7 +68,6 @@ class ChurchForm
                             ->all();
                     })
                     ->visible(fn (Get $get): bool => ChurchType::tryFrom((string) $get('type')) !== ChurchType::GROUP)
-                    ->required(fn (Get $get): bool => ChurchType::tryFrom((string) $get('type')) !== ChurchType::GROUP)
                     ->default(fn (): ?int => $actor && ! $actor->isSuperAdmin()
                         ? $access->defaultChurchId($actor)
                         : null)

@@ -31,4 +31,21 @@ class ChurchDescendantService
     {
         return $this->expand([$churchId]);
     }
+
+    /**
+     * Pour un filtre : une église locale = elle-même ; un groupe/sous-groupe =
+     * toute sa descendance.
+     *
+     * @return array<int, int>
+     */
+    public function forFilter(int $churchId): array
+    {
+        $church = Church::query()->find($churchId);
+
+        if (! $church || $church->type === \App\Enums\ChurchType::LOCAL) {
+            return [$churchId];
+        }
+
+        return $this->forChurch($churchId);
+    }
 }

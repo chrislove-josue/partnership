@@ -69,7 +69,7 @@ class TopPartnerService
         // L'église affichée est celle à qui le don est crédité (l'église
         // sélectionnée), pas l'église d'origine du partenaire.
         $churchNames = Church::query()
-            ->whereIn('id', array_map('intval', $churchIds))
+            ->whereIn('id', $allChurchIds)
             ->pluck('name', 'id');
 
         $totals = [];

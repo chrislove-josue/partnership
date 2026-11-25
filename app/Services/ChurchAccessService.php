@@ -38,7 +38,7 @@ class ChurchAccessService
             return false;
         }
 
-        $targetChurch = Church::with('parent.parent')->find($targetChurchId);
+        $targetChurch = Church::query()->find($targetChurchId);
 
         if (! $targetChurch) {
             return false;
@@ -47,16 +47,13 @@ class ChurchAccessService
         $effectiveType = $user->assignedChurch?->type
             ?? $this->typeFromRole($user->roleName());
 
-        if ($effectiveType === ChurchType::GROUP) {
-            return $targetChurch->parent_id === $user->assigned_church_id
-                || $targetChurch->parent?->parent_id === $user->assigned_church_id;
+        if (! in_array($effectiveType, [ChurchType::GROUP, ChurchType::SUB_GROUP], true)) {
+            return false;
         }
 
-        if ($effectiveType === ChurchType::SUB_GROUP) {
-            return $targetChurch->parent_id === $user->assigned_church_id;
-        }
-
-        return false;
+        // Toute la chaîne d'ancêtres (profondeur illimitée) : le pasteur voit
+        // son église et tous ses descendants, quel que soit le niveau.
+        return in_array($user->assigned_church_id, $targetChurch->ancestorIds(), true);
     }
 
     // ─────────────────────────────────────────────────────────────────────

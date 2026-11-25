@@ -267,6 +267,15 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
               <Text style={styles.heroTotalSecondaryValue}>{formatMoney(summary.total)}</Text>
             </View>
           ) : null}
+          {summary.managerChurch ? (
+            <View style={styles.heroTotalSecondary}>
+              <Text style={styles.heroTotalSecondaryLabel}>
+                Total de votre église — {summary.managerChurch.name}
+              </Text>
+              <Text style={styles.heroTotalSecondaryValue}>{formatMoney(summary.managerTotal)}</Text>
+              <Text style={styles.meta}>{summary.managerCount} don(s) dans cette église</Text>
+            </View>
+          ) : null}
         </View>
       </Card>
 

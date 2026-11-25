@@ -92,7 +92,7 @@ class StatsOverview extends BaseWidget
 
                 $stats[] = Stat::make('Dons de votre église — '.$managedChurch->name, $formatted($managedAmount))
                     ->description($managedCount.' don(s) dans cette église')
-                    ->descriptionIcon('heroicon-o-church')
+                    ->descriptionIcon('heroicon-o-building-office-2')
                     ->color('warning');
             }
         } else {

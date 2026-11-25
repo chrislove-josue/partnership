@@ -58,6 +58,10 @@ interface TopEntry {
 export function TopPartnersScreen() {
   const now = new Date();
   const { user } = useAuth();
+  const role = String(user?.role ?? '');
+  const roles = user?.roles ?? [];
+  const canSeeAllChurches = role === 'SUPER_ADMIN' || role === 'GROUP_PASTOR'
+    || roles.includes('SUPER_ADMIN') || roles.includes('GROUP_PASTOR');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [items, setItems] = useState<TopEntry[]>([]);
@@ -134,6 +138,7 @@ export function TopPartnersScreen() {
     setQuarter(String(Math.floor(now.getMonth() / 3) + 1));
     setYear(String(now.getFullYear()));
     setChurchId(user?.assigned_church_id ? String(user.assigned_church_id) : '');
+    setChurchChosen(false);
     setCategoryGroup('');
     setCategoryId('');
   };

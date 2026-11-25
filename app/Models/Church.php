@@ -62,16 +62,32 @@ class Church extends Model
     }
 
     /**
-     * Ajoute un attribut calculé `total_donations` = somme des dons
-     * rattachés directement à l'église (sans compter ses sous-églises).
+     * Ajoute un attribut calculé `total_donations` = somme des dons de
+     * l'église ET de toute sa descendance.
      */
     public function scopeWithTotalDonations(Builder $query): Builder
     {
+        // Une église de groupe/sous-groupe ne reçoit pas de dons directs :
+        // on doit agréger tout son arbre, pas seulement son propre id.
+        $totals = [];
+
+        foreach (Church::query()->pluck('id') as $id) {
+            $ids = app(\App\Services\ChurchDescendantService::class)->forChurch((int) $id);
+            $totals[(int) $id] = (float) Donation::query()
+                ->whereIn('church_id', $ids)
+                ->where('is_active', true)
+                ->sum('amount');
+        }
+
+        $ids = array_keys($totals);
+        $sql = 'CASE churches.id ';
+        foreach ($totals as $id => $total) {
+            $sql .= 'WHEN '.(int) $id.' THEN '.(float) $total.' ';
+        }
+        $sql .= 'ELSE 0 END';
+
         return $query->addSelect([
-            'total_donations' => Donation::query()
-                ->selectRaw('COALESCE(SUM(donations.amount), 0)')
-                ->whereColumn('donations.church_id', 'churches.id')
-                ->where('donations.is_active', true),
+            'total_donations' => DB::raw($sql),
         ]);
     }
 

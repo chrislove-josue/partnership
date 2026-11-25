@@ -130,6 +130,7 @@
                         <th>Date</th>
                         <th>Partenaire</th>
                         <th>Catégorie</th>
+                        <th>Église créditée</th>
                         <th class="rp-right">Montant</th>
                     </tr>
                     </thead>
@@ -139,11 +140,12 @@
                             <td class="rp-nowrap">{{ $formatDate($donation['date'] ?? null) }}</td>
                             <td class="rp-strong">{{ $donation['partner'] ?? '—' }}</td>
                             <td>{{ $donation['category'] ?? '—' }}</td>
+                            <td>{{ $donation['church'] ?? '—' }}</td>
                             <td class="rp-right rp-strong">{{ $format($donation['amount']) }}</td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="rp-empty">Aucun don pour ces filtres.</td>
+                            <td colspan="5" class="rp-empty">Aucun don pour ces filtres.</td>
                         </tr>
                     @endforelse
                     </tbody>

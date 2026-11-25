@@ -158,7 +158,7 @@ export interface PartnershipReport {
   categories: Array<{ name: string; color: string; group?: string | null; group_label?: string | null; amount: number; count: number }>;
   partners: Array<{ name: string; amount: number; count: number; cellule?: string | null }>;
   partnersWithoutDonation: Array<{ name: string; cellule?: string | null }>;
-  donations: Array<{ amount: number; date: string; category: string; partner: string }>;
+  donations: Array<{ amount: number; date: string; category: string; partner: string; church?: string | null }>;
 }
 
 export interface RecipientsPreview {

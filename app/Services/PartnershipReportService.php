@@ -219,6 +219,7 @@ class PartnershipReportService
                 'date' => $d->date?->toIso8601String(),
                 'category' => $d->category?->name ?? '—',
                 'partner' => $d->partner ? $d->partner->full_name : '—',
+                'church' => $churchNames->get($d->church_id),
             ])->all(),
         ];
     }

@@ -93,9 +93,9 @@ class PartnershipReportService
 
         $range = $this->resolvePeriodRange($type, $year, $index);
 
-        // Le rapport d'une église régroupe les dons de TOUTE sa descendance
-        // (elle-même + ses églises filles, petites-filles, etc.).
-        $churchIds = array_merge([$churchId], $church->descendantIds());
+        // Règle : une église locale = ses dons directs ; un sous-groupe/groupe =
+        // la somme des dons de sa descendance.
+        $churchIds = app(\App\Services\ChurchDescendantService::class)->forFilter($churchId);
         $churchNames = Church::query()
             ->whereIn('id', $churchIds)
             ->pluck('name', 'id');

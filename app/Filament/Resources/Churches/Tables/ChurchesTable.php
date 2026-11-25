@@ -38,6 +38,21 @@ class ChurchesTable
                     ->label('Église parente')
                     ->searchable()
                     ->placeholder('—'),
+                TextColumn::make('hierarchy_path')
+                    ->label('Hiérarchie')
+                    ->getStateUsing(function (\App\Models\Church $record): string {
+                        $names = $record->ancestorIds();
+                        $all = \App\Models\Church::query()
+                            ->whereIn('id', array_merge($names, [$record->id]))
+                            ->pluck('name', 'id');
+
+                        return collect($names)
+                            ->map(fn (int $id): string => $all->get($id, '?'))
+                            ->push($record->name)
+                            ->implode(' › ');
+                    })
+                    ->wrap()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('manager.name')
                     ->label('Responsable')
                     ->searchable()

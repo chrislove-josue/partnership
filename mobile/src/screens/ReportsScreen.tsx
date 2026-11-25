@@ -155,8 +155,8 @@ export function ReportsScreen() {
     setLoading(true);
     setError('');
     try {
-      const period = currentPeriod();
-      const fileName = `rapport-${churchId}-${period.type}-${period.year}-${period.month}.xlsx`;
+      const suffix = periodType === 'month' ? month : periodType === 'quarter' ? `T${quarter}` : '';
+      const fileName = `rapport-${churchId}-${periodType}-${year}${suffix ? `-${suffix}` : ''}.xlsx`;
       await apiDownload(`/reports/partnership/export?${query()}`, fileName);
       Alert.alert('Rapport téléchargé', 'Le fichier est prêt.');
     } catch (caught) {

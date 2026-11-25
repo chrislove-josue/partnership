@@ -67,8 +67,18 @@ class ManagementController extends Controller
             $data['type'] = $type;
         }
 
-        if (isset($data['parent_id']) && $this->isDescendant($church, (int) $data['parent_id'])) {
+        $hierarchy = app(\App\Services\ChurchHierarchyService::class);
+
+        if ($hierarchy->wouldCreateCycle($church, isset($data['parent_id']) ? (int) $data['parent_id'] : null)) {
             return response()->json(['message' => 'Une église ne peut pas avoir une de ses descendantes comme parente.'], 422);
+        }
+
+        $newType = isset($data['type']) ? ChurchType::from($data['type']) : $church->type;
+        $parentId = array_key_exists('parent_id', $data) ? $data['parent_id'] : $church->parent_id;
+        $parent = $parentId ? Church::query()->find((int) $parentId) : null;
+
+        if (! $hierarchy->isAllowedParent($newType, $parent)) {
+            return response()->json(['message' => $hierarchy->parentErrorMessage($newType, $parent)], 422);
         }
 
         $church->update($data);

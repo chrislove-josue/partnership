@@ -60,7 +60,7 @@ class RestructureChurchHierarchy extends Command
         }
 
         try {
-            DB::transaction(function () use ($rootName, $sg1Name, $sg2Name, $mother1, $mother2): void {
+            DB::transaction(function () use ($rootName, $sg1Name, $sg2Name, $mother1Name, $mother2Name): void {
                 $root = Church::firstOrCreate(
                     ['name' => $rootName],
                     ['type' => ChurchType::GROUP, 'parent_id' => null, 'is_active' => true],

@@ -81,8 +81,10 @@ class RestructureChurchHierarchy extends Command
                 }
 
                 // Les églises mères deviennent LOCAL sous leur sous-groupe.
-                $mother1 = $mother1 ?? Church::create(['name' => $mother1Name, 'type' => ChurchType::LOCAL, 'is_active' => true]);
-                $mother2 = $mother2 ?? Church::create(['name' => $mother2Name, 'type' => ChurchType::LOCAL, 'is_active' => true]);
+                $mother1 = Church::where('name', $mother1Name)->first()
+                    ?? Church::create(['name' => $mother1Name, 'type' => ChurchType::LOCAL, 'is_active' => true]);
+                $mother2 = Church::where('name', $mother2Name)->first()
+                    ?? Church::create(['name' => $mother2Name, 'type' => ChurchType::LOCAL, 'is_active' => true]);
 
                 $mother1->update(['type' => ChurchType::LOCAL, 'parent_id' => $sg1->id]);
                 $mother2->update(['type' => ChurchType::LOCAL, 'parent_id' => $sg2->id]);

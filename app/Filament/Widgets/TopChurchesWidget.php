@@ -26,7 +26,7 @@ class TopChurchesWidget extends TableWidget
 
     public function getHeading(): ?string
     {
-        return 'Top 5 des églises partenaires';
+        return 'Top 10 des églises partenaires';
     }
 
     public function table(Table $table): Table
@@ -46,7 +46,7 @@ class TopChurchesWidget extends TableWidget
                     ->whereIn('id', $ids)
                     ->withTotalDonations()
                     ->orderByDesc('total_donations')
-                    ->limit(5);
+                    ->limit(10);
             })
             ->columns([
                 TextColumn::make('name')

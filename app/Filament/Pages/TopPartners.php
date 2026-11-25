@@ -141,6 +141,37 @@ class TopPartners extends Page
             ->live();
     }
 
+    /** Classement des églises sur la même période (admin / pasteur de groupe uniquement). */
+    public function getTopChurches(): array
+    {
+        $actor = Auth::user();
+
+        if (! $actor || ! ($actor->isSuperAdmin()
+            || $actor->roleName() === RoleName::GROUP_PASTOR->value)) {
+            return [];
+        }
+
+        $state = is_array($this->data) ? $this->data : [];
+        $period = PeriodType::tryFrom((string) ($state['period'] ?? '')) ?? PeriodType::MONTH;
+        $year = (int) ($state['year'] ?? now()->year);
+        $index = match ($period) {
+            PeriodType::MONTH => (int) ($state['month'] ?? now()->month),
+            PeriodType::QUARTER => (int) ($state['quarter'] ?? now()->quarter),
+            PeriodType::YEAR => 1,
+        };
+
+        $service = app(TopChurchService::class);
+
+        return [
+            'items' => $service->rank(
+                app(ChurchAccessService::class)->accessibleChurchIds($actor),
+                $period,
+                $year,
+                $index,
+            ),
+        ];
+    }
+
     /** @return array<string, mixed> */
     public function getRanking(): array
     {

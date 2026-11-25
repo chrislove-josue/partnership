@@ -264,7 +264,7 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
           {summary.managerChurch ? (
             <View style={styles.heroTotalSecondary}>
               <Text style={styles.heroTotalSecondaryLabel}>
-                Total de votre église — {summary.managerChurch.name}
+                Dons de votre église — {summary.managerChurch.name}
               </Text>
               <Text style={styles.heroTotalSecondaryValue}>{formatMoney(summary.managerTotal)}</Text>
               <Text style={styles.heroTotalHint}>{summary.managerCount} don(s) dans cette église</Text>

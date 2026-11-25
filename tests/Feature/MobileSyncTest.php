@@ -124,6 +124,21 @@ class MobileSyncTest extends TestCase
         $this->assertEquals(2500, $totals[$local->id]);
     }
 
+    public function test_church_list_exposes_the_manager_for_the_apk(): void
+    {
+        $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $pastor = User::query()->firstOrFail();
+        $church->update(['manager_id' => $pastor->id]);
+
+        $rows = $this->actingAs($this->superAdmin(), 'sanctum')
+            ->getJson('/api/churches')
+            ->assertOk()
+            ->json('data');
+
+        $row = collect($rows)->firstWhere('id', $church->id);
+        $this->assertSame($pastor->id, $row['manager_id']);
+    }
+
     public function test_donations_sync_can_be_paged_with_after_id(): void
     {
         $church = Church::where('name', 'CE SIKECODJI')->firstOrFail();

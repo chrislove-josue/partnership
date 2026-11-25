@@ -26,7 +26,7 @@ class TopChurchesWidget extends TableWidget
 
     public function getHeading(): ?string
     {
-        return 'Top 5 des églises partenaires';
+        return 'Top 10 des églises partenaires';
     }
 
     public function table(Table $table): Table
@@ -42,15 +42,17 @@ class TopChurchesWidget extends TableWidget
                 $ids = app(ChurchAccessService::class)->accessibleChurchIds($actor);
 
                 return Church::query()
+                    ->with(['parent:id,name'])
                     ->whereIn('id', $ids)
                     ->withTotalDonations()
                     ->orderByDesc('total_donations')
-                    ->limit(5);
+                    ->limit(10);
             })
             ->columns([
                 TextColumn::make('name')
                     ->label('Église')
-                    ->searchable(),
+                    ->searchable()
+                    ->description(fn (Church $record): string => $record->parent?->name ?? ''),
                 TextColumn::make('type')
                     ->label('Type')
                     ->badge()

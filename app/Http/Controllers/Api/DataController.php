@@ -79,6 +79,10 @@ class DataController extends Controller
                 'type' => $church->type?->value ?? (string) $church->type,
                 'parent_id' => $church->parent_id,
                 'parent_name' => $church->parent?->name,
+                'hierarchy_path' => collect($church->ancestorIds())
+                    ->map(fn (int $id): string => \App\Models\Church::query()->whereKey($id)->value('name') ?? '?')
+                    ->push($church->name)
+                    ->implode(' › '),
                 'is_active' => $church->is_active,
                 'total_donations' => (float) ($totals[$church->id] ?? 0),
                 'updated_at' => $church->updated_at?->toIso8601String(),

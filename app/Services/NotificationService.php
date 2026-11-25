@@ -117,7 +117,7 @@ class NotificationService
             $current = $current->parent;
         }
 
-        $churchIds = app(\App\Services\ChurchDescendantService::class)->forChurch($church->id);
+        $churchIds = app(ChurchDescendantService::class)->forChurch($church->id);
 
         $agents = User::query()
             ->whereIn('assigned_church_id', $churchIds)

@@ -73,7 +73,7 @@ class ChurchHierarchyService
         $access = app(ChurchAccessService::class);
 
         if ($user->isSuperAdmin()) {
-            return Church::query()->orderBy('id')->get();
+            return Church::query()->with('parent:id,name')->orderBy('id')->get();
         }
 
         $base = $user->assignedChurch;

@@ -4,8 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
-use App\Http\Controllers\Controller;
+use App\Enums\RoleName;
 use App\Models\Church;
+use App\Http\Controllers\Controller;
 use App\Services\ChurchAccessService;
 use App\Services\TopPartnerService;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +21,7 @@ class TopPartnerController extends Controller
 
     /**
      * Classement des partenaires par montant donné sur une période.
-     * GET /api/top-partners?period=month|quarter|year&month=11&quarter=4&year=2026
+     * GET /api/top-partners?period=month|quarter|year&month=11&quarter=4&year=2026&church_id=
      */
     public function index(Request $request): JsonResponse
     {
@@ -46,8 +47,17 @@ class TopPartnerController extends Controller
         $user = $request->user();
         $accessibleIds = array_map('intval', $this->access->accessibleChurchIds($user));
 
-        // Défaut : l'église affectée. `church_id=all` = TOUTES les églises de
-        // la base ; un ID = cette église ; vide = toutes les églises accessibles.
+        // Seuls le super admin et le pasteur de groupe peuvent voir toutes
+        // les églises de la base (`church_id=all`).
+        $canSeeAllChurches = $user->isSuperAdmin()
+            || $user->roleName() === RoleName::GROUP_PASTOR->value;
+
+        if ($request->string('church_id')->toString() === 'all' && ! $canSeeAllChurches) {
+            abort(403, 'Seul le super administrateur ou un pasteur de groupe peut voir toutes les églises.');
+        }
+
+        // Par défaut : église affectée. Une église précise = celle-ci ; vide =
+        // toutes les églises accessibles ; `all` = toutes les églises de la base.
         $requestedId = $request->integer('church_id');
         $defaultId = (int) ($this->access->defaultChurchId($user) ?? 0);
         $rawChurchId = $request->string('church_id')->toString();
@@ -84,6 +94,7 @@ class TopPartnerController extends Controller
             'index' => $index,
             'church_id' => count($churchIds) === 1 ? $churchIds[0] : null,
             'churches' => count($churchIds),
+            'can_see_all' => $canSeeAllChurches,
             'category_group' => $group?->value,
             'category_id' => $request->integer('category_id') ?: null,
             'from' => $from->toDateString(),

@@ -100,7 +100,11 @@ export function TopPartnersScreen() {
       if (categoryGroup) params.set('category_group', categoryGroup);
       if (categoryId) params.set('category_id', categoryId);
 
-      const [response, churchData, categoryData] = await Promise.all([
+      const churchRankingParams = new URLSearchParams({ period, year });
+      if (period === 'month') churchRankingParams.set('month', month);
+      if (period === 'quarter') churchRankingParams.set('quarter', quarter);
+
+      const [response, churchData, categoryData, churchRanking] = await Promise.all([
         api<{
           period: string;
           year: number;
@@ -108,8 +112,11 @@ export function TopPartnersScreen() {
           to: string;
           data: TopEntry[];
         }>(`/top-partners?${params.toString()}`),
-        api<{ data: Church[] }>('/churches', ),
-        api<{ data: Category[] }>('/categories', ),
+        api<{ data: Church[] }>('/churches'),
+        api<{ data: Category[] }>('/categories'),
+        canSeeAllChurches
+          ? api<{ data: TopChurchEntry[] }>(`/top-churches?${churchRankingParams.toString()}`)
+          : Promise.resolve({ data: [] as TopChurchEntry[] }),
       ]);
       setItems(response.data);
       setRange(`${response.from} → ${response.to}`);

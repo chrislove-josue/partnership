@@ -100,8 +100,8 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
   const summary = useMemo(() => {
     const total = donations.reduce((sum, donation) => sum + Number(donation.amount), 0);
 
-    // Le pasteur de groupe/sous-groupe voit d'abord le total de SA église,
-    // puis le total de toutes les églises accessibles.
+    // Le pasteur de groupe/sous-groupe voit le total de SA église et celui
+    // de l'église dont il est responsable (ses dons directs).
     // Le total de l'église régroupe ses dons et ceux de toutes ses filles
     // (une église de groupe/sous-groupe ne reçoit pas de dons directs).
     const assignedChurchId = user?.assigned_church_id;

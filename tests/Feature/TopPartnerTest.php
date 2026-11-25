@@ -140,12 +140,12 @@ class TopPartnerTest extends TestCase
             'category_id' => $this->category->id,
         ]);
 
-        // Sans paramètre : l'église assignée est utilisée par défaut.
+        // Sans paramètre : l'église assignée et toute sa descendance.
         $default = $this->actingAs($this->admin, 'sanctum')
             ->getJson('/api/top-partners?period=month&month=11&year=2026');
         $default->assertOk()
             ->assertJsonPath('church_id', $this->church->id)
-            ->assertJsonPath('count', 1);
+            ->assertJsonPath('count', 2);
 
         // church_id vide = toutes les églises accessibles.
         $all = $this->actingAs($this->admin, 'sanctum')
@@ -284,10 +284,11 @@ class TopPartnerTest extends TestCase
     public function test_all_option_returns_partners_from_every_church(): void
     {
         $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
+        $outsideGroup = Church::create(['name' => 'Autre groupe top', 'type' => ChurchType::GROUP]);
         $other = Church::create([
             'name' => 'Église hors périmètre top',
             'type' => ChurchType::LOCAL,
-            'parent_id' => $group->id,
+            'parent_id' => $outsideGroup->id,
         ]);
 
         $pastor = User::create([

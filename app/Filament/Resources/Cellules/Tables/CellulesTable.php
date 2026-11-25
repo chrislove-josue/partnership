@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Cellules\Tables;
 
+use App\Services\ChurchAccessService;
+use App\Services\ChurchDescendantService;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -44,7 +46,25 @@ class CellulesTable
             ->filters([
                 SelectFilter::make('church_id')
                     ->label('Église')
-                    ->relationship('church', 'name')
+                    ->options(function (): array {
+                        $user = auth()->user();
+
+                        return $user
+                            ? app(ChurchAccessService::class)
+                                ->accessibleChurches($user)
+                                ->pluck('name', 'id')
+                                ->all()
+                            : [];
+                    })
+                    ->query(function ($query, $state): void {
+                        if (! $state['value']) {
+                            return;
+                        }
+
+                        $ids = app(ChurchDescendantService::class)
+                            ->forChurch((int) $state['value']);
+                        $query->whereIn('church_id', $ids);
+                    })
                     ->searchable()
                     ->preload(),
             ])

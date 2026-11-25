@@ -286,18 +286,18 @@ class TopPartnerTest extends TestCase
         $group = Church::where('name', 'CE SIKECODJI')->firstOrFail();
         $other = Church::create([
             'name' => 'Église hors périmètre top',
-            'type' => \App\Enums\ChurchType::LOCAL,
+            'type' => ChurchType::LOCAL,
             'parent_id' => $group->id,
         ]);
 
         $pastor = User::create([
             'name' => 'Pasteur groupe périmètre top',
             'email' => 'pasteur-perimetre-top@example.test',
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'password' => Hash::make('password'),
             'assigned_church_id' => $this->church->id,
             'is_active' => true,
         ]);
-        $pastor->syncRoles([\App\Enums\RoleName::GROUP_PASTOR->value]);
+        $pastor->syncRoles([RoleName::GROUP_PASTOR->value]);
 
         $outsider = Partner::create([
             'first_name' => 'Hors',
@@ -331,11 +331,11 @@ class TopPartnerTest extends TestCase
         $pastor = User::create([
             'name' => 'Pasteur sous-groupe droits',
             'email' => 'pasteur-sg-droits@example.test',
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'password' => Hash::make('password'),
             'assigned_church_id' => $this->church->id,
             'is_active' => true,
         ]);
-        $pastor->syncRoles([\App\Enums\RoleName::SUBGROUP_PASTOR->value]);
+        $pastor->syncRoles([RoleName::SUBGROUP_PASTOR->value]);
 
         $this->actingAs($pastor, 'sanctum')
             ->getJson('/api/top-partners?period=month&month=11&year=2026&church_id=all')
@@ -344,11 +344,11 @@ class TopPartnerTest extends TestCase
         $staff = User::create([
             'name' => 'Staff droits',
             'email' => 'staff-droits@example.test',
-            'password' => \Illuminate\Support\Facades\Hash::make('password'),
+            'password' => Hash::make('password'),
             'assigned_church_id' => $this->church->id,
             'is_active' => true,
         ]);
-        $staff->syncRoles([\App\Enums\RoleName::STAFF->value]);
+        $staff->syncRoles([RoleName::STAFF->value]);
 
         $this->actingAs($staff, 'sanctum')
             ->getJson('/api/top-partners?period=month&month=11&year=2026&church_id=all')

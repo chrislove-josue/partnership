@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Enums\CategoryGroup;
 use App\Enums\PeriodType;
+use App\Enums\RoleName;
 use App\Models\CategoryDon;
 use App\Models\Church;
 use App\Services\ChurchAccessService;
@@ -64,7 +65,7 @@ class TopPartners extends Page
 
         // « Toutes les églises de la base » : super admin et pasteur de groupe uniquement.
         $canSeeAllChurches = $actor && ($actor->isSuperAdmin()
-            || $actor->roleName() === \App\Enums\RoleName::GROUP_PASTOR->value);
+            || $actor->roleName() === RoleName::GROUP_PASTOR->value);
 
         // L'église affectée au pasteur est proposée en premier.
         $assignedId = (int) (Auth::user()?->assigned_church_id ?? 0);
@@ -160,7 +161,7 @@ class TopPartners extends Page
             $accessibleIds = array_map('intval', $actor ? app(ChurchAccessService::class)->accessibleChurchIds($actor) : []);
             $churchId = (string) ($state['church_id'] ?? '');
             $actorIsAdmin = $actor && ($actor->isSuperAdmin()
-                || $actor->roleName() === \App\Enums\RoleName::GROUP_PASTOR->value);
+                || $actor->roleName() === RoleName::GROUP_PASTOR->value);
             // Une église précise, toutes les églises de la base (admin/pasteur de
             // groupe), ou le périmètre du rôle.
             $churchIds = $churchId === 'all' && $actorIsAdmin

@@ -63,14 +63,18 @@ class DataController extends Controller
             $churches = $churches->take($limit);
         }
 
-        // L'APK affiche le total par église : il doit être calculé ici comme
-        // dans le tableau de bord Filament (dons rattachés directement).
-        $totals = Donation::query()
-            ->selectRaw('church_id, COALESCE(SUM(amount), 0) as total')
-            ->whereIn('church_id', $churches->pluck('id'))
-            ->where('is_active', true)
-            ->groupBy('church_id')
-            ->pluck('total', 'church_id');
+        // Chaque église affiche le total de ses dons ET de ceux de toute sa
+        // descendance (groupes et sous-groupes n'ont pas de dons directs).
+        $descendants = app(\App\Services\ChurchDescendantService::class);
+        $totals = [];
+
+        foreach ($churches as $church) {
+            $ids = $descendants->forChurch($church->id);
+            $totals[$church->id] = (float) Donation::query()
+                ->whereIn('church_id', $ids)
+                ->where('is_active', true)
+                ->sum('amount');
+        }
 
         return response()->json([
             'data' => $churches->map(fn (Church $church): array => [

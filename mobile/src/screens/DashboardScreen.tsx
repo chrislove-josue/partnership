@@ -139,6 +139,12 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
     });
     const monthTotal = monthDonations.reduce((sum, donation) => sum + Number(donation.amount), 0);
 
+    const managerChurch = churches.find((church) => church.manager_id === user?.id);
+    const managerDonations = managerChurch
+      ? donations.filter((donation) => donation.church_id === managerChurch.id)
+      : [];
+    const managerTotal = managerDonations.reduce((sum, donation) => sum + Number(donation.amount), 0);
+
     const partnerIdsWithDonation = new Set(donations.map((donation) => donation.partner_id));
 
     const categoryMap = new Map<string, CategoryTotal>();

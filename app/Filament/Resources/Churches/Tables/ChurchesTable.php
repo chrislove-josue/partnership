@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Churches\Tables;
 use App\Enums\ChurchType;
 use App\Filament\Resources\Churches\Actions\ChurchDeleteGuard;
 use App\Filament\Resources\Churches\Actions\ChurchStatusActions;
+use App\Models\Church;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
@@ -40,9 +41,9 @@ class ChurchesTable
                     ->placeholder('—'),
                 TextColumn::make('hierarchy_path')
                     ->label('Hiérarchie')
-                    ->getStateUsing(function (\App\Models\Church $record): string {
+                    ->getStateUsing(function (Church $record): string {
                         $names = $record->ancestorIds();
-                        $all = \App\Models\Church::query()
+                        $all = Church::query()
                             ->whereIn('id', array_merge($names, [$record->id]))
                             ->pluck('name', 'id');
 

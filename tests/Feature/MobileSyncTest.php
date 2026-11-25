@@ -118,7 +118,9 @@ class MobileSyncTest extends TestCase
             $row['id'] => $row['total_donations'],
         ]);
 
-        $this->assertEquals(1500, $totals[$group->id]);
+        // Un groupe agrège les dons de toute sa descendance (1500 + 2500),
+        // une église locale affiche ses dons directs.
+        $this->assertEquals(4000, $totals[$group->id]);
         $this->assertEquals(2500, $totals[$local->id]);
     }
 

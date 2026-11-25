@@ -253,6 +253,9 @@ export function ReportsScreen() {
           <Card>
             <SectionTitle>{report.church.name}</SectionTitle>
             <Badge text={report.period.label} />
+            {report.church.hierarchyPath ? (
+              <Text style={styles.meta}>{report.church.hierarchyPath}</Text>
+            ) : null}
             <Text style={styles.total}>{formatMoney(report.totals.amount)}</Text>
             <Text style={styles.meta}>
               {report.totals.donationCount} don(s) · {report.totals.partnersWithDonation} partenaire(s) avec don

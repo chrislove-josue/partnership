@@ -84,6 +84,9 @@ class DataController extends Controller
                 'type' => $church->type?->value ?? (string) $church->type,
                 'parent_id' => $church->parent_id,
                 'parent_name' => $church->parent?->name,
+                // Nécessaire à l'APK pour afficher le total des dons de
+                // l'église dont le pasteur est responsable (église mère).
+                'manager_id' => $church->manager_id,
                 'hierarchy_path' => collect($church->ancestorIds())
                     ->map(fn (int $id): string => Church::query()->whereKey($id)->value('name') ?? '?')
                     ->push($church->name)

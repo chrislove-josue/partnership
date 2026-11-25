@@ -152,7 +152,7 @@ export interface ReportTotals {
 }
 
 export interface PartnershipReport {
-  church: { id: number; name: string; type: string; parentName?: string | null };
+  church: { id: number; name: string; type: string; parentName?: string | null; hierarchyPath?: string | null };
   period: { label: string; from: string; to: string; type: string };
   totals: ReportTotals;
   categories: Array<{ name: string; color: string; group?: string | null; group_label?: string | null; amount: number; count: number }>;

@@ -98,7 +98,9 @@ class Church extends Model
         }
         $expression = 'CASE churches.id '.$cases.'ELSE 0 END';
 
-        return $query->addSelect(DB::raw($expression.' as total_donations'));
+        return $query
+            ->select('churches.*')
+            ->selectRaw($expression.' as total_donations');
     }
 
     /**

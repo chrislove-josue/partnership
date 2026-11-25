@@ -31,7 +31,7 @@ class TargetHierarchyTest extends TestCase
         $sg2 = Church::create(['name' => 'Sous-groupe 2', 'type' => ChurchType::SUB_GROUP, 'parent_id' => $root->id]);
 
         // CE SIKECODJI = église mère (LOCAL) du Sous-groupe 1, avec ses filles
-        $mother = Church::create(['name' => 'CE SIKECODJI', 'type' => ChurchType::LOCAL, 'parent_id' => $sg1->id]);
+        $mother = Church::create(['name' => 'CE SIKECODJI MERE', 'type' => ChurchType::LOCAL, 'parent_id' => $sg1->id]);
         $daughter = Church::create(['name' => 'Fille de Sikècodji', 'type' => ChurchType::LOCAL, 'parent_id' => $mother->id]);
 
         // CE CALAVI = église mère (LOCAL) du Sous-groupe 2, avec ses filles

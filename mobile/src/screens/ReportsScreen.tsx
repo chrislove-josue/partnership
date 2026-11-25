@@ -184,6 +184,10 @@ export function ReportsScreen() {
     setReportSearch('');
     setReportSection('');
     setCategoryGroup('');
+    setPeriodType('month');
+    setMonth(String(now.getMonth() + 1));
+    setQuarter(String(Math.floor(now.getMonth() / 3) + 1));
+    setYear(String(now.getFullYear()));
   };
 
   return (
@@ -191,6 +195,18 @@ export function ReportsScreen() {
       <Card>
         {loadingChurches ? <LoadingView /> : null}
         <SelectField label="Église" value={churchId} options={churchOptions} onChange={setChurchId} searchable />
+        <SelectField label="Période" value={periodType} options={PERIODS} onChange={setPeriodType} />
+        {periodType === 'month' ? (
+          <SelectField label="Mois" value={month} options={MONTHS} onChange={setMonth} />
+        ) : null}
+        {periodType === 'quarter' ? (
+          <SelectField label="Trimestre" value={quarter} options={QUARTERS} onChange={setQuarter} />
+        ) : null}
+        <SelectField label="Année" value={year} options={[
+          { label: String(Number(year) - 1), value: String(Number(year) - 1) },
+          { label: String(year), value: year },
+          { label: String(Number(year) + 1), value: String(Number(year) + 1) },
+        ]} onChange={setYear} />
         <SelectField
           label="Famille de catégorie"
           value={categoryGroup}

@@ -101,15 +101,17 @@ export function TopPartnersScreen() {
       setRange(`${response.from} → ${response.to}`);
       setChurches(churchData.data);
       setCategories(categoryData.data);
-      // Même règle que les autres écrans : église du compte si accessible,
-      // sinon première église de la liste.
-      setChurchId((current) => current || defaultChurchId(churchData.data, user?.assigned_church_id));
+      // N'appliquer le défaut qu'au premier chargement : un choix explicite
+      // (y compris « toutes les églises accessibles » = '') doit être conservé.
+      if (!churchChosen) {
+        setChurchId(defaultChurchId(churchData.data, user?.assigned_church_id));
+      }
     } catch (caught) {
       setError(getErrorMessage(caught, 'Impossible de charger les top partenaires.'));
     } finally {
       setLoading(false);
     }
-  }, [period, month, quarter, year, churchId, categoryGroup, categoryId, user?.assigned_church_id]);
+  }, [period, month, quarter, year, churchId, churchChosen, categoryGroup, categoryId, user?.assigned_church_id]);
 
   useEffect(() => {
     void load();
@@ -152,14 +154,14 @@ export function TopPartnersScreen() {
           value={churchId}
           options={[
             { label: 'Toutes les églises accessibles', value: '' },
-            { label: 'Toutes les églises de la base', value: 'all' },
+            ...(canSeeAllChurches ? [{ label: 'Toutes les églises de la base', value: 'all' }] : []),
             ...[...churches].sort((a, b) => {
               if (a.id === user?.assigned_church_id) return -1;
               if (b.id === user?.assigned_church_id) return 1;
               return 0;
             }).map((c) => ({ label: c.name, value: String(c.id) })),
           ]}
-          onChange={setChurchId}
+          onChange={(value) => { setChurchId(value); setChurchChosen(true); }}
           searchable
         />
         <SelectField label="Période" value={period} options={PERIODS} onChange={setPeriod} />

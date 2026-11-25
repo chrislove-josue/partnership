@@ -291,13 +291,13 @@ class TopPartnerTest extends TestCase
         ]);
 
         $pastor = User::create([
-            'name' => 'Pasteur périmètre top',
+            'name' => 'Pasteur groupe périmètre top',
             'email' => 'pasteur-perimetre-top@example.test',
             'password' => \Illuminate\Support\Facades\Hash::make('password'),
             'assigned_church_id' => $this->church->id,
             'is_active' => true,
         ]);
-        $pastor->syncRoles([\App\Enums\RoleName::LOCAL_PASTOR->value]);
+        $pastor->syncRoles([\App\Enums\RoleName::GROUP_PASTOR->value]);
 
         $outsider = Partner::create([
             'first_name' => 'Hors',

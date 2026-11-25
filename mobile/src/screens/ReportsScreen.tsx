@@ -75,16 +75,16 @@ export function ReportsScreen() {
   }, [user?.assigned_church_id]);
 
   const query = useCallback(() => {
-    const period = currentPeriod();
     const params = new URLSearchParams({
       church_id: churchId,
-      type: period.type,
-      month: period.month,
-      year: period.year,
+      type: periodType,
+      year,
     });
+    if (periodType === 'month') params.set('month', month);
+    if (periodType === 'quarter') params.set('quarter', quarter);
     if (categoryGroup) params.set('category_group', categoryGroup);
     return params.toString();
-  }, [churchId, categoryGroup]);
+  }, [churchId, periodType, month, quarter, year, categoryGroup]);
 
   const generate = async () => {
     if (!churchId) {

@@ -93,6 +93,6 @@ class ChurchHierarchyService
 
         $ids = array_merge([$base->id], $base->descendantIds());
 
-        return Church::query()->whereIn('id', $ids)->orderBy('id')->get();
+        return Church::query()->with('parent:id,name')->whereIn('id', $ids)->orderBy('id')->get();
     }
 }

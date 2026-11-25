@@ -53,22 +53,26 @@ class StatsOverview extends BaseWidget
         $stats = [];
 
         if ($showBothTotals) {
-            $assignedChurchId = (int) ($actor->assigned_church_id ?? 0);
-            $assignedChurch = Church::query()->find($assignedChurchId);
+        $assignedChurch = $actor->assignedChurch;
+        $ownIds = $assignedChurch
+            ? array_merge([$assignedChurch->id], $assignedChurch->descendantIds())
+            : [];
 
-            $ownQuery = Donation::query()
-                ->where('church_id', $assignedChurchId)
-                ->where('is_active', true);
-            $ownAmount = $ownQuery->sum('amount');
-            $ownCount = $ownQuery->count();
+        // Le total "de votre église" régroupe les dons de toute sa descendance
+        // (une église de groupe/sous-groupe ne reçoit pas de dons directs).
+        $ownQuery = Donation::query()
+            ->whereIn('church_id', $ownIds)
+            ->where('is_active', true);
+        $ownAmount = $ownQuery->sum('amount');
+        $ownCount = $ownQuery->count();
 
-            $stats[] = Stat::make(
-                'Dons de votre église'.($assignedChurch ? ' — '.$assignedChurch->name : ''),
-                $formatted($ownAmount),
-            )
-                ->description($ownCount.' don(s) dans votre église')
-                ->descriptionIcon('heroicon-m-building-office')
-                ->color('primary');
+        $stats[] = Stat::make(
+            'Dons de votre église'.($assignedChurch ? ' — '.$assignedChurch->name : ''),
+            $formatted($ownAmount),
+        )
+            ->description($ownCount.' don(s) dans votre église et ses filles')
+            ->descriptionIcon('heroicon-m-building-office')
+            ->color('primary');
 
             $stats[] = Stat::make('Dons sur toutes les églises accessibles', $formatted($totalAmount))
                 ->description($donationsCount.' don(s) sur toutes les églises accessibles')

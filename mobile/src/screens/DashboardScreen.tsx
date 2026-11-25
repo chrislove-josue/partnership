@@ -102,9 +102,27 @@ export function DashboardScreen({ navigation }: { navigation: { navigate: (name:
 
     // Le pasteur de groupe/sous-groupe voit d'abord le total de SA église,
     // puis le total de toutes les églises accessibles.
+    // Le total de l'église régroupe ses dons et ceux de toutes ses filles
+    // (une église de groupe/sous-groupe ne reçoit pas de dons directs).
     const assignedChurchId = user?.assigned_church_id;
-    const ownDonations = assignedChurchId
-      ? donations.filter((donation) => donation.church_id === assignedChurchId)
+    const descendantIds = assignedChurchId
+      ? churches
+          .filter((church) => {
+            let current = church.parent_id;
+            const seen = new Set<number>();
+            while (current) {
+              if (current === assignedChurchId) return true;
+              if (seen.has(current)) break;
+              seen.add(current);
+              current = churches.find((item) => item.id === current)?.parent_id ?? null;
+            }
+            return false;
+          })
+          .map((church) => church.id)
+      : [];
+    const ownIds = assignedChurchId ? [assignedChurchId, ...descendantIds] : [];
+    const ownDonations = ownIds.length
+      ? donations.filter((donation) => ownIds.includes(donation.church_id))
       : donations;
     const ownTotal = ownDonations.reduce((sum, donation) => sum + Number(donation.amount), 0);
     const ownChurch = churches.find((church) => church.id === assignedChurchId);

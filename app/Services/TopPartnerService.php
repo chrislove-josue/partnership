@@ -36,9 +36,17 @@ class TopPartnerService
 
         [$from, $to] = $this->range($period, $year, $index);
 
-        // Une église de groupe/sous-groupe ne reçoit pas de dons directement :
-        // on réunit chaque église sélectionnée à toute sa descendance.
-        $allChurchIds = app(ChurchDescendantService::class)->expand($churchIds);
+        // Règle : une église locale = ses dons directs ; un groupe/sous-groupe =
+        // la somme de sa descendance. Le périmètre « toutes les églises » passe
+        // toutes les églises, forFilter garde les locales telles quelles.
+        $descendants = app(ChurchDescendantService::class);
+        $allChurchIds = [];
+
+        foreach ($churchIds as $id) {
+            $allChurchIds = array_merge($allChurchIds, $descendants->forFilter((int) $id));
+        }
+
+        $allChurchIds = array_values(array_unique(array_map('intval', $allChurchIds)));
 
         $donations = Donation::query()
             ->with('partner:id,first_name,last_name,church_id,cellule_id,user_id')

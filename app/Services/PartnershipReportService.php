@@ -169,6 +169,10 @@ class PartnershipReportService
                 'type' => $church->type instanceof ChurchType ? $church->type->value : (string) $church->type,
                 'parentId' => $church->parent_id,
                 'parentName' => $church->parent?->name,
+                'hierarchyPath' => collect($church->ancestorIds())
+                    ->map(fn (int $id): string => Church::query()->whereKey($id)->value('name') ?? '?')
+                    ->push($church->name)
+                    ->implode(' › '),
             ],
             'period' => [
                 'type' => $type->value,

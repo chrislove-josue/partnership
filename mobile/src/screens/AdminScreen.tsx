@@ -414,6 +414,7 @@ export function AdminScreen() {
             </View>
             <Text style={styles.meta}>Total dons : {formatMoney(church.total_donations ?? 0)}</Text>
             {church.parent_name ? <Text style={styles.meta}>Parente : {church.parent_name}</Text> : null}
+            {church.hierarchy_path ? <Text style={styles.meta}>{church.hierarchy_path}</Text> : null}
             <View style={styles.actions}>
               <Pressable onPress={() => openForm(church)}><Text style={styles.edit}>Modifier</Text></Pressable>
               {canDeleteChurches ? (

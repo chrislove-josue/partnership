@@ -29,14 +29,14 @@ class TopChurchesWidgetTest extends TestCase
             ->assertOk();
     }
 
-    public function test_it_lists_the_five_churches_with_the_most_donations(): void
+    public function test_it_lists_the_ten_churches_with_the_most_donations(): void
     {
         $this->seed();
 
         $category = CategoryDon::create(['name' => 'Offrande']);
         $churches = [];
 
-        foreach ([1000, 2000, 3000, 4000, 5000, 6000] as $amount) {
+        foreach ([1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000, 12000] as $amount) {
             $church = Church::create([
                 'name' => 'Top Church '.$amount,
                 'type' => ChurchType::LOCAL,
@@ -63,8 +63,8 @@ class TopChurchesWidgetTest extends TestCase
         Livewire::actingAs($admin)
             ->test(TopChurchesWidget::class)
             ->assertOk()
-            ->assertCanSeeTableRecords([$churches[6000], $churches[5000]])
-            ->assertCanNotSeeTableRecords([$churches[1000]]);
+            ->assertCanSeeTableRecords([$churches[12000], $churches[3000]])
+            ->assertCanNotSeeTableRecords([$churches[1000], $churches[2000]]);
     }
 
     public function test_it_scopes_churches_by_the_actor_permissions(): void

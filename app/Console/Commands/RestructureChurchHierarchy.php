@@ -42,12 +42,6 @@ class RestructureChurchHierarchy extends Command
         $mother1 = Church::where('name', $mother1Name)->first();
         $mother2 = Church::where('name', $mother2Name)->first();
 
-        if (! $mother1 || ! $mother2) {
-            $this->error('Églises mères introuvables (CE SIKECODJI / CE CALAVI).');
-
-            return self::FAILURE;
-        }
-
         $this->line('Structure cible :');
         $this->line("  {$rootName} (GROUP)");
         $this->line("  ├── {$sg1Name} (SUB_GROUP) → {$mother1Name} (LOCAL) + ses filles");

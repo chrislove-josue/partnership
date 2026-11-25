@@ -42,6 +42,26 @@ class ReportHierarchyTest extends TestCase
         return $partner;
     }
 
+    public function test_report_of_a_local_church_shows_only_its_direct_donations(): void
+    {
+        $group = Church::create(['name' => 'Groupe rapport local', 'type' => ChurchType::GROUP]);
+        $local = Church::create(['name' => 'Locale rapport', 'type' => ChurchType::LOCAL, 'parent_id' => $group->id]);
+        $daughter = Church::create(['name' => 'Fille rapport local', 'type' => ChurchType::LOCAL, 'parent_id' => $local->id]);
+
+        $this->addDonation($local, 1000);
+        $this->addDonation($daughter, 2000);
+
+        $report = app(PartnershipReportService::class)->buildReport(
+            $local->id,
+            PeriodType::MONTH,
+            (int) now()->year,
+            (int) now()->month,
+        );
+
+        $this->assertEquals(1000, (float) $report['totals']['amount']);
+        $this->assertSame(1, $report['totals']['donationCount']);
+    }
+
     public function test_report_groups_donations_of_the_whole_subtree(): void
     {
         $root = Church::create(['name' => 'Groupe rapport', 'type' => ChurchType::GROUP]);

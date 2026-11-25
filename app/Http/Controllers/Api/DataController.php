@@ -78,6 +78,7 @@ class DataController extends Controller
                 'name' => $church->name,
                 'type' => $church->type?->value ?? (string) $church->type,
                 'parent_id' => $church->parent_id,
+                'parent_name' => $church->parent?->name,
                 'is_active' => $church->is_active,
                 'total_donations' => (float) ($totals[$church->id] ?? 0),
                 'updated_at' => $church->updated_at?->toIso8601String(),

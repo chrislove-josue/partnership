@@ -95,7 +95,7 @@ class PartnershipReportService
 
         // Règle : une église locale = ses dons directs ; un sous-groupe/groupe =
         // la somme des dons de sa descendance.
-        $churchIds = app(\App\Services\ChurchDescendantService::class)->forFilter($churchId);
+        $churchIds = app(ChurchDescendantService::class)->forFilter($churchId);
         $churchNames = Church::query()
             ->whereIn('id', $churchIds)
             ->pluck('name', 'id');

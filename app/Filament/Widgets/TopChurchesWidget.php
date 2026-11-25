@@ -52,7 +52,8 @@ class TopChurchesWidget extends TableWidget
                 TextColumn::make('name')
                     ->label('Église')
                     ->searchable()
-                    ->description(fn (Church $record): string => $record->parent?->name ?? ''),
+                    ->description(fn (Church $record): string => $record->parent?->name ?? '')
+                    ->grow(),
                 TextColumn::make('type')
                     ->label('Type')
                     ->badge()

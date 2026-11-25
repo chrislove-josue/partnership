@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\RoleName;
+use App\Models\Church;
 use App\Models\Donation;
 use App\Models\Partner;
 use App\Services\ChurchAccessService;

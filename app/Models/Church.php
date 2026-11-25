@@ -79,7 +79,9 @@ class Church extends Model
 
         $totals = [];
 
-        foreach (Church::query()->select('id', 'type')->get() as $item) {
+        // IMPORTANT : utiliser un builder séparé (newQuery) pour ne pas écraser
+        // le select de la requête principale, sinon Filament perd la clé id.
+        foreach (Church::query()->newQuery()->select('id', 'type')->get() as $item) {
             $ids = $item->type === ChurchType::LOCAL
                 ? [(int) $item->id]
                 : app(ChurchDescendantService::class)->forChurch((int) $item->id);
